@@ -4,11 +4,11 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0b1723">
 <meta name="description" content="NEXO LIFE RP — twoje własne miasto 3D. Domy, samochody, roleplay i otwarty świat zbudowany w 100% z kodu.">
-<meta property="og:title" content="NEXO LIFE RP 4.0 — World Reimagined">
+<meta property="og:title" content="NEXO LIFE RP 5.0 — City Stories">
 <meta property="og:description" content="Wkrocz do NEXO Valley. Twoje miasto, twoja historia.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%230a2430'/%3E%3Cpath fill='%23c5ff78' d='M13 49V15h9l20 22V15h9v34h-9L22 27v22z'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-<title>NEXO LIFE RP 4.0 — World Reimagined</title>
+<title>NEXO LIFE RP 5.0 — City Stories</title>
 <style>
 :root{--card:rgba(8,23,37,.84);--line:rgba(212,245,255,.17);--white:#ecf8ff;--mint:#a8ff73;--soft:#a4bfcd}*{box-sizing:border-box}
 html,body{height:100%;margin:0;overflow:hidden;background:#79b9e4;color:var(--white);font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;user-select:none}
@@ -129,12 +129,13 @@ button{font:inherit;cursor:pointer;color:inherit}#world{width:100%;height:100%;d
 <body>
 <canvas id="world"></canvas><div id="shade"></div><div id="filmgrain" aria-hidden="true"></div>
 <div class="hud"><div id="zonebanner" class="zonebanner"><span>◉ NEXO VALLEY</span><b id="zone">CENTRUM MIASTA</b><small id="clock">12:00 • SŁONECZNIE</small></div>
-<header class="head"><div class="logo"><i>N</i><div><b>NEXO LIFE RP</b><small>WORLD REIMAGINED • ALPHA 4.0</small></div></div><div class="header-right"><div class="cash glass"><small>TWOJE PIENIĄDZE</small><span id="cash">$ 2 500</span></div><button class="smallbtn" id="day">☀ DZIEŃ</button><button class="smallbtn" id="sound" title="Wycisz dźwięki">🔊</button><button class="smallbtn" id="photo" title="Tryb fotograficzny">📷</button><button class="smallbtn" id="pause">Ⅱ</button></div></header>
+<header class="head"><div class="logo"><i>N</i><div><b>NEXO LIFE RP</b><small>CITY STORIES • ALPHA 5.0</small></div></div><div class="header-right"><div class="cash glass"><small>TWOJE PIENIĄDZE</small><span id="cash">$ 2 500</span></div><button class="smallbtn" id="day">☀ DZIEŃ</button><button class="smallbtn" id="sound" title="Wycisz dźwięki">🔊</button><button class="smallbtn" id="photo" title="Tryb fotograficzny">📷</button><button class="smallbtn" id="pause">Ⅱ</button></div></header>
 <nav class="sidebar">
 <button class="menu-btn" data-page="phone"><span class="ico">📱</span>Telefon</button>
 <button class="menu-btn" data-page="avatar"><span class="ico">👤</span>Postać</button>
 <button class="menu-btn" data-page="cars"><span class="ico">🚘</span>Pojazdy</button>
 <button class="menu-btn" data-page="homes"><span class="ico">🏠</span>Domy</button>
+<button class="menu-btn" data-page="places"><span class="ico">🗺️</span>Miasto</button>
 <button class="menu-btn" data-page="jobs"><span class="ico">💼</span>Praca</button>
 <button class="menu-btn" data-page="rp"><span class="ico">🎭</span>Roleplay</button>
 <button class="menu-btn" data-page="bag"><span class="ico">🎒</span>Plecak</button>
@@ -149,7 +150,7 @@ button{font:inherit;cursor:pointer;color:inherit}#world{width:100%;height:100%;d
 <div class="status">NEXO STUDIOS · PROCEDURAL 3D · NO IMPORTED MODELS · LOCAL SAVE</div>
 <div class="toast" id="toast"></div>
 </div>
-<button id="photoExit" aria-label="Wyjdź z trybu zdjęcia">✕ Zamknij tryb foto</button><div id="start"><div class="welcome"><div class="sup">NEXO STUDIOS PRESENTS</div><div class="welcome-overline"><span class="pulse"></span> NOWY WYMIAR ROLEPLAY</div><h1>Twoje miasto.<br><em>Twoja historia.</em></h1><p>Zamieszkaj w NEXO VALLEY. Odkrywaj ulice, prowadź własne auto, wybieraj dom i twórz swoją historię. Cały świat zbudowany wyłącznie kodem.</p><div class="chips"><b>✧ TWOJE ŻYCIE</b><b>🏡 TWOJE DOMY</b><b>🚘 TWOJE POJAZDY</b><b>🌦 ŻYWY ŚWIAT</b></div><button id="startBtn" class="primary" disabled aria-busy="true">◌ ŁADOWANIE MIASTA...</button><div id="bootStatus" role="status" style="font-size:12px;color:#c8d6e0;margin-top:12px;min-height:20px">Przygotowuję świat 3D…</div><footer>Wersja Alpha 4.0 · World Reimagined · Zapis lokalny</footer></div></div>
+<button id="photoExit" aria-label="Wyjdź z trybu zdjęcia">✕ Zamknij tryb foto</button><div id="start"><div class="welcome"><div class="sup">NEXO STUDIOS PRESENTS</div><div class="welcome-overline"><span class="pulse"></span> NOWY WYMIAR ROLEPLAY</div><h1>Twoje miasto.<br><em>Twoja historia.</em></h1><p>Wybierz spośród różnych domów i samochodów, zamieszkaj w NEXO VALLEY i stwórz własną historię. Bez narzuconych misji. Cały świat generowany wyłącznie kodem.</p><div class="chips"><b>✧ TWOJE ŻYCIE</b><b>🏠 KATALOG DOMÓW</b><b>🚘 10 POJAZDÓW</b><b>🌦 ŻYWY ŚWIAT</b></div><button id="startBtn" class="primary" disabled aria-busy="true">◌ ŁADOWANIE MIASTA...</button><div id="bootStatus" role="status" style="font-size:12px;color:#c8d6e0;margin-top:12px;min-height:20px">Przygotowuję świat 3D…</div><footer>Wersja Alpha 5.0 · City Stories · Zapis lokalny</footer></div></div>
 <script>
 (function(){
  const message=document.getElementById('bootStatus');
