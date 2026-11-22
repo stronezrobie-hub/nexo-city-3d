@@ -26,7 +26,7 @@ export class Input {
         if(button.hasPointerCapture(event.pointerId))button.releasePointerCapture(event.pointerId);
       };
       button.addEventListener('pointerdown',event=>{
-        event.preventDefault();button.setPointerCapture(event.pointerId);
+        event.preventDefault();try{button.setPointerCapture(event.pointerId)}catch{/* Syntetyczny dotyk bez aktywnego wskaźnika. */}
         if(code==='interact')this.onInteract();
         else if(code==='jump')this.jumpQueued=true;
         else this.touch.add(code);
