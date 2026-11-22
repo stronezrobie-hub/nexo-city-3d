@@ -8,7 +8,7 @@ permissions:
 jobs:
   smoke:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -23,3 +23,5 @@ jobs:
           sleep 2
       - name: Verify rendering and entering game
         run: node tests/browser-smoke.cjs
+      - name: Verify graphics presets, time of day and weather
+        run: node tests/graphics-smoke.cjs
