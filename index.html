@@ -107,12 +107,21 @@ button{font:inherit;cursor:pointer;color:inherit}#world{width:100%;height:100%;d
  .bottom{bottom:max(12px,env(safe-area-inset-bottom));left:10px}.map-box{bottom:max(12px,env(safe-area-inset-bottom));right:10px}
  .interact{bottom:140px}.touch{bottom:205px}
 }
+
+/* Photo mode and cinematic overlays */
+#photoExit{display:none;position:fixed;z-index:99;top:25px;right:25px;padding:13px 20px;border-radius:13px;background:#0a1d2de8;border:1px solid #ffffff6d;box-shadow:0 12px 44px #0009;color:#fff;font-weight:900;backdrop-filter:blur(12px)}
+#photoExit.visible{display:block}
+.hud.photo>*{opacity:0;pointer-events:none}
+.hud.photo{pointer-events:none}
+.zonebanner{transition:opacity .3s}
+#clock{font-variant-numeric:tabular-nums}
+@media(max-width:680px){#photoExit{top:14px;right:14px;font-size:11px;padding:10px 13px}.top-right{gap:4px}.header-right #photo{display:none}}
 </style>
 </head>
 <body>
 <canvas id="world"></canvas><div id="shade"></div><div id="filmgrain" aria-hidden="true"></div>
 <div class="hud"><div id="zonebanner" class="zonebanner"><span>◉ NEXO VALLEY</span><b id="zone">CENTRUM MIASTA</b><small id="clock">12:00 • SŁONECZNIE</small></div>
-<header class="head"><div class="logo"><i>N</i><div><b>NEXO LIFE RP</b><small>WORLD REIMAGINED • ALPHA 4.0</small></div></div><div class="header-right"><div class="cash glass"><small>TWOJE PIENIĄDZE</small><span id="cash">$ 2 500</span></div><button class="smallbtn" id="day">☀ DZIEŃ</button><button class="smallbtn" id="sound" title="Wycisz dźwięki">🔊</button><button class="smallbtn" id="pause">Ⅱ</button></div></header>
+<header class="head"><div class="logo"><i>N</i><div><b>NEXO LIFE RP</b><small>WORLD REIMAGINED • ALPHA 4.0</small></div></div><div class="header-right"><div class="cash glass"><small>TWOJE PIENIĄDZE</small><span id="cash">$ 2 500</span></div><button class="smallbtn" id="day">☀ DZIEŃ</button><button class="smallbtn" id="sound" title="Wycisz dźwięki">🔊</button><button class="smallbtn" id="photo" title="Tryb fotograficzny">📷</button><button class="smallbtn" id="pause">Ⅱ</button></div></header>
 <nav class="sidebar">
 <button class="menu-btn" data-page="phone"><span class="ico">📱</span>Telefon</button>
 <button class="menu-btn" data-page="avatar"><span class="ico">👤</span>Postać</button>
@@ -132,7 +141,7 @@ button{font:inherit;cursor:pointer;color:inherit}#world{width:100%;height:100%;d
 <div class="status">NEXO STUDIOS · PROCEDURAL 3D · NO IMPORTED MODELS · LOCAL SAVE</div>
 <div class="toast" id="toast"></div>
 </div>
-<div id="start"><div class="welcome"><div class="sup">NEXO STUDIOS PRESENTS</div><div class="welcome-overline"><span class="pulse"></span> NOWY WYMIAR ROLEPLAY</div><h1>Twoje miasto.<br><em>Twoja historia.</em></h1><p>Zamieszkaj w NEXO VALLEY. Odkrywaj ulice, prowadź własne auto, wybieraj dom i twórz swoją historię. Cały świat zbudowany wyłącznie kodem.</p><div class="chips"><b>✧ TWOJE ŻYCIE</b><b>🏡 TWOJE DOMY</b><b>🚘 TWOJE POJAZDY</b><b>🌦 ŻYWY ŚWIAT</b></div><button id="startBtn" class="primary">▶ WEJDŹ DO MIASTA</button><footer>Wersja Alpha 4.0 · World Reimagined · Zapis lokalny</footer></div></div>
+<button id="photoExit" aria-label="Wyjdź z trybu zdjęcia">✕ Zamknij tryb foto</button><div id="start"><div class="welcome"><div class="sup">NEXO STUDIOS PRESENTS</div><div class="welcome-overline"><span class="pulse"></span> NOWY WYMIAR ROLEPLAY</div><h1>Twoje miasto.<br><em>Twoja historia.</em></h1><p>Zamieszkaj w NEXO VALLEY. Odkrywaj ulice, prowadź własne auto, wybieraj dom i twórz swoją historię. Cały świat zbudowany wyłącznie kodem.</p><div class="chips"><b>✧ TWOJE ŻYCIE</b><b>🏡 TWOJE DOMY</b><b>🚘 TWOJE POJAZDY</b><b>🌦 ŻYWY ŚWIAT</b></div><button id="startBtn" class="primary">▶ WEJDŹ DO MIASTA</button><footer>Wersja Alpha 4.0 · World Reimagined · Zapis lokalny</footer></div></div>
 <script type="module">
 import * as T from 'https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js';
 const el=id=>document.getElementById(id),W=window;
@@ -546,8 +555,33 @@ function animateWeather(dt){
  for(const o of signals){const phase=(Math.floor(clock.elapsedTime/7+o.offset*.3)%3+3)%3;o.bulb.material.color.setHex(phase===o.i?[0xff6864,0xffd166,0x79ff88][o.i]:[0x4c2729,0x5c4f2b,0x24492f][o.i])}
 }
 function showToast(txt){const e=el('toast');e.textContent=txt;e.classList.add('on');clearTimeout(showToast.id);showToast.id=setTimeout(()=>e.classList.remove('on'),2400)}
+let orbitYaw=0,orbitLift=0,cameraDistance=1,dragPointer=null,lastPointerX=0,lastPointerY=0,photoMode=false;
+const surface=el('world');
+surface.addEventListener('pointerdown',e=>{
+ if(!started||paused)return;
+ if(e.pointerType==='mouse'&&e.button!==0)return;
+ dragPointer=e.pointerId;lastPointerX=e.clientX;lastPointerY=e.clientY;surface.setPointerCapture(e.pointerId);
+});
+surface.addEventListener('pointermove',e=>{
+ if(dragPointer!==e.pointerId)return;
+ const dx=e.clientX-lastPointerX,dy=e.clientY-lastPointerY;
+ lastPointerX=e.clientX;lastPointerY=e.clientY;
+ orbitYaw=Math.max(-Math.PI,Math.min(Math.PI,orbitYaw-dx*.005));
+ orbitLift=Math.max(-5,Math.min(16,orbitLift+dy*.045));
+});
+for(const event of ['pointerup','pointercancel','lostpointercapture'])surface.addEventListener(event,e=>{if(e.pointerId===dragPointer)dragPointer=null});
+surface.addEventListener('wheel',e=>{if(!started)return;e.preventDefault();cameraDistance=Math.max(.6,Math.min(1.7,cameraDistance+e.deltaY*.0009))},{passive:false});
+function togglePhoto(){
+ if(!started)return;
+ photoMode=!photoMode;
+ document.querySelector('.hud').classList.toggle('photo',photoMode);
+ el('photoExit').classList.toggle('visible',photoMode);
+ if(photoMode)key.clear();
+}
+el('photo').onclick=togglePhoto;
+el('photoExit').onclick=togglePhoto;
 const key=new Set(),mapped={w:'forward',arrowup:'forward',s:'back',arrowdown:'back',a:'left',arrowleft:'left',d:'right',arrowright:'right',shift:'run'};
-document.addEventListener('keydown',e=>{const k=e.key.toLowerCase();if(mapped[k]){key.add(mapped[k]);e.preventDefault()}if(e.repeat)return;if(k==='e')interact();if(k==='f')togglePanel('phone');if(k==='h')honk();if(k==='c'){highView=!highView;showToast(highView?'Kamera z góry':'Kamera zza pleców')}if(k==='p'||k==='escape')togglePause()});
+document.addEventListener('keydown',e=>{const k=e.key.toLowerCase();if(mapped[k]){key.add(mapped[k]);e.preventDefault()}if(e.repeat)return;if(photoMode){if(k==='o'||k==='escape')togglePhoto();return}if(k==='o')togglePhoto();if(k==='e')interact();if(k==='f')togglePanel('phone');if(k==='h')honk();if(k==='c'){highView=!highView;showToast(highView?'Kamera z góry':'Kamera zza pleców')}if(k==='p'||k==='escape')togglePause()});
 document.addEventListener('keyup',e=>{const k=e.key.toLowerCase();if(mapped[k])key.delete(mapped[k])});W.addEventListener('blur',()=>key.clear());
 document.querySelectorAll('[data-control]').forEach(b=>{const action=b.dataset.control;b.addEventListener('pointerdown',e=>{e.preventDefault();b.setPointerCapture(e.pointerId);key.add(action);b.classList.add('down')});for(const ev of ['pointerup','pointercancel','lostpointercapture'])b.addEventListener(ev,()=>{key.delete(action);b.classList.remove('down')})});
 document.querySelectorAll('[data-shortcut]').forEach(b=>b.addEventListener('click',()=>{const action=b.dataset.shortcut;if(action==='interact')interact();if(action==='phone')togglePanel('phone');if(action==='camera'){highView=!highView;showToast('Zmieniono kamerę')}if(action==='honk')honk()}));
@@ -693,12 +727,17 @@ const x=t.vertical?t.lane:t.t,z=t.vertical?t.t:t.lane;t.model.root.position.set(
 if(driving&&Math.hypot(x-car.root.position.x,z-car.root.position.z)<4){carSpeed*=-.2}
 }}
 function progress(dt){if(inside)return;const t=driving?car.root.position:playerPos;if(Math.hypot(t.x-marker.position.x,t.z-marker.position.z)<5.4){save.cash+=250;save.delivery++;if(save.delivery>=5){save.cash+=650;save.delivery=0;showToast('Ukończono trasę! +$900')}else showToast('Dostawa zakończona! +$250');persist();setMarker();updateHud()}}
-function cameraUpdate(dt){const target=driving?car.root.position:playerPos,rot=driving?carYaw:charYaw;
-const dist=highView?31:driving?19:11,height=highView?32:driving?11:7;
-const p=new T.Vector3(target.x+Math.sin(rot)*dist,height+(inside?620:0),target.z+Math.cos(rot)*dist);
-if(inside){p.x=target.x+Math.sin(rot)*9;p.y=5;p.z=target.z+Math.cos(rot)*9}
-cam.position.lerp(p,1-Math.exp(-5*dt));cam.lookAt(target.x,driving?1.7:2,target.z);
-sun.position.set(target.x-75,140,target.z+90);sun.target.position.set(target.x,0,target.z);sun.target.updateMatrixWorld()
+function cameraUpdate(dt){
+ const target=driving?car.root.position:playerPos,rot=(driving?carYaw:charYaw)+orbitYaw;
+ const dist=(highView?31:driving?19:11)*cameraDistance,height=(highView?32:driving?11:7)+orbitLift;
+ const p=new T.Vector3(target.x+Math.sin(rot)*dist,Math.max(2.5,height),target.z+Math.cos(rot)*dist);
+ if(inside){p.x=target.x+Math.sin(rot)*Math.min(9,dist);p.y=Math.min(7,Math.max(2.7,5+orbitLift*.1));p.z=target.z+Math.cos(rot)*Math.min(9,dist)}
+ cam.position.lerp(p,1-Math.exp(-5*dt));
+ cam.lookAt(target.x,driving?1.7:2.2,target.z);
+ const fieldOfView=driving?65+Math.min(8,Math.abs(carSpeed)*.15):61;
+ cam.fov+=(fieldOfView-cam.fov)*Math.min(1,dt*4);
+ cam.updateProjectionMatrix();
+ sun.position.set(target.x-75,140,target.z+90);sun.target.position.set(target.x,0,target.z);sun.target.updateMatrixWorld()
 }
 const mc=el('map'),ctx=mc.getContext('2d');
 function minimap(){
@@ -711,13 +750,25 @@ ctx.fillStyle='#d1ff83';ctx.beginPath();ctx.arc(marker.position.x*scale,marker.p
 ctx.fillStyle='#ffdaa0';for(const h of homes)if(h.id===save.house){ctx.beginPath();ctx.arc(h.x*scale,h.z*scale,5,0,Math.PI*2);ctx.fill()}ctx.restore();
 ctx.fillStyle='#baff6b';ctx.beginPath();ctx.moveTo(s/2,s/2-10);ctx.lineTo(s/2-7,s/2+9);ctx.lineTo(s/2+7,s/2+9);ctx.closePath();ctx.fill()
 }
-function renderHUD(){const a=nearObj();el('interact').style.display=a&&!paused?'block':'none';el('interactText').textContent=a?a.label:'';
+let currentZone='';
+function updateZoneHud(){
+ if(inside){currentZone='TWÓJ DOM'}
+ else{
+  const nearest=businesses.reduce((best,b)=>{const d=(b.x-playerPos.x)**2+(b.z-playerPos.z)**2;return d<best.d?{d,b}:best},{d:Infinity,b:null});
+  currentZone=nearest.d<1100?nearest.b.name.toUpperCase():Math.abs(playerPos.x)<65&&Math.abs(playerPos.z)<65?'CENTRUM MIASTA':playerPos.x>65?'WSCHODNIA DZIELNICA':playerPos.x< -65?'ZACHODNIA DZIELNICA':'OSIEDLE PARKOWE';
+ }
+ el('zone').textContent=currentZone;
+ const mins=(night?22*60+10:10*60+45)+Math.floor(clock.elapsedTime/4);
+ const hh=String(Math.floor(mins/60)%24).padStart(2,'0'),mm=String(mins%60).padStart(2,'0');
+ el('clock').textContent=hh+':'+mm+' • '+(night?'NOC':weather==='rain'?'DESZCZ':weather==='fog'?'MGŁA':'SŁONECZNIE');
+}
+function renderHUD(){updateZoneHud();const a=nearObj();el('interact').style.display=a&&!paused?'block':'none';el('interactText').textContent=a?a.label:'';
 el('mode').textContent=inside?'🏠 W DOMU':driving?'🚘 PROWADZENIE AUTA':'🚶 SPACER PO MIEŚCIE';el('speed').style.display=driving?'block':'none';
 el('speed').firstChild.textContent=String(Math.round(Math.abs(carSpeed)*3.2))+' ';
 minimap()}
 W.addEventListener('resize',()=>{cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
 cam.position.set(8,8,35);cam.lookAt(8,1,19);
-function loop(){requestAnimationFrame(loop);let dt=Math.min(.045,clock.getDelta());if(!paused){if(driving)moveCar(dt);else moveCharacter(dt);animateRoleplay(dt);animateWeather(dt);updateTraffic(dt);progress(dt);payTick+=dt;if(payTick>60){payTick-=60;if(save.job!=='Mieszkaniec'){save.cash+=500;persist();updateHud();showToast('Wypłata za pracę: +$500')}}marker.rotation.y+=dt*.65;torus.rotation.z+=dt*.7;
+function loop(){requestAnimationFrame(loop);let dt=Math.min(.045,clock.getDelta());if(!paused&&!photoMode){if(driving)moveCar(dt);else moveCharacter(dt);animateRoleplay(dt);animateWeather(dt);updateTraffic(dt);progress(dt);payTick+=dt;if(payTick>60){payTick-=60;if(save.job!=='Mieszkaniec'){save.cash+=500;persist();updateHud();showToast('Wypłata za pracę: +$500')}}marker.rotation.y+=dt*.65;torus.rotation.z+=dt*.7;
 for(const n of npc){const tt=clock.elapsedTime*.45+n.seed;n.g.position.set(n.x+Math.cos(tt)*3,0,n.z+Math.sin(tt)*3);n.g.rotation.y=-tt;n.l.rotation.x=Math.sin(tt*6)*.27;n.r.rotation.x=-Math.sin(tt*6)*.27}
 }
 cameraUpdate(dt);skyDome.position.copy(driving?car.root.position:playerPos);skyDome.visible=!inside;updateStreetLights();updateAudio();renderer.render(scene,cam);uiTick+=dt;if(uiTick>.17){renderHUD();uiTick=0}}
