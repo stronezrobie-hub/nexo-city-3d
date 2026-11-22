@@ -65,7 +65,35 @@ const amb=new T.HemisphereLight(0xe2f6ff,0x72906b,2.1);scene.add(amb);
 const sun=new T.DirectionalLight(0xffe9c9,2.65);sun.position.set(-75,140,90);sun.castShadow=true;sun.shadow.mapSize.set(matchMedia('(pointer:coarse)').matches?768:2048,matchMedia('(pointer:coarse)').matches?768:2048);sun.shadow.normalBias=.035;sun.shadow.camera.left=-105;sun.shadow.camera.right=105;sun.shadow.camera.top=105;sun.shadow.camera.bottom=-105;sun.shadow.camera.far=350;scene.add(sun);
 const mat=(c,roughness=.8)=>new T.MeshStandardMaterial({color:c,roughness});
 const m={grass:mat(0x66a46c),road:mat(0x3c4856),side:mat(0xa3adb3),stripe:mat(0xe5dcad),glass:mat(0x80c1d9,.25),dark:mat(0x243442),tree:mat(0x52895d),leaf2:mat(0x75a96b),wood:mat(0x73543c),roof:mat(0x445d65),trim:mat(0xe7e1d1),yellow:new T.MeshBasicMaterial({color:0xc4ff63}),white:mat(0xf5eee3)};
+// Physically shaded procedural glass, road and roof finishes.
+m.glass=new T.MeshPhysicalMaterial({color:0x87b7ca,roughness:.13,metalness:.2,transparent:true,opacity:.79,clearcoat:.95,clearcoatRoughness:.09,side:T.DoubleSide,depthWrite:false,envMapIntensity:1.1});
+m.roof.roughness=.55;m.road.roughness=.92;
 const colliders=[],homes=[],businesses=[],trees=[],traffic=[];
+/* Procedural ambient contact-shadow decal: no external textures. */
+function createRadialTexture(){
+ const cv=document.createElement('canvas');cv.width=cv.height=128;
+ const g=cv.getContext('2d'),grad=g.createRadialGradient(64,64,6,64,64,62);
+ grad.addColorStop(0,'rgba(0,0,0,.7)');grad.addColorStop(.38,'rgba(0,0,0,.43)');
+ grad.addColorStop(.75,'rgba(0,0,0,.13)');grad.addColorStop(1,'rgba(0,0,0,0)');
+ g.fillStyle=grad;g.fillRect(0,0,128,128);
+ return new T.CanvasTexture(cv);
+}
+const contactShadowMat=new T.MeshBasicMaterial({map:createRadialTexture(),transparent:true,opacity:.43,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-1});
+function createContactShadow(parent,w,d){
+ const mesh=new T.Mesh(new T.PlaneGeometry(w,d),contactShadowMat);
+ mesh.rotation.x=-Math.PI/2;mesh.position.y=.18;mesh.renderOrder=3;parent.add(mesh);
+ return mesh;
+}
+const headlampLights=[];
+function attachPlayerHeadlights(vehicle){
+ headlampLights.length=0;
+ for(const x of [-1.15,1.15]){
+  const lamp=new T.SpotLight(0xffe8c1,0,50,.32,.55,2);
+  lamp.position.set(x,1.38,-3.2);lamp.castShadow=false;
+  const target=new T.Object3D();target.position.set(x*.72,.15,-27);
+  vehicle.root.add(lamp,target);lamp.target=target;headlampLights.push(lamp);
+ }
+}
 /* Surface textures generated procedurally on Canvas, no downloaded assets. */
 function proceduralTexture(kind,scaleX=6,scaleY=6){
  const cv=document.createElement('canvas');cv.width=cv.height=128;const g=cv.getContext('2d');
@@ -438,6 +466,7 @@ for(const xx of [-.31,.31]){
 avatar.castShadow=true;
 function carModel(color){
  const grp=new T.Group();
+ createContactShadow(grp,5.2,7.8);
  const coat=new T.MeshPhysicalMaterial({color,metalness:.31,roughness:.27,clearcoat:.85,clearcoatRoughness:.18});
  const black=mat(0x15212b,.46),tire=mat(0x151b22,.92),rim=mat(0xa7afb8,.37),darkGlass=new T.MeshPhysicalMaterial({color:0x628ba2,metalness:.12,roughness:.14,transparent:true,opacity:.79,clearcoat:1});
  const light=new T.MeshStandardMaterial({color:0xfff5d2,emissive:0xffe8b3,emissiveIntensity:1.35});
@@ -527,7 +556,7 @@ function setQuality(value){
  refreshGraphicsHud();
 }
 setQuality(save.quality);
-let car=carModel(0xa6e7fc);car.root.position.set(6,0,-12);scene.add(car.root);
+let car=carModel(0xa6e7fc);car.root.position.set(6,0,-12);scene.add(car.root);attachPlayerHeadlights(car);
 const vehicleModels=[
  {name:'City Cruiser',icon:'🚙',speed:36,color:0xa6e7fc},
  {name:'Family SUV',icon:'🚘',speed:30,color:0xe0d6bd},
@@ -545,7 +574,7 @@ function replaceVehicle(type){
  const selected=Number.isInteger(type)&&type>=0&&type<vehicleModels.length?type:0;
  const v=vehicleModels[selected],old=car.root,oldPos=old.position.clone(),oldYaw=old.rotation.y;
  scene.remove(old);old.traverse(obj=>{if(obj.isMesh)obj.geometry.dispose()});
- car=carModel(v.color);scene.add(car.root);car.root.position.copy(oldPos);car.root.rotation.y=oldYaw;
+ car=carModel(v.color);scene.add(car.root);attachPlayerHeadlights(car);car.root.position.copy(oldPos);car.root.rotation.y=oldYaw;
  const roof=mat(0xd0d8d8),edge=mat(0x1c2933),accent=mat(0xece7d7);
  sirenParts=[];
  if(selected===1||selected===7){
@@ -680,6 +709,29 @@ const weatherPositions=new Float32Array(330*3);
 for(let i=0;i<330;i++){weatherPositions[i*3]=(Math.random()-.5)*100;weatherPositions[i*3+1]=Math.random()*44;weatherPositions[i*3+2]=(Math.random()-.5)*100}
 const rainGeo=new T.BufferGeometry();rainGeo.setAttribute('position',new T.BufferAttribute(weatherPositions,3));
 const rainCloud=new T.Points(rainGeo,new T.PointsMaterial({color:0xc5e7ff,size:.18,transparent:true,opacity:.76,depthWrite:false}));scene.add(rainCloud);
+/* Wet roads have visible puddles and environment-lit highlights when raining. */
+const puddleMaterial=new T.MeshPhysicalMaterial({
+ color:0x8ea5b1,roughness:.075,metalness:.52,transparent:true,opacity:.60,
+ clearcoat:1,clearcoatRoughness:.05,envMapIntensity:1.35,
+ depthWrite:false,side:T.DoubleSide
+});
+const puddles=[];
+for(let p=0;p<38;p++){
+ const vertical=random()>.5,roadIndex=Math.floor(rr(-3,4))*60,offset=rr(-185,185);
+ if(Math.abs((offset+180)%60)<16)continue;
+ const puddle=new T.Mesh(new T.CircleGeometry(1,22),puddleMaterial);
+ puddle.rotation.x=-Math.PI/2;
+ puddle.position.set(vertical?roadIndex+rr(-4,4):offset,.113,vertical?offset:roadIndex+rr(-4,4));
+ puddle.scale.set(rr(1.1,3.7),rr(.5,1.5),1);puddle.renderOrder=2;scene.add(puddle);puddles.push(puddle);
+}
+function updateWorldLighting(){
+ const visible=night&&!inside;
+ puddles.forEach(p=>p.visible=weather==='rain'&&graphics.mode!=='low');
+ for(const lamp of headlampLights)lamp.intensity=visible&&graphics.mode!=='low'?15:0;
+ const desiredFog=graphics.visibility||380;
+ scene.fog.far=weather==='fog'?Math.min(215,desiredFog):weather==='rain'?Math.min(315,desiredFog):desiredFog;
+}
+
 function applyAtmosphere(){
  const foggy=weather==='fog',raining=weather==='rain';
  const bg=night?(foggy?0x263546:0x172a45):foggy?0x8e9da6:raining?0x829fb8:0x93ccf5;
@@ -1291,7 +1343,7 @@ let fpsInterval=0,fpsFrames=0;
 function loop(){requestAnimationFrame(loop);const frameDt=clock.getDelta();let dt=Math.min(.045,frameDt);fpsInterval+=frameDt;fpsFrames++;if(fpsInterval>=1){graphics.fps=Math.round(fpsFrames/fpsInterval);fpsInterval=0;fpsFrames=0;refreshGraphicsHud();}if(!paused&&!photoMode){if(!homeCamera){if(driving)moveCar(dt);else moveCharacter(dt)}animateRoleplay(dt);animateWeather(dt);updateTraffic(dt);progress(dt);payTick+=dt;if(payTick>60){payTick-=60;if(save.job!=='Mieszkaniec'){save.cash+=500;persist();updateHud();showToast('Wypłata za pracę: +$500')}}marker.rotation.y+=dt*.65;torus.rotation.z+=dt*.7;
 for(const n of npc){const tt=clock.elapsedTime*.45+n.seed;n.g.position.set(n.x+Math.cos(tt)*3,0,n.z+Math.sin(tt)*3);n.g.rotation.y=-tt;n.l.rotation.x=Math.sin(tt*6)*.27;n.r.rotation.x=-Math.sin(tt*6)*.27}
 }
-updateSiren();cameraUpdate(dt);skyDome.position.copy(driving?car.root.position:playerPos);skyDome.visible=homeCamera?homeCamera!=='salon':!inside;updateStreetLights();updateAudio();renderGraphics(dt);uiTick+=dt;if(uiTick>.17){renderHUD();uiTick=0}}
+updateSiren();cameraUpdate(dt);updateWorldLighting();skyDome.position.copy(driving?car.root.position:playerPos);skyDome.visible=homeCamera?homeCamera!=='salon':!inside;updateStreetLights();updateAudio();renderGraphics(dt);uiTick+=dt;if(uiTick>.17){renderHUD();uiTick=0}}
 window.__nexoBootReady=true;
 const bootButton=el('startBtn');bootButton.disabled=false;bootButton.removeAttribute('aria-busy');bootButton.textContent='▶ WEJDŹ DO MIASTA';
 el('bootStatus').textContent='✓ Miasto załadowane. Możesz rozpocząć grę.';
