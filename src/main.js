@@ -310,7 +310,7 @@ function carModel(color){
  return{root:grp,coat};
 }
 let save={cash:2500,job:'Mieszkaniec',color:0,house:0,delivery:0,rpName:'Gracz',bio:'Nowy mieszkaniec NEXO CITY',skin:0,hair:0,vehicle:0,prop:'none',pet:'none',locked:false,homeColor:0,houseStyle:'classic',furnitureStyle:'cozy',weather:'clear',quality:'auto'};
-try{const data=JSON.parse(localStorage.getItem('nexo-life-rp-alpha2')||'{}');if(data&&typeof data==='object')Object.assign(save,{cash:Number(data.cash)||2500,job:typeof data.job==='string'?data.job:'Mieszkaniec',color:Math.max(0,Number(data.color)||0)%clothes.length,house:Number(data.house)||0,delivery:Math.min(4,Math.max(0,Number(data.delivery)||0)),rpName:typeof data.rpName==='string'?data.rpName.slice(0,24):'Gracz',bio:typeof data.bio==='string'?data.bio.slice(0,80):'Nowy mieszkaniec NEXO CITY',skin:Math.max(0,Number(data.skin)||0)%5,hair:Math.max(0,Number(data.hair)||0)%5,vehicle:Math.max(0,Number(data.vehicle)||0)%4,prop:typeof data.prop==='string'?data.prop:'none',pet:typeof data.pet==='string'?data.pet:'none',locked:!!data.locked,homeColor:Math.max(0,Number(data.homeColor)||0)%5,houseStyle:['classic','modern','villa','loft'].includes(data.houseStyle)?data.houseStyle:'classic',furnitureStyle:['cozy','luxury','neon'].includes(data.furnitureStyle)?data.furnitureStyle:'cozy',weather:['clear','rain','fog'].includes(data.weather)?data.weather:'clear',quality:['auto','fast','ultra'].includes(data.quality)?data.quality:'auto'})}catch{}
+try{const data=JSON.parse(localStorage.getItem('nexo-life-rp-alpha2')||'{}');if(data&&typeof data==='object')Object.assign(save,{cash:Number(data.cash)||2500,job:typeof data.job==='string'?data.job:'Mieszkaniec',color:Math.max(0,Number(data.color)||0)%clothes.length,house:Number(data.house)||0,delivery:Math.min(4,Math.max(0,Number(data.delivery)||0)),rpName:typeof data.rpName==='string'?data.rpName.slice(0,24):'Gracz',bio:typeof data.bio==='string'?data.bio.slice(0,80):'Nowy mieszkaniec NEXO CITY',skin:Math.max(0,Number(data.skin)||0)%5,hair:Math.max(0,Number(data.hair)||0)%5,vehicle:Math.max(0,Number(data.vehicle)||0)%10,prop:typeof data.prop==='string'?data.prop:'none',pet:typeof data.pet==='string'?data.pet:'none',locked:!!data.locked,homeColor:Math.max(0,Number(data.homeColor)||0)%5,houseStyle:['classic','modern','villa','loft'].includes(data.houseStyle)?data.houseStyle:'classic',furnitureStyle:['cozy','luxury','neon'].includes(data.furnitureStyle)?data.furnitureStyle:'cozy',weather:['clear','rain','fog'].includes(data.weather)?data.weather:'clear',quality:['auto','fast','ultra'].includes(data.quality)?data.quality:'auto'})}catch{}
 const skinColors=[0xf0c39b,0xf9d8bc,0xb98462,0x80543e,0xc7a68c],hairColors=[0x342a29,0xe5bd76,0x644734,0x1a2430,0xb5543d];
 torso.color.setHex(clothes[save.color]);skin.color.setHex(skinColors[save.skin]);hair.color.setHex(hairColors[save.hair]);
 function persist(){try{localStorage.setItem('nexo-life-rp-alpha2',JSON.stringify(save))}catch{}}
@@ -325,16 +325,76 @@ function setQuality(value){
 }
 setQuality(save.quality);
 let car=carModel(0xa6e7fc);car.root.position.set(6,0,-12);scene.add(car.root);
-const vehicleModels=[{name:'City Cruiser',speed:36,color:0xa6e7fc},{name:'Family SUV',speed:30,color:0xe0d6bd},{name:'Street Sport',speed:47,color:0xd95765},{name:'Police Unit',speed:42,color:0xe2e8ee}];
+const vehicleModels=[
+ {name:'City Cruiser',icon:'🚙',speed:36,color:0xa6e7fc},
+ {name:'Family SUV',icon:'🚘',speed:30,color:0xe0d6bd},
+ {name:'Street Sport',icon:'🏎️',speed:47,color:0xd95765},
+ {name:'Police Unit',icon:'🚓',speed:42,color:0xe2e8ee,emergency:true},
+ {name:'City Taxi',icon:'🚕',speed:37,color:0xf0cf58},
+ {name:'Ambulance',icon:'🚑',speed:37,color:0xe5edf1,emergency:true},
+ {name:'Fire Rescue',icon:'🚒',speed:31,color:0xd54744,emergency:true},
+ {name:'Offroad Explorer',icon:'🛻',speed:34,color:0x6b9875},
+ {name:'Delivery Van',icon:'🚐',speed:32,color:0xc2dbe5},
+ {name:'Executive Sedan',icon:'🏁',speed:45,color:0x292f42}
+];
+let sirenOn=false,sirenParts=[];
 function replaceVehicle(type){
- const v=vehicleModels[type]||vehicleModels[0],old=car.root,oldPos=old.position.clone(),oldYaw=old.rotation.y;
+ const selected=Number.isInteger(type)&&type>=0&&type<vehicleModels.length?type:0;
+ const v=vehicleModels[selected],old=car.root,oldPos=old.position.clone(),oldYaw=old.rotation.y;
  scene.remove(old);old.traverse(obj=>{if(obj.isMesh)obj.geometry.dispose()});
  car=carModel(v.color);scene.add(car.root);car.root.position.copy(oldPos);car.root.rotation.y=oldYaw;
- if(type===1){car.root.scale.set(1.08,1.24,1.08);cube(car.root,0,2.7,.4,2.8,.25,3,m.dark,false);for(const x of [-1.25,1.25])cube(car.root,x,2.98,.45,.22,.2,3.5,m.dark,false)}
- if(type===2){car.root.scale.set(1.04,.86,1.08);cube(car.root,0,1.75,3.36,3.2,.22,.85,car.coat,false)}
- if(type===3){cube(car.root,-.65,2.55,-.15,1.1,.35,.75,mat(0xd83142),false);cube(car.root,.65,2.55,-.15,1.1,.35,.75,mat(0x2c7fd6),false)}
- save.vehicle=type;persist();
+ const roof=mat(0xd0d8d8),edge=mat(0x1c2933),accent=mat(0xece7d7);
+ sirenParts=[];
+ if(selected===1||selected===7){
+  car.root.scale.set(selected===7?1.17:1.08,selected===7?1.34:1.23,selected===7?1.10:1.08);
+  cube(car.root,0,2.72,.4,2.82,.34,3.35,car.coat,false);
+  for(const x of [-1.25,1.25])cube(car.root,x,2.98,.3,.2,.19,3.6,edge,false);
+  if(selected===7){cube(car.root,0,3.02,1,2.7,.25,2.3,edge,false);for(const x of [-1,1])cube(car.root,x,.95,-3.6,.22,1.2,.48,edge,false)}
+ }
+ if(selected===2){car.root.scale.set(1.07,.88,1.1);cube(car.root,0,1.73,3.40,3.3,.2,.87,car.coat,false);cube(car.root,0,.55,-3.53,3.65,.3,.15,edge,false)}
+ if(selected===3||selected===5||selected===6){
+   if(selected===5||selected===6){
+    car.root.scale.set(1.18,1.33,1.15);
+    cube(car.root,0,2.56,1,3.35,1.63,3.45,car.coat);
+    cube(car.root,0,3.53,1,3.48,.25,3.5,roof,false);
+    for(const side of [-1,1])cube(car.root,side*1.73,2.55,1.3,.1,.95,1.25,m.glass,false);
+    cube(car.root,0,2.65,2.86,1.7,.85,.16,selected===5?mat(0xcd4e52):accent,false);
+   }
+   const red=new T.MeshStandardMaterial({color:0xe52c34,emissive:0xe52c34,emissiveIntensity:.1});
+   const blue=new T.MeshStandardMaterial({color:0x1a7ee5,emissive:0x1a7ee5,emissiveIntensity:.1});
+   const baseY=selected===3?2.65:3.79;
+   sirenParts.push(red,blue);
+   cube(car.root,-.6,baseY,-.3,.9,.37,.6,red,false);
+   cube(car.root,.6,baseY,-.3,.9,.37,.6,blue,false);
+   cube(car.root,0,baseY-.19,-.3,2.22,.16,.75,edge,false);
+ }
+ if(selected===4){
+   cube(car.root,0,2.7,-.2,1.4,.52,.7,accent,false);
+   cube(car.root,0,2.98,-.2,1.2,.12,.68,edge,false);
+   for(const side of [-1,1])cube(car.root,side*1.91,1.0,-.2,.09,.26,3.3,edge,false);
+ }
+ if(selected===8){
+   car.root.scale.set(1.16,1.22,1.24);
+   cube(car.root,0,2.55,1.33,3.3,1.51,3.3,car.coat);
+   cube(car.root,0,3.38,.5,3.5,.2,5.3,roof,false);
+   for(const side of [-1,1])cube(car.root,side*1.7,2.64,1.7,.08,1.1,1.1,edge,false);
+ }
+ if(selected===9){
+   car.root.scale.set(1.13,.9,1.22);
+   cube(car.root,0,2.42,.5,3.25,.15,3.35,edge,false);
+   for(const side of [-1,1])cube(car.root,side*1.96,1.22,1.76,.17,.08,1.2,accent,false);
+ }
+ save.vehicle=selected;sirenOn=false;persist();
 }
+function toggleSiren(){
+ if(!vehicleModels[save.vehicle]?.emergency){showToast('Syrena jest dostępna w pojazdach służb');return}
+ sirenOn=!sirenOn;showToast(sirenOn?'🚨 Syrena włączona':'Syrena wyłączona');
+}
+function updateSiren(){
+ const pulse=Math.floor(clock.elapsedTime*5)%2;
+ sirenParts.forEach((m,i)=>m.emissiveIntensity=sirenOn&&i===pulse?4.3:.12);
+}
+
 replaceVehicle(save.vehicle);
 for(let i=0;i<15;i++){const model=carModel([0xeecc70,0xec998a,0xb3d2d6,0xbca5f0,0xa5d7a9][Math.floor(rr(0,5))]);model.root.scale.setScalar(.78);scene.add(model.root);traffic.push({model,vertical:random()>.5,lane:Math.floor(rr(-3,4))*60+(random()>.5?3.2:-3.2),t:rr(-185,185),dir:random()>.5?1:-1,speed:rr(7,14)})}
 const npc=[];
@@ -447,7 +507,7 @@ function togglePhoto(){
 el('photo').onclick=togglePhoto;
 el('photoExit').onclick=togglePhoto;
 const key=new Set(),mapped={w:'forward',arrowup:'forward',s:'back',arrowdown:'back',a:'left',arrowleft:'left',d:'right',arrowright:'right',shift:'run'};
-document.addEventListener('keydown',e=>{const k=e.key.toLowerCase();if(mapped[k]){key.add(mapped[k]);e.preventDefault()}if(e.repeat)return;if(photoMode){if(k==='o'||k==='escape')togglePhoto();return}if(k==='o')togglePhoto();if(k==='e')interact();if(k==='f')togglePanel('phone');if(k==='h')honk();if(k==='c'){highView=!highView;showToast(highView?'Kamera z góry':'Kamera zza pleców')}if(k==='p'||k==='escape')togglePause()});
+document.addEventListener('keydown',e=>{const k=e.key.toLowerCase();if(mapped[k]){key.add(mapped[k]);e.preventDefault()}if(e.repeat)return;if(photoMode){if(k==='o'||k==='escape')togglePhoto();return}if(k==='o')togglePhoto();if(k==='e')interact();if(k==='f')togglePanel('phone');if(k==='h')honk();if(k==='l')toggleSiren();if(k==='c'){highView=!highView;showToast(highView?'Kamera z góry':'Kamera zza pleców')}if(k==='p'||k==='escape')togglePause()});
 document.addEventListener('keyup',e=>{const k=e.key.toLowerCase();if(mapped[k])key.delete(mapped[k])});W.addEventListener('blur',()=>key.clear());
 document.querySelectorAll('[data-control]').forEach(b=>{const action=b.dataset.control;b.addEventListener('pointerdown',e=>{e.preventDefault();b.setPointerCapture(e.pointerId);key.add(action);b.classList.add('down')});for(const ev of ['pointerup','pointercancel','lostpointercapture'])b.addEventListener(ev,()=>{key.delete(action);b.classList.remove('down')})});
 document.querySelectorAll('[data-shortcut]').forEach(b=>b.addEventListener('click',()=>{const action=b.dataset.shortcut;if(action==='interact')interact();if(action==='phone')togglePanel('phone');if(action==='camera'){highView=!highView;showToast('Zmieniono kamerę')}if(action==='honk')honk()}));
@@ -700,7 +760,7 @@ cam.position.set(8,8,35);cam.lookAt(8,1,19);
 function loop(){requestAnimationFrame(loop);let dt=Math.min(.045,clock.getDelta());if(!paused&&!photoMode){if(driving)moveCar(dt);else moveCharacter(dt);animateRoleplay(dt);animateWeather(dt);updateTraffic(dt);progress(dt);payTick+=dt;if(payTick>60){payTick-=60;if(save.job!=='Mieszkaniec'){save.cash+=500;persist();updateHud();showToast('Wypłata za pracę: +$500')}}marker.rotation.y+=dt*.65;torus.rotation.z+=dt*.7;
 for(const n of npc){const tt=clock.elapsedTime*.45+n.seed;n.g.position.set(n.x+Math.cos(tt)*3,0,n.z+Math.sin(tt)*3);n.g.rotation.y=-tt;n.l.rotation.x=Math.sin(tt*6)*.27;n.r.rotation.x=-Math.sin(tt*6)*.27}
 }
-cameraUpdate(dt);skyDome.position.copy(driving?car.root.position:playerPos);skyDome.visible=!inside;updateStreetLights();updateAudio();renderer.render(scene,cam);uiTick+=dt;if(uiTick>.17){renderHUD();uiTick=0}}
+updateSiren();cameraUpdate(dt);skyDome.position.copy(driving?car.root.position:playerPos);skyDome.visible=!inside;updateStreetLights();updateAudio();renderer.render(scene,cam);uiTick+=dt;if(uiTick>.17){renderHUD();uiTick=0}}
 window.__nexoBootReady=true;
 const bootButton=el('startBtn');bootButton.disabled=false;bootButton.removeAttribute('aria-busy');bootButton.textContent='▶ WEJDŹ DO MIASTA';
 el('bootStatus').textContent='✓ Miasto załadowane. Możesz rozpocząć grę.';
