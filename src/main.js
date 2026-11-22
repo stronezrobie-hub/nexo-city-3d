@@ -425,8 +425,8 @@ function carModel(color){
  cube(grp,0,.3,-2.8,2.1,.24,.5,black,false);
  return{root:grp,coat};
 }
-let save={cash:2500,job:'Mieszkaniec',color:0,house:0,delivery:0,deliveryActive:false,bank:0,rpName:'Gracz',bio:'Nowy mieszkaniec NEXO CITY',skin:0,hair:0,vehicle:0,prop:'none',pet:'none',locked:false,homeColor:0,decor:[],houseStyle:'classic',furnitureStyle:'cozy',weather:'clear',quality:'auto'};
-try{const data=JSON.parse(localStorage.getItem('nexo-life-rp-alpha2')||'{}');if(data&&typeof data==='object')Object.assign(save,{cash:Number(data.cash)||2500,job:typeof data.job==='string'?data.job:'Mieszkaniec',color:Math.max(0,Number(data.color)||0)%clothes.length,house:Number(data.house)||0,delivery:Math.min(4,Math.max(0,Number(data.delivery)||0)),deliveryActive:!!data.deliveryActive,bank:Math.max(0,Number(data.bank)||0),rpName:typeof data.rpName==='string'?data.rpName.slice(0,24):'Gracz',bio:typeof data.bio==='string'?data.bio.slice(0,80):'Nowy mieszkaniec NEXO CITY',skin:Math.max(0,Number(data.skin)||0)%5,hair:Math.max(0,Number(data.hair)||0)%5,vehicle:Math.max(0,Number(data.vehicle)||0)%10,prop:typeof data.prop==='string'?data.prop:'none',pet:typeof data.pet==='string'?data.pet:'none',locked:!!data.locked,homeColor:Math.max(0,Number(data.homeColor)||0)%5,decor:Array.isArray(data.decor)?data.decor.slice(0,6):[],houseStyle:['classic','modern','villa','loft'].includes(data.houseStyle)?data.houseStyle:'classic',furnitureStyle:['cozy','luxury','neon'].includes(data.furnitureStyle)?data.furnitureStyle:'cozy',weather:['clear','rain','fog'].includes(data.weather)?data.weather:'clear',quality:['auto','fast','ultra'].includes(data.quality)?data.quality:'auto'})}catch{}
+let save={cash:2500,job:'Mieszkaniec',color:0,house:0,delivery:0,deliveryActive:false,bank:0,rpName:'Gracz',bio:'Nowy mieszkaniec NEXO CITY',skin:0,hair:0,vehicle:0,prop:'none',pet:'none',locked:false,homeColor:0,decor:[],houseStyle:'classic',furnitureStyle:'cozy',weather:'clear',quality:'auto',familyActive:false,familyName:'Rodzina NEXO',familyRole:'Opiekun'};
+try{const data=JSON.parse(localStorage.getItem('nexo-life-rp-alpha2')||'{}');if(data&&typeof data==='object')Object.assign(save,{cash:Number(data.cash)||2500,job:typeof data.job==='string'?data.job:'Mieszkaniec',color:Math.max(0,Number(data.color)||0)%clothes.length,house:Number(data.house)||0,delivery:Math.min(4,Math.max(0,Number(data.delivery)||0)),deliveryActive:!!data.deliveryActive,bank:Math.max(0,Number(data.bank)||0),rpName:typeof data.rpName==='string'?data.rpName.slice(0,24):'Gracz',bio:typeof data.bio==='string'?data.bio.slice(0,80):'Nowy mieszkaniec NEXO CITY',skin:Math.max(0,Number(data.skin)||0)%5,hair:Math.max(0,Number(data.hair)||0)%5,vehicle:Math.max(0,Number(data.vehicle)||0)%10,prop:typeof data.prop==='string'?data.prop:'none',pet:typeof data.pet==='string'?data.pet:'none',locked:!!data.locked,homeColor:Math.max(0,Number(data.homeColor)||0)%5,decor:Array.isArray(data.decor)?data.decor.slice(0,6):[],houseStyle:['classic','modern','villa','loft'].includes(data.houseStyle)?data.houseStyle:'classic',furnitureStyle:['cozy','luxury','neon'].includes(data.furnitureStyle)?data.furnitureStyle:'cozy',weather:['clear','rain','fog'].includes(data.weather)?data.weather:'clear',quality:['auto','fast','ultra'].includes(data.quality)?data.quality:'auto',familyActive:!!data.familyActive,familyName:typeof data.familyName==='string'?data.familyName.slice(0,28):'Rodzina NEXO',familyRole:['Opiekun','Dziecko','Rodzeństwo','Gość'].includes(data.familyRole)?data.familyRole:'Opiekun'})}catch{}
 const skinColors=[0xf0c39b,0xf9d8bc,0xb98462,0x80543e,0xc7a68c],hairColors=[0x342a29,0xe5bd76,0x644734,0x1a2430,0xb5543d];
 torso.color.setHex(clothes[save.color]);skin.color.setHex(skinColors[save.skin]);hair.color.setHex(hairColors[save.hair]);
 function persist(){try{localStorage.setItem('nexo-life-rp-alpha2',JSON.stringify(save))}catch{}}
@@ -584,8 +584,10 @@ function animateRoleplay(dt){
  if(emote!=='none'&&walking)emote='none';
  if(emote==='wave'){emoteClock+=dt;rightArm.rotation.z=-2.2;rightArm.rotation.x=Math.sin(emoteClock*9)*.5}
  if(emote==='dance'){emoteClock+=dt;avatar.rotation.z=Math.sin(emoteClock*8)*.18;leftArm.rotation.x=Math.sin(emoteClock*7);rightArm.rotation.x=-Math.sin(emoteClock*7)}
+ if(emote==='salute'){rightArm.rotation.z=-2.1;rightArm.rotation.x=-.85}
+ if(emote==='cheer'){emoteClock+=dt;leftArm.rotation.z=2.6;rightArm.rotation.z=-2.6;leftArm.rotation.x=Math.sin(emoteClock*6)*.15;rightArm.rotation.x=-Math.sin(emoteClock*6)*.15}
  if(emote==='sit'){avatar.position.y=-.5;leftArm.rotation.x=-.25;rightArm.rotation.x=-.25}
- if(emote==='none'){avatar.rotation.z*=.7;rightArm.rotation.z*=.65}
+ if(emote==='none'){avatar.rotation.z*=.7;rightArm.rotation.z*=.65;leftArm.rotation.z*=.65}
  if(emote!=='sit')avatar.position.y=0;
 }
 const weatherPositions=new Float32Array(330*3);
@@ -705,7 +707,7 @@ function pageText(){
  if(activePage==='phone')return {title:'📱 NEXO PHONE',lead:'Twoje miasto w kieszeni. Wybierz, co chcesz robić.',body:[
  ['avatar','👤 Postać','Wygląd i styl'],['cars','🚘 Garaż','10 rodzajów pojazdów'],
  ['homes','🏠 Dom','Parcele, katalog domów i wnętrza'],['jobs','💼 Praca','Zawody i opcjonalne dostawy'],['places','🗺️ Miasto','Wszystkie miejsca i teleport'],
- ['rp','🎭 Roleplay','Imię, biografia i emotki'],['bag','🎒 Plecak','Przedmioty i zwierzęta'],['weather','🌦 Pogoda','Słońce, deszcz lub mgła'],['settings','⚙️ Ustawienia','Jakość grafiki i kamera']
+ ['rp','🎭 Roleplay','Imię i biografia'],['animations','💃 Animacje','Gesty postaci'],['family','👨‍👩‍👧 Rodzina RP','Rodzinne role offline'],['cameras','📹 Kamery domowe','Podgląd własnego domu'],['bag','🎒 Plecak','Przedmioty i zwierzęta'],['weather','🌦 Pogoda','Słońce, deszcz lub mgła'],['settings','⚙️ Ustawienia','Jakość grafiki i kamera']
  ].map(x=>'<div class="option"><div><b>'+x[1]+'</b><small>'+x[2]+'</small></div><button data-open="'+x[0]+'">OTWÓRZ</button></div>').join('')};
 if(activePage==='avatar')return{title:'👤 KREATOR POSTACI',lead:'Personalizuj swój wygląd. Wszystkie elementy postaci powstają z kodu.',body:
  '<div class="panel-caption">STRÓJ</div><div class="swatches">'+clothes.map((c,i)=>'<button class="swatch '+(save.color===i?'selected':'')+'" style="background:#'+c.toString(16).padStart(6,'0')+'" data-color="'+i+'" aria-label="Strój '+i+'"></button>').join('')+'</div>'+
@@ -737,6 +739,23 @@ if(activePage==='jobs')return{title:'💼 PRACA I AKTYWNOŚCI RP',lead:'Odgrywaj
  ['Mieszkaniec','Kurier','Policjant','Lekarz','Strażak','Sprzedawca','Nauczyciel','Mechanik','Kierowca','Reporter'].map(name=>'<div class="option"><div><b>'+name+'</b><small>'+(name==='Mieszkaniec'?'Swobodna rozgrywka':name==='Kurier'?'Możesz realizować dostawy':'Wypłata za aktywną grę')+'</small></div><button data-job="'+name+'" '+(save.job===name?'disabled':'')+'>'+(save.job===name?'WYBRANO':'WYBIERZ')+'</button></div>').join('')};
 if(activePage==='places')return{title:'🗺️ PRZEWODNIK PO MIEŚCIE',lead:'Odwiedzaj miejsca pracy i spotkań w NEXO Valley. Naciśnij „IDŹ”, aby szybko przenieść się przed wejście.',body:
  businesses.map((b,i)=>'<div class="option"><div><b>'+({'school':'🎓','police':'🚓','hospital':'🏥','cafe':'☕','shop':'🛍️','garage':'🚘','bank':'🏦','fire':'🚒','gas':'⛽'}[b.kind]||'🏙️')+' '+b.name+'</b><small>'+('Wspólne miejsce RP · '+(i+1))+'</small></div><button data-visit="'+i+'">IDŹ</button></div>').join('')};
+
+if(activePage==='animations')return{title:'💃 ANIMACJE POSTACI',lead:'Wybierz gest do odgrywania roli w mieście. Podczas chodzenia gesty zatrzymują się automatycznie.',body:
+ [['wave','👋 Pomachaj','Przywitaj mieszkańców'],['dance','💃 Taniec','Zatańcz w mieście'],['sit','🪑 Usiądź','Odpocznij'],['salute','🫡 Salutuj','Powitanie oficjalne'],['cheer','🙌 Ciesz się','Podnieś ręce'],['none','🧍 Zatrzymaj','Powróć do normalnej pozycji']]
+ .map(x=>'<div class="option"><div><b>'+x[1]+'</b><small>'+x[2]+'</small></div><button data-emote="'+x[0]+'">'+(emote===x[0]?'AKTYWNA':'WYKONAJ')+'</button></div>').join('')};
+if(activePage==='family')return{title:'👨‍👩‍👧 RODZINA RP',lead:'Stwórz lokalną rodzinę do odgrywania ról. W tej wersji nie są wysyłane zaproszenia do innych graczy.',body:
+ '<div class="panel-caption">NAZWA RODZINY</div><input id="familyName" class="rp-field" maxlength="28" value="'+esc(save.familyName)+'" placeholder="Rodzina NEXO">'+
+ '<div class="option"><div><b>'+(save.familyActive?'👨‍👩‍👧 '+esc(save.familyName):'👪 Utwórz rodzinę')+'</b><small>'+(save.familyActive?'Twoja rola: '+save.familyRole:'Wybierz nazwę i utwórz rodzinę RP')+'</small></div><button data-family-save="1">'+(save.familyActive?'ZAPISZ':'UTWÓRZ')+'</button></div>'+
+ (save.familyActive?'<div class="panel-caption">TWOJA ROLA W RODZINIE</div>'+
+ ['Opiekun','Dziecko','Rodzeństwo','Gość'].map(x=>'<div class="option"><b>'+x+'</b><button data-family-role="'+x+'" '+(save.familyRole===x?'disabled':'')+'>'+(save.familyRole===x?'WYBRANO':'WYBIERZ')+'</button></div>').join('')+
+ '<button class="fullbtn" data-family-leave="1">OPUŚĆ RODZINĘ RP</button>':'')+
+ '<p class="panel-lead">Tryb jednoosobowy: rodzina to ustawienia postaci i scenek RP, a nie internetowy system znajomych.</p>'};
+if(activePage==='cameras')return{title:'📹 KAMERY DOMOWE',lead:save.house?'Podgląd wybranych punktów Twojej posesji. Kamery to widoki sceny 3D w grze, nie nagrania z urządzeń.':'Aby korzystać z kamer, najpierw wybierz swój dom w zakładce Domy.',body:
+ (save.house?'<div class="option"><div><b>📷 Kamera 01 — wejście</b><small>Widok głównego wejścia</small></div><button data-home-camera="front">PODGLĄD</button></div>'+
+ '<div class="option"><div><b>📷 Kamera 02 — ogród</b><small>Widok z boku posesji</small></div><button data-home-camera="garden">PODGLĄD</button></div>'+
+ '<div class="option"><div><b>📷 Kamera 03 — salon</b><small>Widok wnętrza domu</small></div><button data-home-camera="salon">PODGLĄD</button></div>'+
+ '<button class="fullbtn" data-home-camera="off">'+(homeCamera?'ZAKOŃCZ PODGLĄD':'WRÓĆ DO POSTACI')+'</button>'
+ :'<button class="fullbtn" data-open="homes">WYBIERZ DOM</button>')};
 if(activePage==='rp')return{title:'🎭 ROLEPLAY',lead:'Ustaw imię postaci, swoją historię i wykonuj emotki.',body:
  '<div class="panel-caption">TWOJE IMIĘ RP</div><input class="rp-field" id="rpName" maxlength="24" value="'+esc(save.rpName)+'" placeholder="Imię postaci">'+
  '<div class="panel-caption">TWOJA HISTORIA</div><input class="rp-field" id="rpBio" maxlength="80" value="'+esc(save.bio)+'" placeholder="Kim jest Twoja postać?">'+
@@ -817,6 +836,10 @@ if(b.dataset.photo){togglePanel(activePage);togglePhoto()}
 if(b.dataset.lock){save.locked=!save.locked;persist();renderPanel();showToast(save.locked?'Zamknięto drzwi (RP)':'Otwarto drzwi')}
 if(b.dataset.homecolor){save.homeColor=(save.homeColor+1)%5;repaintHome();persist();renderPanel();showToast('Nowy kolor domu')}
 if(b.dataset.saveprofile){save.rpName=(el('rpName')?.value||'Gracz').trim().slice(0,24)||'Gracz';save.bio=(el('rpBio')?.value||'').trim().slice(0,80);persist();updateHud();renderPanel();showToast('Zapisano profil RP')}
+if(b.dataset.familySave){save.familyName=(el('familyName')?.value||'Rodzina NEXO').trim().slice(0,28)||'Rodzina NEXO';save.familyActive=true;persist();updateHud();renderPanel();showToast('Rodzina RP: '+save.familyName)}
+if(b.dataset.familyRole){save.familyRole=b.dataset.familyRole;persist();updateHud();renderPanel();showToast('Nowa rola: '+save.familyRole)}
+if(b.dataset.familyLeave){save.familyActive=false;persist();updateHud();renderPanel();showToast('Opuszczono rodzinę RP')}
+if(b.dataset.homeCamera!==undefined){setHomeCamera(b.dataset.homeCamera);if(homeCamera){togglePanel(activePage)}else renderPanel()}
 if(b.dataset.spawn!==undefined){
  if(inside){showToast('Wyjdź z domu, żeby przywołać auto');return}
  replaceVehicle(Number(b.dataset.spawn));
@@ -967,7 +990,7 @@ function applyInteriorTheme(){
 repaintHome();applyInteriorTheme();
 function updateHud(){
  el('cash').textContent='$ '+save.cash.toLocaleString('pl-PL');
- el('role').textContent=save.rpName+' · '+save.job;
+ el('role').textContent=save.rpName+' · '+save.job+(save.familyActive?' · '+save.familyRole:'');
  el('mission').textContent=save.deliveryActive?save.delivery+'/5':'FREE RP';
  el('taskProgress').style.width=(save.deliveryActive?save.delivery/5*100:0)+'%';
  el('taskTitle').textContent=save.deliveryActive?'Kurier miejski':'Witaj w NEXO Valley!';
