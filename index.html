@@ -453,11 +453,21 @@ function carModel(color){
  cube(grp,0,.3,-2.8,2.1,.24,.5,black,false);
  return{root:grp,coat};
 }
-let save={cash:2500,job:'Mieszkaniec',color:0,house:0,delivery:0,rpName:'Gracz',bio:'Nowy mieszkaniec NEXO CITY',skin:0,hair:0,vehicle:0,prop:'none',pet:'none',locked:false,homeColor:0,weather:'clear'};
-try{const data=JSON.parse(localStorage.getItem('nexo-life-rp-alpha2')||'{}');if(data&&typeof data==='object')Object.assign(save,{cash:Number(data.cash)||2500,job:typeof data.job==='string'?data.job:'Mieszkaniec',color:Math.max(0,Number(data.color)||0)%clothes.length,house:Number(data.house)||0,delivery:Math.min(4,Math.max(0,Number(data.delivery)||0)),rpName:typeof data.rpName==='string'?data.rpName.slice(0,24):'Gracz',bio:typeof data.bio==='string'?data.bio.slice(0,80):'Nowy mieszkaniec NEXO CITY',skin:Math.max(0,Number(data.skin)||0)%5,hair:Math.max(0,Number(data.hair)||0)%5,vehicle:Math.max(0,Number(data.vehicle)||0)%4,prop:typeof data.prop==='string'?data.prop:'none',pet:typeof data.pet==='string'?data.pet:'none',locked:!!data.locked,homeColor:Math.max(0,Number(data.homeColor)||0)%5,weather:['clear','rain','fog'].includes(data.weather)?data.weather:'clear'})}catch{}
+let save={cash:2500,job:'Mieszkaniec',color:0,house:0,delivery:0,rpName:'Gracz',bio:'Nowy mieszkaniec NEXO CITY',skin:0,hair:0,vehicle:0,prop:'none',pet:'none',locked:false,homeColor:0,weather:'clear',quality:'auto'};
+try{const data=JSON.parse(localStorage.getItem('nexo-life-rp-alpha2')||'{}');if(data&&typeof data==='object')Object.assign(save,{cash:Number(data.cash)||2500,job:typeof data.job==='string'?data.job:'Mieszkaniec',color:Math.max(0,Number(data.color)||0)%clothes.length,house:Number(data.house)||0,delivery:Math.min(4,Math.max(0,Number(data.delivery)||0)),rpName:typeof data.rpName==='string'?data.rpName.slice(0,24):'Gracz',bio:typeof data.bio==='string'?data.bio.slice(0,80):'Nowy mieszkaniec NEXO CITY',skin:Math.max(0,Number(data.skin)||0)%5,hair:Math.max(0,Number(data.hair)||0)%5,vehicle:Math.max(0,Number(data.vehicle)||0)%4,prop:typeof data.prop==='string'?data.prop:'none',pet:typeof data.pet==='string'?data.pet:'none',locked:!!data.locked,homeColor:Math.max(0,Number(data.homeColor)||0)%5,weather:['clear','rain','fog'].includes(data.weather)?data.weather:'clear',quality:['auto','fast','ultra'].includes(data.quality)?data.quality:'auto'})}catch{}
 const skinColors=[0xf0c39b,0xf9d8bc,0xb98462,0x80543e,0xc7a68c],hairColors=[0x342a29,0xe5bd76,0x644734,0x1a2430,0xb5543d];
 torso.color.setHex(clothes[save.color]);skin.color.setHex(skinColors[save.skin]);hair.color.setHex(hairColors[save.hair]);
 function persist(){try{localStorage.setItem('nexo-life-rp-alpha2',JSON.stringify(save))}catch{}}
+function setQuality(value){
+ save.quality=value;persist();
+ const mobile=matchMedia('(pointer:coarse)').matches;
+ const dpr=value==='fast'?.75:value==='ultra'?Math.min(devicePixelRatio||1,2):Math.min(devicePixelRatio||1,mobile?1:1.5);
+ renderer.setPixelRatio(dpr);renderer.setSize(innerWidth,innerHeight);
+ sun.castShadow=value!=='fast';
+ renderer.shadowMap.enabled=value!=='fast';
+ renderer.shadowMap.needsUpdate=true;
+}
+setQuality(save.quality);
 let car=carModel(0xa6e7fc);car.root.position.set(6,0,-12);scene.add(car.root);
 const vehicleModels=[{name:'City Cruiser',speed:36,color:0xa6e7fc},{name:'Family SUV',speed:30,color:0xe0d6bd},{name:'Street Sport',speed:47,color:0xd95765},{name:'Police Unit',speed:42,color:0xe2e8ee}];
 function replaceVehicle(type){
@@ -625,7 +635,7 @@ document.querySelectorAll('[data-page]').forEach(e=>e.onclick=()=>togglePanel(e.
 function pageText(){if(activePage==='phone')return {title:'📱 NEXO PHONE',lead:'Twoje miasto w kieszeni. Wybierz, co chcesz robić.',body:[
  ['avatar','👤 Postać','Wygląd i styl'],['cars','🚘 Garaż','Cztery modele samochodów'],
  ['homes','🏠 Dom','Twój dom i jego ustawienia'],['jobs','💼 Praca','Wybierz swój zawód'],
- ['rp','🎭 Roleplay','Imię, biografia i emotki'],['bag','🎒 Plecak','Przedmioty i zwierzęta'],['weather','🌦 Pogoda','Słońce, deszcz lub mgła']
+ ['rp','🎭 Roleplay','Imię, biografia i emotki'],['bag','🎒 Plecak','Przedmioty i zwierzęta'],['weather','🌦 Pogoda','Słońce, deszcz lub mgła'],['settings','⚙️ Ustawienia','Jakość grafiki i kamera']
  ].map(x=>'<div class="option"><div><b>'+x[1]+'</b><small>'+x[2]+'</small></div><button data-open="'+x[0]+'">OTWÓRZ</button></div>').join('')};
 if(activePage==='avatar')return{title:'👤 KREATOR POSTACI',lead:'Personalizuj swój wygląd. Wszystkie elementy postaci powstają z kodu.',body:
  '<div class="panel-caption">STRÓJ</div><div class="swatches">'+clothes.map((c,i)=>'<button class="swatch '+(save.color===i?'selected':'')+'" style="background:#'+c.toString(16).padStart(6,'0')+'" data-color="'+i+'" aria-label="Strój '+i+'"></button>').join('')+'</div>'+
@@ -649,6 +659,10 @@ if(activePage==='bag')return{title:'🎒 PLECAK I PUPIL',lead:'Wybierz przedmiot
  [['none','✋ Puste ręce'],['phone','📱 Telefon'],['flashlight','🔦 Latarka'],['coffee','☕ Kawa'],['umbrella','☂️ Parasol'],['balloon','🎈 Balon']].map(x=>'<div class="option"><b>'+x[1]+'</b><button data-prop="'+x[0]+'" '+(save.prop===x[0]?'disabled':'')+'>'+(save.prop===x[0]?'WYBRANO':'WEŹ')+'</button></div>').join('')+
  '<div class="panel-caption">ZWIERZĘTA</div>'+
  [['none','Bez zwierzaka'],['dog','🐶 Pies'],['cat','🐱 Kot']].map(x=>'<div class="option"><b>'+x[1]+'</b><button data-pet="'+x[0]+'" '+(save.pet===x[0]?'disabled':'')+'>'+(save.pet===x[0]?'WYBRANO':'WYBIERZ')+'</button></div>').join('')};
+if(activePage==='settings')return{title:'⚙️ GRAFIKA I KAMERA',lead:'Dostosuj jakość obrazu do swojego sprzętu. Ustawienia zapisują się automatycznie.',body:
+ '<div class="panel-caption">JAKOŚĆ GRAFIKI</div>'+
+ [['fast','⚡ Wydajność','Mniej efektów dla słabszych telefonów'],['auto','✨ Zrównoważona','Dostosowana do urządzenia'],['ultra','💎 Ultra','Ostrzejsza grafika i cienie']].map(x=>'<div class="option"><div><b>'+x[1]+'</b><small>'+x[2]+'</small></div><button data-quality="'+x[0]+'" '+(save.quality===x[0]?'disabled':'')+'>'+(save.quality===x[0]?'AKTYWNA':'USTAW')+'</button></div>').join('')+
+ '<p class="panel-lead">Przeciągnij palcem lub myszą po świecie, aby obracać kamerę. Kółkiem myszy zmieniaj przybliżenie. Klawisz O uruchamia tryb fotograficzny.</p>'};
 if(activePage==='weather')return{title:'🌦 POGODA I ATMOSFERA',lead:'Zmiana pogody wpływa na widoczność i wygląd miasta.',body:
  [['clear','☀️ Słonecznie','Jasne niebo i dobra widoczność'],['rain','🌧️ Deszcz','Opady i mokra nawierzchnia'],['fog','🌫️ Mgła','Ograniczona widoczność']].map(x=>'<div class="option"><div><b>'+x[1]+'</b><small>'+x[2]+'</small></div><button data-weather="'+x[0]+'" '+(weather===x[0]?'disabled':'')+'>'+(weather===x[0]?'WYBRANO':'USTAW')+'</button></div>').join('')};
 return{title:'NEXO LIFE RP',lead:'',body:''}
@@ -666,6 +680,7 @@ if(b.dataset.prop!==undefined){equipProp(b.dataset.prop);renderPanel();showToast
 if(b.dataset.pet!==undefined){save.pet=b.dataset.pet;buildPet(save.pet);persist();renderPanel();showToast(save.pet==='none'?'Zwierzak odwołany':'Masz nowego pupila!')}
 if(b.dataset.emote!==undefined){emote=b.dataset.emote;emoteClock=0;showToast('Emotka: '+emote)}
 if(b.dataset.weather){weather=b.dataset.weather;save.weather=weather;persist();applyAtmosphere();renderPanel();showToast('Zmieniono pogodę')}
+if(b.dataset.quality){setQuality(b.dataset.quality);renderPanel();showToast('Zmieniono jakość grafiki')}
 if(b.dataset.lock){save.locked=!save.locked;persist();renderPanel();showToast(save.locked?'Zamknięto drzwi (RP)':'Otwarto drzwi')}
 if(b.dataset.homecolor){save.homeColor=(save.homeColor+1)%5;repaintHome();persist();renderPanel();showToast('Nowy kolor domu')}
 if(b.dataset.saveprofile){save.rpName=(el('rpName')?.value||'Gracz').trim().slice(0,24)||'Gracz';save.bio=(el('rpBio')?.value||'').trim().slice(0,80);persist();updateHud();renderPanel();showToast('Zapisano profil RP')}
@@ -741,14 +756,14 @@ function cameraUpdate(dt){
 }
 const mc=el('map'),ctx=mc.getContext('2d');
 function minimap(){
-const s=316,scale=.64;ctx.fillStyle='#203f43';ctx.fillRect(0,0,s,s);
+const s=316,scale=.64;ctx.fillStyle='#182e3b';ctx.fillRect(0,0,s,s);
 if(inside){ctx.fillStyle='#a4b4ac';ctx.fillRect(60,60,196,196);ctx.fillStyle='#405564';ctx.fillRect(78,78,160,160);ctx.fillStyle='#aeff79';ctx.beginPath();ctx.arc(s/2,s/2,8,0,Math.PI*2);ctx.fill();return}
 ctx.save();ctx.translate(s/2,s/2);ctx.rotate(driving?carYaw:charYaw);ctx.translate(-playerPos.x*scale,-playerPos.z*scale);
-ctx.fillStyle='#566b73';for(let k=-3;k<=3;k++){ctx.fillRect(k*60*scale-5,-205*scale,10,410*scale);ctx.fillRect(-205*scale,k*60*scale-5,410*scale,10)}
+ctx.fillStyle='#69878d';for(let k=-3;k<=3;k++){ctx.fillRect(k*60*scale-5.6,-205*scale,11.2,410*scale);ctx.fillRect(-205*scale,k*60*scale-5.6,410*scale,11.2)}
 ctx.fillStyle='#8b9fa2';for(const b of colliders)ctx.fillRect(b.x1*scale,b.z1*scale,(b.x2-b.x1)*scale,(b.z2-b.z1)*scale);
-ctx.fillStyle='#d1ff83';ctx.beginPath();ctx.arc(marker.position.x*scale,marker.position.z*scale,6,0,Math.PI*2);ctx.fill();
+ctx.strokeStyle='#d2ff78aa';ctx.lineWidth=2;ctx.setLineDash([7,6]);ctx.beginPath();ctx.moveTo(playerPos.x*scale,playerPos.z*scale);ctx.lineTo(marker.position.x*scale,marker.position.z*scale);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle='#d1ff83';ctx.beginPath();ctx.arc(marker.position.x*scale,marker.position.z*scale,7,0,Math.PI*2);ctx.fill();
 ctx.fillStyle='#ffdaa0';for(const h of homes)if(h.id===save.house){ctx.beginPath();ctx.arc(h.x*scale,h.z*scale,5,0,Math.PI*2);ctx.fill()}ctx.restore();
-ctx.fillStyle='#baff6b';ctx.beginPath();ctx.moveTo(s/2,s/2-10);ctx.lineTo(s/2-7,s/2+9);ctx.lineTo(s/2+7,s/2+9);ctx.closePath();ctx.fill()
+ctx.fillStyle='#baff6b';ctx.shadowColor='#baff6b';ctx.shadowBlur=10;ctx.beginPath();ctx.moveTo(s/2,s/2-10);ctx.lineTo(s/2-7,s/2+9);ctx.lineTo(s/2+7,s/2+9);ctx.closePath();ctx.fill();ctx.shadowBlur=0;ctx.fillStyle='#e6f6ff';ctx.font='900 14px system-ui';ctx.fillText('N',s/2-5,15)
 }
 let currentZone='';
 function updateZoneHud(){
