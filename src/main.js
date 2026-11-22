@@ -309,8 +309,8 @@ function carModel(color){
  cube(grp,0,.3,-2.8,2.1,.24,.5,black,false);
  return{root:grp,coat};
 }
-let save={cash:2500,job:'Mieszkaniec',color:0,house:0,delivery:0,deliveryActive:false,rpName:'Gracz',bio:'Nowy mieszkaniec NEXO CITY',skin:0,hair:0,vehicle:0,prop:'none',pet:'none',locked:false,homeColor:0,houseStyle:'classic',furnitureStyle:'cozy',weather:'clear',quality:'auto'};
-try{const data=JSON.parse(localStorage.getItem('nexo-life-rp-alpha2')||'{}');if(data&&typeof data==='object')Object.assign(save,{cash:Number(data.cash)||2500,job:typeof data.job==='string'?data.job:'Mieszkaniec',color:Math.max(0,Number(data.color)||0)%clothes.length,house:Number(data.house)||0,delivery:Math.min(4,Math.max(0,Number(data.delivery)||0)),deliveryActive:!!data.deliveryActive,rpName:typeof data.rpName==='string'?data.rpName.slice(0,24):'Gracz',bio:typeof data.bio==='string'?data.bio.slice(0,80):'Nowy mieszkaniec NEXO CITY',skin:Math.max(0,Number(data.skin)||0)%5,hair:Math.max(0,Number(data.hair)||0)%5,vehicle:Math.max(0,Number(data.vehicle)||0)%10,prop:typeof data.prop==='string'?data.prop:'none',pet:typeof data.pet==='string'?data.pet:'none',locked:!!data.locked,homeColor:Math.max(0,Number(data.homeColor)||0)%5,houseStyle:['classic','modern','villa','loft'].includes(data.houseStyle)?data.houseStyle:'classic',furnitureStyle:['cozy','luxury','neon'].includes(data.furnitureStyle)?data.furnitureStyle:'cozy',weather:['clear','rain','fog'].includes(data.weather)?data.weather:'clear',quality:['auto','fast','ultra'].includes(data.quality)?data.quality:'auto'})}catch{}
+let save={cash:2500,job:'Mieszkaniec',color:0,house:0,delivery:0,deliveryActive:false,bank:0,rpName:'Gracz',bio:'Nowy mieszkaniec NEXO CITY',skin:0,hair:0,vehicle:0,prop:'none',pet:'none',locked:false,homeColor:0,houseStyle:'classic',furnitureStyle:'cozy',weather:'clear',quality:'auto'};
+try{const data=JSON.parse(localStorage.getItem('nexo-life-rp-alpha2')||'{}');if(data&&typeof data==='object')Object.assign(save,{cash:Number(data.cash)||2500,job:typeof data.job==='string'?data.job:'Mieszkaniec',color:Math.max(0,Number(data.color)||0)%clothes.length,house:Number(data.house)||0,delivery:Math.min(4,Math.max(0,Number(data.delivery)||0)),deliveryActive:!!data.deliveryActive,bank:Math.max(0,Number(data.bank)||0),rpName:typeof data.rpName==='string'?data.rpName.slice(0,24):'Gracz',bio:typeof data.bio==='string'?data.bio.slice(0,80):'Nowy mieszkaniec NEXO CITY',skin:Math.max(0,Number(data.skin)||0)%5,hair:Math.max(0,Number(data.hair)||0)%5,vehicle:Math.max(0,Number(data.vehicle)||0)%10,prop:typeof data.prop==='string'?data.prop:'none',pet:typeof data.pet==='string'?data.pet:'none',locked:!!data.locked,homeColor:Math.max(0,Number(data.homeColor)||0)%5,houseStyle:['classic','modern','villa','loft'].includes(data.houseStyle)?data.houseStyle:'classic',furnitureStyle:['cozy','luxury','neon'].includes(data.furnitureStyle)?data.furnitureStyle:'cozy',weather:['clear','rain','fog'].includes(data.weather)?data.weather:'clear',quality:['auto','fast','ultra'].includes(data.quality)?data.quality:'auto'})}catch{}
 const skinColors=[0xf0c39b,0xf9d8bc,0xb98462,0x80543e,0xc7a68c],hairColors=[0x342a29,0xe5bd76,0x644734,0x1a2430,0xb5543d];
 torso.color.setHex(clothes[save.color]);skin.color.setHex(skinColors[save.skin]);hair.color.setHex(hairColors[save.hair]);
 function persist(){try{localStorage.setItem('nexo-life-rp-alpha2',JSON.stringify(save))}catch{}}
@@ -548,7 +548,27 @@ el('startBtn').onclick=()=>{started=true;paused=false;initAudio();el('start').cl
 el('day').onclick=()=>{night=!night;applyAtmosphere();el('day').textContent=night?'☾ NOC':'☀ DZIEŃ';showToast(night?'Zapadła noc':'Nastał dzień')};
 function togglePanel(p){if(activePage===p){activePage=null;el('panel').classList.remove('visible')}else{activePage=p;renderPanel()}document.querySelectorAll('[data-page]').forEach(e=>e.classList.toggle('active',e.dataset.page===activePage))}
 document.querySelectorAll('[data-page]').forEach(e=>e.onclick=()=>togglePanel(e.dataset.page));
-function pageText(){if(activePage==='phone')return {title:'📱 NEXO PHONE',lead:'Twoje miasto w kieszeni. Wybierz, co chcesz robić.',body:[
+let currentPlace=null;
+function pageText(){
+ if(activePage==='place'){
+  const b=currentPlace;
+  if(!b)return{title:'Miejsce',lead:'Wybierz miejsce na mapie.',body:''};
+  const jobs={hospital:'Lekarz',police:'Policjant',cafe:'Sprzedawca',shop:'Sprzedawca',fire:'Strażak',school:'Nauczyciel',garage:'Mechanik',gas:'Mechanik',bank:'Mieszkaniec'};
+  const actions={
+   hospital:[['heal','🩺 Badanie lekarskie','Przebadaj swoją postać (RP)'],['job','👨‍⚕️ Praca w szpitalu','Zostań lekarzem']],
+   police:[['radio','📻 Weź radio','Wyposaż postać w sprzęt patrolowy'],['job','👮 Zostań policjantem','Rozpocznij patrol']],
+   cafe:[['coffee','☕ Kup kawę','Koszt 15 $'],['job','👨‍🍳 Pracuj w kawiarni','Dołącz do obsługi']],
+   shop:[['balloon','🎈 Kup balon','Koszt 10 $'],['job','🛒 Pracuj w sklepie','Zostań sprzedawcą']],
+   school:[['learn','📚 Lekcja','Rozpocznij scenkę RP'],['job','👩‍🏫 Praca w szkole','Zostań nauczycielem']],
+   bank:[['deposit','🏦 Wpłać 100 $','Przenieś gotówkę do banku'],['withdraw','💵 Wypłać 100 $','Odbierz środki z banku']],
+   garage:[['garage','🚘 Otwórz salon','Wybierz samochód'],['job','🧰 Praca mechanika','Zmień zawód']],
+   fire:[['rescue','🚒 Wóz strażacki','Przywołaj pojazd służb'],['job','🧑‍🚒 Dołącz do straży','Zostań strażakiem']],
+   gas:[['fuel','⛽ Tankuj pojazd','Zatrzymaj się przy dystrybutorze (RP)'],['job','🛠️ Pracuj na stacji','Zostań mechanikiem']]
+  };
+  return{title:'🏙️ '+b.name,lead:'Miejsce w NEXO Valley. Wybierz dostępną aktywność. '+(b.kind==='bank'?'Saldo bankowe: $ '+save.bank.toLocaleString('pl-PL')+'.':''),body:
+   (actions[b.kind]||[]).map(x=>'<div class="option"><div><b>'+x[1]+'</b><small>'+x[2]+'</small></div><button data-place-action="'+x[0]+'">WYKONAJ</button></div>').join('')};
+ }
+ if(activePage==='phone')return {title:'📱 NEXO PHONE',lead:'Twoje miasto w kieszeni. Wybierz, co chcesz robić.',body:[
  ['avatar','👤 Postać','Wygląd i styl'],['cars','🚘 Garaż','10 rodzajów pojazdów'],
  ['homes','🏠 Dom','Parcele, katalog domów i wnętrza'],['jobs','💼 Praca','Zawody i opcjonalne dostawy'],['places','🗺️ Miasto','Wszystkie miejsca i teleport'],
  ['rp','🎭 Roleplay','Imię, biografia i emotki'],['bag','🎒 Plecak','Przedmioty i zwierzęta'],['weather','🌦 Pogoda','Słońce, deszcz lub mgła'],['settings','⚙️ Ustawienia','Jakość grafiki i kamera']
@@ -605,6 +625,28 @@ if(b.dataset.color!==undefined){save.color=Number(b.dataset.color);torso.color.s
 if(b.dataset.job){save.job=b.dataset.job;persist();renderPanel();updateHud();showToast('Nowa praca: '+save.job)}
 if(b.dataset.paint){car.coat.color.setHex([0xa6e7fc,0xf49aab,0xb4ff91,0xe0c2ff,0xf4db90][Math.floor(rr(0,5))]);showToast('Zmieniono lakier')}
 if(b.dataset.siren){toggleSiren();renderPanel()}
+if(b.dataset.placeAction){
+ const action=b.dataset.placeAction;
+ if(action==='job'&&currentPlace){
+  const jobs={hospital:'Lekarz',police:'Policjant',cafe:'Sprzedawca',shop:'Sprzedawca',fire:'Strażak',school:'Nauczyciel',garage:'Mechanik',gas:'Mechanik'};
+  save.job=jobs[currentPlace.kind]||'Mieszkaniec';persist();updateHud();showToast('Nowa praca: '+save.job)
+ }else if(action==='garage'){activePage='cars';renderPanel()}
+ else if(action==='radio'){equipProp('phone');showToast('Radio patrolowe w ekwipunku (RP)')}
+ else if(action==='learn'){emote='sit';showToast('Trwa lekcja — scenka RP')}
+ else if(action==='heal'){showToast('Wyniki badania prawidłowe!')}
+ else if(action==='coffee'||action==='balloon'){
+  const cost=action==='coffee'?15:10;
+  if(save.cash<cost)showToast('Potrzebujesz $ '+cost);
+  else{save.cash-=cost;persist();equipProp(action);updateHud();showToast('Kupiono przedmiot!')}
+ }else if(action==='deposit'||action==='withdraw'){
+  if(action==='deposit'&&save.cash>=100){save.cash-=100;save.bank+=100}
+  else if(action==='withdraw'&&save.bank>=100){save.bank-=100;save.cash+=100}
+  else {showToast('Brak wystarczających środków');return}
+  persist();updateHud();showToast('Operacja bankowa zakończona')
+ }else if(action==='rescue'){replaceVehicle(6);const r=Math.round(playerPos.x/60)*60;car.root.position.set(r+4,0,playerPos.z+6);showToast('Przywołano wóz strażacki')}
+ else if(action==='fuel'){showToast('Zatankowano! Tankowanie jest obecnie symulacją RP')}
+ if(activePage==='place')renderPanel();
+}
 if(b.dataset.delivery){save.deliveryActive=!save.deliveryActive;persist();setMarker();updateHud();renderPanel();showToast(save.deliveryActive?'Trasa kurierska rozpoczęta':'Swobodne RP — dostawy wyłączone')}
 if(b.dataset['houseStyle']){save.houseStyle=b.dataset['houseStyle'];persist();repaintHome();renderPanel();showToast('Wybrano nowy model domu')}
 if(b.dataset.interior){save.furnitureStyle=b.dataset.interior;persist();applyInteriorTheme();renderPanel();showToast('Zmieniono wnętrze domu')}
@@ -722,7 +764,11 @@ if(obj.kind==='leave'){driving=false;avatar.visible=true;playerPos.set(car.root.
 if(obj.kind==='enter'){driving=true;avatar.visible=false;carYaw=car.root.rotation.y;carSpeed=0;showToast('Witaj za kierownicą!')}
 if(obj.kind==='home'){const h=obj.value;if(save.house!==h.id){save.house=h.id;save.locked=false;repaintHome();persist();showToast('Zajęto dom numer '+h.id)}else showToast('Witaj w swoim domu');exitPosition=h.entry.clone();inside=true;driving=false;avatar.visible=true;playerPos.set(0,0,629);charYaw=Math.PI}
 if(obj.kind==='exit'){inside=false;playerPos.copy(exitPosition||new T.Vector3(8,0,19));playerPos.z+=3;charYaw=Math.PI;showToast('Wróciłeś do miasta')}
-if(obj.kind==='business'){const b=obj.value;if(b.kind==='hospital')save.job='Lekarz';if(b.kind==='police')save.job='Policjant';if(b.kind==='cafe'||b.kind==='shop')save.job='Sprzedawca';if(b.kind==='garage'){togglePanel('cars');showToast('Witamy w salonie!');return}if(b.kind==='school'){showToast('Witaj w szkole!');return}persist();updateHud();showToast('Odwiedzono: '+b.name+' · zawód: '+save.job)}
+if(obj.kind==='business'){
+ currentPlace=obj.value;
+ if(activePage==='place'){renderPanel()}else{activePage='place';renderPanel();document.querySelectorAll('[data-page]').forEach(e=>e.classList.remove('active'))}
+ showToast('Witaj w '+currentPlace.name);
+}
 }
 el('interact').onclick=interact;
 function blocked(x,z){if(Math.abs(x)>198||Math.abs(z)>198)return true;for(const b of colliders)if(x>b.x1-1.1&&x<b.x2+1.1&&z>b.z1-1.1&&z<b.z2+1.1)return true;return false}
