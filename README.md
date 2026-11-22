@@ -54,15 +54,22 @@ Projekt Vercel jest połączony z gałęzią `main` GitHuba — każda zatwierdz
 
 Na telefonach dostępne są dotykowe przyciski poruszania, interakcji i kamery.
 
-## Instalacja lokalna
+## Uruchamianie lokalne (Vite)
 
-W katalogu repozytorium uruchom:
+W katalogu repozytorium:
 
 ```bash
-python -m http.server 8080
+npm install
+npm run dev
 ```
 
-Następnie otwórz http://localhost:8080. Three.js jest ładowany jako biblioteka JS z CDN, więc wymagane jest połączenie internetowe.
+Następnie otwórz lokalny adres podany przez Vite. Wersję produkcyjną buduje polecenie `npm run build`.
+
+**Naprawa uruchamiania:** biblioteka `three` jest dołączana do paczki JS przez Vite. Po wejściu na stronę nie jest już pobierana z zewnętrznego CDN. Ekran startowy odblokowuje przycisk po załadowaniu silnika i pokazuje komunikat, gdy inicjalizacja się nie uda.
+
+## Testy
+
+W repozytorium znajduje się automatyczny test otwierania gry w Chromium w GitHub Actions (`.github/workflows/browser-smoke.yml`).
 
 ## Ważne ograniczenia
 
