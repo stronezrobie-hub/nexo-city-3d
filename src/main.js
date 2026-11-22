@@ -262,6 +262,7 @@ for(const p of [-1.7,1.7])cube(indoor,6+p,.6,10,1,.7,1.2,mat(0x777a74),false);
 cube(indoor,0,4.1,-12.4,6,3.6,.35,m.dark,false);
 const screen=new T.MeshBasicMaterial({color:0x36748b});cube(indoor,0,4.1,-12.15,5.5,3.1,.12,screen,false);
 const indoorLight=new T.PointLight(0xffedcf,100,40);indoorLight.position.set(0,7,0);indoor.add(indoorLight);
+const homeDecorRoot=new T.Group();indoor.add(homeDecorRoot);
 const clothes=[0x8bdeff,0xf9a7af,0xa9ff86,0xdfbbff,0xffcd7b,0xffffff,0x454d6d];
 const skin=mat(0xf0c39b),hair=mat(0x342a29),pants=mat(0x293b52),shoes=mat(0x202b37);
 const avatar=new T.Group(),torso=mat(clothes[0]),head=new T.Group();scene.add(avatar);
@@ -309,8 +310,8 @@ function carModel(color){
  cube(grp,0,.3,-2.8,2.1,.24,.5,black,false);
  return{root:grp,coat};
 }
-let save={cash:2500,job:'Mieszkaniec',color:0,house:0,delivery:0,deliveryActive:false,bank:0,rpName:'Gracz',bio:'Nowy mieszkaniec NEXO CITY',skin:0,hair:0,vehicle:0,prop:'none',pet:'none',locked:false,homeColor:0,houseStyle:'classic',furnitureStyle:'cozy',weather:'clear',quality:'auto'};
-try{const data=JSON.parse(localStorage.getItem('nexo-life-rp-alpha2')||'{}');if(data&&typeof data==='object')Object.assign(save,{cash:Number(data.cash)||2500,job:typeof data.job==='string'?data.job:'Mieszkaniec',color:Math.max(0,Number(data.color)||0)%clothes.length,house:Number(data.house)||0,delivery:Math.min(4,Math.max(0,Number(data.delivery)||0)),deliveryActive:!!data.deliveryActive,bank:Math.max(0,Number(data.bank)||0),rpName:typeof data.rpName==='string'?data.rpName.slice(0,24):'Gracz',bio:typeof data.bio==='string'?data.bio.slice(0,80):'Nowy mieszkaniec NEXO CITY',skin:Math.max(0,Number(data.skin)||0)%5,hair:Math.max(0,Number(data.hair)||0)%5,vehicle:Math.max(0,Number(data.vehicle)||0)%10,prop:typeof data.prop==='string'?data.prop:'none',pet:typeof data.pet==='string'?data.pet:'none',locked:!!data.locked,homeColor:Math.max(0,Number(data.homeColor)||0)%5,houseStyle:['classic','modern','villa','loft'].includes(data.houseStyle)?data.houseStyle:'classic',furnitureStyle:['cozy','luxury','neon'].includes(data.furnitureStyle)?data.furnitureStyle:'cozy',weather:['clear','rain','fog'].includes(data.weather)?data.weather:'clear',quality:['auto','fast','ultra'].includes(data.quality)?data.quality:'auto'})}catch{}
+let save={cash:2500,job:'Mieszkaniec',color:0,house:0,delivery:0,deliveryActive:false,bank:0,rpName:'Gracz',bio:'Nowy mieszkaniec NEXO CITY',skin:0,hair:0,vehicle:0,prop:'none',pet:'none',locked:false,homeColor:0,decor:[],houseStyle:'classic',furnitureStyle:'cozy',weather:'clear',quality:'auto'};
+try{const data=JSON.parse(localStorage.getItem('nexo-life-rp-alpha2')||'{}');if(data&&typeof data==='object')Object.assign(save,{cash:Number(data.cash)||2500,job:typeof data.job==='string'?data.job:'Mieszkaniec',color:Math.max(0,Number(data.color)||0)%clothes.length,house:Number(data.house)||0,delivery:Math.min(4,Math.max(0,Number(data.delivery)||0)),deliveryActive:!!data.deliveryActive,bank:Math.max(0,Number(data.bank)||0),rpName:typeof data.rpName==='string'?data.rpName.slice(0,24):'Gracz',bio:typeof data.bio==='string'?data.bio.slice(0,80):'Nowy mieszkaniec NEXO CITY',skin:Math.max(0,Number(data.skin)||0)%5,hair:Math.max(0,Number(data.hair)||0)%5,vehicle:Math.max(0,Number(data.vehicle)||0)%10,prop:typeof data.prop==='string'?data.prop:'none',pet:typeof data.pet==='string'?data.pet:'none',locked:!!data.locked,homeColor:Math.max(0,Number(data.homeColor)||0)%5,decor:Array.isArray(data.decor)?data.decor.slice(0,6):[],houseStyle:['classic','modern','villa','loft'].includes(data.houseStyle)?data.houseStyle:'classic',furnitureStyle:['cozy','luxury','neon'].includes(data.furnitureStyle)?data.furnitureStyle:'cozy',weather:['clear','rain','fog'].includes(data.weather)?data.weather:'clear',quality:['auto','fast','ultra'].includes(data.quality)?data.quality:'auto'})}catch{}
 const skinColors=[0xf0c39b,0xf9d8bc,0xb98462,0x80543e,0xc7a68c],hairColors=[0x342a29,0xe5bd76,0x644734,0x1a2430,0xb5543d];
 torso.color.setHex(clothes[save.color]);skin.color.setHex(skinColors[save.skin]);hair.color.setHex(hairColors[save.hair]);
 function persist(){try{localStorage.setItem('nexo-life-rp-alpha2',JSON.stringify(save))}catch{}}
@@ -507,7 +508,7 @@ function togglePhoto(){
 el('photo').onclick=togglePhoto;
 el('photoExit').onclick=togglePhoto;
 const key=new Set(),mapped={w:'forward',arrowup:'forward',s:'back',arrowdown:'back',a:'left',arrowleft:'left',d:'right',arrowright:'right',shift:'run'};
-document.addEventListener('keydown',e=>{const k=e.key.toLowerCase();if(mapped[k]){key.add(mapped[k]);e.preventDefault()}if(e.repeat)return;if(photoMode){if(k==='o'||k==='escape')togglePhoto();return}if(k==='o')togglePhoto();if(k==='e')interact();if(k==='f')togglePanel('phone');if(k==='h')honk();if(k==='l')toggleSiren();if(k==='c'){highView=!highView;showToast(highView?'Kamera z góry':'Kamera zza pleców')}if(k==='p'||k==='escape')togglePause()});
+document.addEventListener('keydown',e=>{if(e.target?.matches?.('input, textarea, select, [contenteditable]'))return;const k=e.key.toLowerCase();if(mapped[k]){key.add(mapped[k]);e.preventDefault()}if(e.repeat)return;if(photoMode){if(k==='o'||k==='escape')togglePhoto();return}if(k==='o')togglePhoto();if(k==='e')interact();if(k==='f')togglePanel('phone');if(k==='h')honk();if(k==='l')toggleSiren();if(k==='c'){highView=!highView;showToast(highView?'Kamera z góry':'Kamera zza pleców')}if(k==='p'||k==='escape')togglePause()});
 document.addEventListener('keyup',e=>{const k=e.key.toLowerCase();if(mapped[k])key.delete(mapped[k])});W.addEventListener('blur',()=>key.clear());
 document.querySelectorAll('[data-control]').forEach(b=>{const action=b.dataset.control;b.addEventListener('pointerdown',e=>{e.preventDefault();b.setPointerCapture(e.pointerId);key.add(action);b.classList.add('down')});for(const ev of ['pointerup','pointercancel','lostpointercapture'])b.addEventListener(ev,()=>{key.delete(action);b.classList.remove('down')})});
 document.querySelectorAll('[data-shortcut]').forEach(b=>b.addEventListener('click',()=>{const action=b.dataset.shortcut;if(action==='interact')interact();if(action==='phone')togglePanel('phone');if(action==='camera'){highView=!highView;showToast('Zmieniono kamerę')}if(action==='honk')honk()}));
@@ -587,8 +588,13 @@ if(activePage==='homes')return{title:'🏠 DOMY I PARCELE',lead:'Wybierz działk
  homes.slice(0,12).map(h=>'<div class="option"><div><b>🏡 Dom nr '+String(h.id).padStart(2,'0')+'</b><small>Osiedle NEXO Valley'+(save.house===h.id?' · Twój dom':'')+'</small></div><button data-claim="'+h.id+'" '+(save.house===h.id?'disabled':'')+'>'+(save.house===h.id?'WYBRANO':'ZAJMIJ')+'</button></div>').join('')+
  '<div class="panel-caption">KATALOG DOMÓW</div>'+
  houseStyles.map(h=>'<div class="option"><div><b>'+h.icon+' '+h.name+'</b><small>'+h.description+'</small></div><button data-house-style="'+h.id+'" '+(!save.house||save.houseStyle===h.id?'disabled':'')+'>'+(save.houseStyle===h.id?'AKTYWNY':'WYBIERZ')+'</button></div>').join('')+
- '<div class="panel-caption">STYL WNĘTRZA</div>'+
+ '<div class="option"><div><b>🚪 Wejdź do środka</b><small>Przenieś postać do swojego domu</small></div><button data-house-enter="1" '+(!save.house?'disabled':'')+'>WEJDŹ</button></div>'+ '<div class="panel-caption">STYL WNĘTRZA</div>'+
  furnitureStyles.map(t=>'<div class="option"><div><b>'+t.icon+' '+t.name+'</b></div><button data-interior="'+t.id+'" '+(!save.house||save.furnitureStyle===t.id?'disabled':'')+'>'+(save.furnitureStyle===t.id?'AKTYWNY':'USTAW')+'</button></div>').join('')+
+ '<div class="panel-caption">🛠️ URZĄDŹ SWÓJ DOM</div>'+
+ '<p class="panel-lead">Dodaj do sześciu mebli i dekoracji. Będą widoczne po wejściu do domu i zapiszą się automatycznie.</p>'+
+ decorCatalog.map(v=>'<div class="option"><div><b>'+v.icon+' '+v.label+'</b><small>Dodaj do wolnego miejsca</small></div><button data-decor="'+v.id+'" '+(!save.house||save.decor.length>=decorSpots.length?'disabled':'')+'>DODAJ</button></div>').join('')+
+ (save.decor.length?'<div class="panel-caption">UMIESZCZONE DEKORACJE</div>'+
+ save.decor.map(v=>'<div class="option"><div><b>'+ (decorCatalog.find(t=>t.id===v.type)?.icon||'🪑')+' '+(decorCatalog.find(t=>t.id===v.type)?.label||v.type)+'</b><small>Miejsce '+(v.slot+1)+'</small></div><button data-decor-remove="'+v.slot+'">USUŃ</button></div>').join(''):'')+
  '<div class="panel-caption">USTAWIENIA DOMU</div>'+
  '<div class="option"><div><b>'+(save.locked?'🔒 Drzwi zamknięte':'🔓 Drzwi otwarte')+'</b><small>Symulacja RP — tryb jednoosobowy</small></div><button data-lock="1" '+(!save.house?'disabled':'')+'>'+(save.locked?'OTWÓRZ':'ZAMKNIJ')+'</button></div>'+
  '<div class="option"><div><b>🎨 Kolor elewacji</b><small>Pięć wariantów kolorystycznych</small></div><button data-homecolor="1" '+(!save.house?'disabled':'')+'>ZMIEŃ</button></div>'};
@@ -650,6 +656,15 @@ if(b.dataset.placeAction){
 if(b.dataset.delivery){save.deliveryActive=!save.deliveryActive;persist();setMarker();updateHud();renderPanel();showToast(save.deliveryActive?'Trasa kurierska rozpoczęta':'Swobodne RP — dostawy wyłączone')}
 if(b.dataset['houseStyle']){save.houseStyle=b.dataset['houseStyle'];persist();repaintHome();renderPanel();showToast('Wybrano nowy model domu')}
 if(b.dataset.interior){save.furnitureStyle=b.dataset.interior;persist();applyInteriorTheme();renderPanel();showToast('Zmieniono wnętrze domu')}
+if(b.dataset.decor!==undefined){addDecoration(b.dataset.decor);renderPanel()}
+if(b.dataset.decorRemove!==undefined){removeDecoration(Number(b.dataset.decorRemove));renderPanel();showToast('Usunięto dekorację')}
+if(b.dataset.houseEnter){
+ const home=homes.find(h=>h.id===save.house);
+ if(!home)return;
+ exitPosition=home.entry.clone();inside=true;driving=false;carSpeed=0;avatar.visible=true;
+ playerPos.set(0,0,629);charYaw=Math.PI;
+ togglePanel(activePage);showToast('Witaj w swoim domu!');
+}
 if(b.dataset.claim!==undefined){
  const h=homes.find(h=>h.id===Number(b.dataset.claim));
  if(h){save.house=h.id;save.locked=false;persist();repaintHome();inside=false;driving=false;carSpeed=0;avatar.visible=true;playerPos.copy(h.entry);renderPanel();showToast('Dom nr '+h.id+' należy teraz do Ciebie!')}
@@ -703,6 +718,72 @@ const furnitureStyles=[
  {id:'luxury',name:'Luksusowy',icon:'💎'},
  {id:'neon',name:'Gaming / Neon',icon:'🎮'}
 ];
+/* Code-only home decorator: six fixed build spots safely inside the interior.
+ Each added object gets its own 3D geometry, saved in localStorage. */
+const decorCatalog=[
+ {id:'plant',label:'Roślina',icon:'🪴'},
+ {id:'lamp',label:'Lampa stojąca',icon:'💡'},
+ {id:'books',label:'Regał',icon:'📚'},
+ {id:'tv',label:'Telewizor',icon:'📺'},
+ {id:'chair',label:'Fotel',icon:'🪑'},
+ {id:'desk',label:'Biurko',icon:'🖥️'}
+];
+const decorSpots=[
+ {x:-10,z:-4},{x:-10,z:0},{x:-10,z:9},
+ {x:9,z:-1},{x:9,z:6},{x:1,z:9}
+];
+const decorInstances=[];
+const decorWood=mat(0x8c6b50),decorMetal=mat(0x394857),decorLight=new T.MeshStandardMaterial({color:0xffedd7,emissive:0xffd9a0,emissiveIntensity:.55});
+const decorPlant=mat(0x4c9b68),decorScreen=new T.MeshStandardMaterial({color:0x204254,emissive:0x27698a,emissiveIntensity:.16});
+function rebuildDecor(){
+ while(homeDecorRoot.children.length){const child=homeDecorRoot.children[0];homeDecorRoot.remove(child);child.traverse(o=>{if(o.isMesh)o.geometry.dispose()})}
+ decorInstances.length=0;
+ const used=new Set();const valid=[];
+ for(const entry of save.decor||[]){
+  const slot=Number(entry?.slot),type=entry?.type;
+  if(!Number.isInteger(slot)||slot<0||slot>=decorSpots.length||used.has(slot)||!decorCatalog.some(x=>x.id===type))continue;
+  used.add(slot);valid.push({slot,type});
+  const spot=decorSpots[slot],g=new T.Group();g.position.set(spot.x,0,spot.z);homeDecorRoot.add(g);
+  const wood=decorWood,metal=decorMetal;
+  if(type==='plant'){
+   const pot=new T.Mesh(new T.CylinderGeometry(.48,.37,1.0,10),mat(0xbfa287));pot.position.y=.55;g.add(pot);
+   const stem=new T.Mesh(new T.CylinderGeometry(.09,.11,2.1,8),mat(0x4f7754));stem.position.y=2;g.add(stem);
+   for(const a of [-1.4,0,1.4]){const leaf=new T.Mesh(new T.IcosahedronGeometry(.74,1),decorPlant);leaf.position.set(Math.cos(a)*.55,2.25+Math.sin(a)*.5,Math.sin(a)*.55);g.add(leaf)}
+  }else if(type==='lamp'){
+   cube(g,0,.2,0,.8,.4,.8,metal,false);
+   cube(g,0,2.25,0,.18,4.1,.18,metal,false);
+   const bulb=new T.Mesh(new T.ConeGeometry(.85,1.05,14,1,true),decorLight);bulb.position.y=4.35;bulb.rotation.x=Math.PI;g.add(bulb);
+  }else if(type==='books'){
+   cube(g,0,2,0,2.6,4,.8,wood,false);
+   for(let y of [1.0,2.0,3.05])cube(g,0,y,.45,2.6,.14,.95,metal,false);
+   for(let i=0;i<11;i++){const book=mat([0xb95c55,0x7f9ec6,0xd4b377,0x77a98a][i%4]);cube(g,-1.05+i*.20,1.25+(i%3)*.78,.51,.17,.85,.25,book,false)}
+  }else if(type==='tv'){
+   cube(g,0,1.05,0,3.7,.5,1.15,wood,false);
+   cube(g,0,2.85,.16,3.35,2.05,.24,metal,false);
+   cube(g,0,2.85,-.01,3.05,1.8,.08,decorScreen,false);
+  }else if(type==='chair'){
+   cube(g,0,.95,0,1.8,.55,1.8,wood,false);
+   cube(g,0,1.8,.65,1.8,1.7,.4,mat(0x688b9b),false);
+   for(const x of [-.65,.65])for(const z of [-.65,.65])cube(g,x,.4,z,.24,.8,.24,metal,false);
+  }else if(type==='desk'){
+   cube(g,0,1.5,0,3.7,.27,1.65,wood,false);
+   for(const x of [-1.5,1.5])for(const z of [-.62,.62])cube(g,x,.77,z,.22,1.4,.22,metal,false);
+   cube(g,0,2.55,.25,1.4,1.65,.18,metal,false);
+   cube(g,0,2.57,.13,1.2,1.35,.08,decorScreen,false);
+  }
+  decorInstances.push({slot,type,world:new T.Vector3(spot.x,0,spot.z+620)});
+ }
+ save.decor=valid;
+}
+function addDecoration(type){
+ if(!decorCatalog.some(v=>v.id===type))return false;
+ const taken=new Set(save.decor.map(v=>v.slot));
+ const slot=decorSpots.findIndex((_,i)=>!taken.has(i));
+ if(slot<0){showToast('W domu jest już 6 dekoracji. Usuń jedną, żeby dodać kolejną.');return false}
+ save.decor.push({slot,type});persist();rebuildDecor();showToast('Dodano: '+decorCatalog.find(v=>v.id===type).label);return true;
+}
+function removeDecoration(slot){save.decor=save.decor.filter(x=>x.slot!==slot);persist();rebuildDecor()}
+rebuildDecor();
 const darkFrame=mat(0x23343f,.28),balcony=mat(0xe9e6dd),brick=mat(0x875d50),glassFront=new T.MeshPhysicalMaterial({color:0x9dcbd8,transparent:true,opacity:.72,roughness:.12,metalness:.1});
 function rebuildOwnedHome(){
  for(const h of homes){if(h.custom){scene.remove(h.custom);h.custom.traverse(o=>{if(o.isMesh)o.geometry.dispose()});h.custom=null}h.visuals.forEach(o=>o.visible=true)}
@@ -766,7 +847,12 @@ const torus=new T.Mesh(new T.TorusGeometry(2.8,.25,9,36),m.yellow);torus.positio
 const beamMat=new T.MeshBasicMaterial({color:0xcaff60,transparent:true,opacity:.18,side:T.DoubleSide,depthWrite:false});
 const beam=new T.Mesh(new T.CylinderGeometry(2.5,2.5,6.5,18,1,true),beamMat);beam.position.y=3.35;marker.add(beam);
 function setMarker(){const p=points[save.delivery%points.length];marker.position.set(p[0],0,p[1]);marker.visible=!!save.deliveryActive}setMarker();
-function nearObj(){if(inside){if(playerPos.distanceTo(new T.Vector3(0,0,630))<8)return {kind:'exit',label:'Wyjdź z domu'};return null}
+function nearObj(){if(inside){
+ const nearest=decorInstances.map(x=>({item:x,d:playerPos.distanceTo(x.world)})).sort((a,b)=>a.d-b.d)[0];
+ if(nearest&&nearest.d<3.1)return{kind:'decoration',value:nearest.item,label:'Użyj: '+decorCatalog.find(x=>x.id===nearest.item.type).label};
+ if(playerPos.distanceTo(new T.Vector3(0,0,630))<6)return {kind:'exit',label:'Wyjdź z domu'};
+ return null
+}
 if(driving)return{kind:'leave',label:'Wysiądź z samochodu'};
 const distance=playerPos.distanceTo(car.root.position);if(distance<7)return{kind:'enter',label:'Wsiądź do samochodu'};
 let chosen=null,best=7;
@@ -778,6 +864,15 @@ function interact(){if(!started||paused)return;const obj=nearObj();if(!obj){show
 if(obj.kind==='leave'){driving=false;avatar.visible=true;playerPos.set(car.root.position.x+4,0,car.root.position.z+3);carSpeed=0;showToast('Wysiadłeś z samochodu')}
 if(obj.kind==='enter'){driving=true;avatar.visible=false;carYaw=car.root.rotation.y;carSpeed=0;showToast('Witaj za kierownicą!')}
 if(obj.kind==='home'){const h=obj.value;if(save.house!==h.id){save.house=h.id;save.locked=false;repaintHome();persist();showToast('Zajęto dom numer '+h.id)}else showToast('Witaj w swoim domu');exitPosition=h.entry.clone();inside=true;driving=false;avatar.visible=true;playerPos.set(0,0,629);charYaw=Math.PI}
+if(obj.kind==='decoration'){
+ const d=obj.value;
+ if(d.type==='lamp'){decorLight.emissiveIntensity=decorLight.emissiveIntensity>1?.1:2.5;showToast('Przełączono lampę')}
+ else if(d.type==='tv'){decorScreen.emissiveIntensity=decorScreen.emissiveIntensity>1?.1:2.2;showToast('Przełączono telewizor')}
+ else if(d.type==='chair'){emote='sit';showToast('Odpoczywasz w fotelu')}
+ else if(d.type==='books'){showToast('Czytasz książkę — miłej lektury!')}
+ else if(d.type==='plant'){showToast('Podlano kwiaty')}
+ else if(d.type==='desk'){emote='sit';showToast('Pracujesz przy biurku')}
+}
 if(obj.kind==='exit'){inside=false;playerPos.copy(exitPosition||new T.Vector3(8,0,19));playerPos.z+=3;charYaw=Math.PI;showToast('Wróciłeś do miasta')}
 if(obj.kind==='business'){
  currentPlace=obj.value;
