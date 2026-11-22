@@ -1,64 +1,75 @@
-# NEXO LIFE RP 3.0 — Realistic City Update
+# NEXO LIFE RP 4.0 — World Reimagined
 
-Autorska gra internetowa 3D typu **life roleplay**, rozwijana w 100% kodem, bez Blendera, ręcznego modelowania i gotowych assetów 3D. Mechaniki inspirowane otwartym RP, ale **to nie jest kopia Brookhaven ani gra Roblox**.
+**Niezależna, proceduralna gra przeglądarkowa 3D, całkowicie z kodu.** Nie wymaga Blendera ani ręcznego tworzenia modeli 3D. Nie jest produktem Roblox/Brookhaven i nie kopiuje ich assetów.
 
-**Gra:** https://nexo-life-rp.vercel.app
+## Zagraj
+
+**https://nexo-life-rp.vercel.app**
 
 **Repozytorium:** https://github.com/stronezrobie-hub/nexo-city-3d
 
-**Wdrożenia:** GitHub `main` → Vercel, automatycznie.
+Projekt Vercel jest połączony z gałęzią `main` GitHuba — każda zatwierdzona aktualizacja automatycznie uruchamia nowe wdrożenie.
 
-## Aktualna wersja Alpha 3.0
+## Nowości w Alpha 4.0
 
-### Świat i realizm
-- Proceduralna mapa low-poly 3D, ulice, przejścia dla pieszych, chodniki, sygnalizacja świetlna.
-- Domy, garaże, szyldy generowane w runtime, ławki, drzewa, chmury.
-- Szkoła, szpital, komisariat, straż pożarna, bank, kawiarnia, sklep, salon aut, stacja paliw.
-- Deszcz, mgła, słońce, ręczne przełączanie dnia i nocy.
-- Postacie NPC, uproszczone poruszanie się innych samochodów.
+- Nowy, nowoczesny ekran startowy i przeprojektowany interfejs gry (HUD, menu, minimapa, komunikaty, panel misji).
+- Proceduralne niebo renderowane shaderem, nowe oświetlenie, dynamiczne cienie.
+- Materiały trawy, drogi i chodników generowane z kodu przy użyciu CanvasTexture; bez zewnętrznych tekstur.
+- Bardziej szczegółowe samochody: karoserie, szyby, zderzaki, reflektory, felgi, lusterka, detale nadwozia.
+- Bardziej naturalne drzewa, parki z fontannami, kwiaty, rabaty, ławki i ogródki.
+- Oświetlenie ulic nocą z lokalnymi dynamicznymi światłami.
+- Kamera z obracaniem myszą/przeciągnięciem na ekranie dotykowym i zoomem kółkiem.
+- Tryb fotograficzny klawiszem `O` lub przyciskiem aparatu; zamykanie również przez przycisk na ekranie.
+- Nazwy dzielnic i zegar w grze.
+- Ustawienia jakości w telefonie gry: Wydajność, Auto, Ultra. Profil Wydajność ogranicza rozdzielczość i wyłącza cienie.
+- Poprawiona minimapa z linią do celu i wyróżnieniem pozycji gracza.
+- Nowa ikona strony, metadane udostępniania.
 
-### Roleplay
-- Postać z kolorem ubrań, skóry i włosów, imieniem i biografią RP.
-- Emotki: machanie, taniec, siadanie.
-- Plecak: telefon, latarka, kawa, parasol, balon.
-- Pupile podążające za postacią: pies i kot.
-- Cztery rodzaje samochodów: miejski, SUV, sportowy i policyjny.
-- Jazda, wysiadanie i wsiadanie, klakson i syntetyczny dźwięk silnika.
-- Własny dom, wejście do umeblowanego wnętrza, zmiana koloru elewacji i flaga zamka RP.
-- Prace, wypłaty i misje dostawcze, lokalny zapis postępu.
+## Funkcje RP
 
-### Sterowanie
-- WASD / strzałki — ruch i jazda
-- E — interakcje / wsiadanie / wysiadanie / domy
-- F — telefon
-- C — kamera
-- Shift — sprint
-- H — klakson (w pojeździe)
-- P / Esc — pauza
+- Własna postać: ubiór, kolor skóry i włosów, imię, biografia.
+- Spacer, sprint, emotki, plecak i proceduralne przedmioty.
+- Zwierzęta: pies i kot.
+- 4 rodzaje pojazdów, jazda, klakson, generowany dźwięk silnika.
+- Domy: zajęcie, wnętrze, elewacja i ustawienia RP.
+- Szkoła, szpital, policja, straż pożarna, bank, sklep, kawiarnia, stacja paliw.
+- Prace, wypłaty, zadania dostawcze.
+- Deszcz, mgła, dzień/noc, ruch uliczny, NPC.
+- Zapisywanie stanu w localStorage.
 
-Telefon: ekranowe przyciski do jazdy/chodzenia, interakcji, kamery i klaksonu.
+## Sterowanie
 
-## Technologie
+| Sterowanie | Akcja |
+| --- | --- |
+| WASD / strzałki | Spacer lub jazda |
+| Shift | Sprint |
+| E | Interakcja, samochód, dom |
+| F | Telefon |
+| C | Zmiana kamery |
+| H | Klakson w pojeździe |
+| P / Esc | Pauza |
+| O | Tryb fotograficzny |
+| Przeciąganie po świecie | Obracanie kamery |
+| Kółko myszy | Zoom |
 
-HTML, CSS, JavaScript i Three.js (ładowany z CDN). Geometria, kolory, szyldy (CanvasTexture), efekty i dźwięki (Web Audio API) są tworzone kodem. `index.html` stanowi komplet aktualnej aplikacji.
+Na telefonach dostępne są dotykowe przyciski poruszania, interakcji i kamery.
 
-## Uruchamianie lokalne
+## Instalacja lokalna
+
+W katalogu repozytorium uruchom:
 
 ```bash
 python -m http.server 8080
 ```
 
-Otwórz `http://localhost:8080`. Ładowanie Three.js wymaga internetu.
+Następnie otwórz http://localhost:8080. Three.js jest ładowany jako biblioteka JS z CDN, więc wymagane jest połączenie internetowe.
 
-## Co jest jeszcze do zrobienia
+## Ważne ograniczenia
 
-Ta wersja **nie jest pełną odpowiedniczką Brookhaven**. Obecnie brak:
-- prawdziwego multiplayera, serwera, wspólnego czatu i zapraszania znajomych,
-- kont użytkowników i serwerowego zapisu postępów,
-- zaawansowanej fizyki pojazdów i ruchu drogowego AI,
-- pełnych wnętrz wszystkich budynków, edytora mebli, prywatnych parceli dla wielu graczy,
-- animacji motion-capture, fotorealistycznych tekstur i pełnego świata AAA.
+- Alpha 4.0 jest **single-player**. Nie ma multiplayera, serwera ani czatu.
+- Stan gry zapisuje się **lokalnie w konkretnej przeglądarce** (localStorage), a nie w chmurze.
+- Ustawienia drzwi mają wyłącznie charakter RP, nie stanowią mechanizmu uprawnień dla innych graczy.
+- Modele są zbudowane proceduralnie, więc mimo ulepszeń nie jest to fotorealistyczna gra klasy AAA.
+- Składnia JavaScript i wdrożenia Vercel są sprawdzane; pełne testy interakcji i płynności w różnych przeglądarkach są osobnym krokiem.
 
-Niektóre mechaniki (jak blokowanie domu) służą **odgrywaniu ról w trybie jednoosobowym**, nie stanowią realnych zabezpieczeń przed innymi graczami. Gra zapisuje ustawienia przez `localStorage` w danej przeglądarce. Bez infrastruktury backendowej nie da się zrealizować wiarygodnego multiplayera.
-
-© NEXO STUDIOS. Projekt niezależny od Roblox/Brookhaven.
+© NEXO Studios.
