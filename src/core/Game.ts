@@ -130,7 +130,7 @@ export class Game {
       this.hud.update(this.save.coins,label,inside?'TWÓJ DOM':'NEXO VALLEY',this.player.position);
     }
     this.frame++;
-    if(this.frame%120===0 && this.started)window.__nexoDebug={
+    if(this.started)window.__nexoDebug={
       position:[this.player.position.x,this.player.position.y,this.player.position.z],
       doorOpen:this.world.house.getColliders().length===this.world.house.collisions.length,
       frame:this.frame,
