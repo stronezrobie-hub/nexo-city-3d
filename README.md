@@ -1,10 +1,43 @@
-# NEXO LIFE RP 6.2 — RP Hub
+# NEXO LIFE RP 7.0 — Graphics Edition
 
 **Autorska, jednoosobowa gra 3D w przeglądarce. Cały świat powstaje z kodu, bez gotowych modeli 3D.** To niezależna produkcja, która rozwija mechaniki gatunku life RP; nie jest powiązana z Brookhaven ani Roblox.
 
 **Zagraj:** https://nexo-life-rp.vercel.app
 
 **GitHub:** https://github.com/stronezrobie-hub/nexo-city-3d
+
+## Graphics 7.0 — realistyczniejszy świat, pełna regulacja jakości
+
+**Pięć profili grafiki** dostępnych w menu **Graphics 7.0** oraz przez przycisk 💎 w górnym pasku:
+
+| Poziom | Efekty renderowania |
+| --- | --- |
+| **Low** | niższa rozdzielczość, bez map cieni i ciężkich efektów |
+| **Balanced** | podstawowe, miękkie cienie, optymalna rozdzielczość |
+| **High** | dokładniejsze cienie, wyższa rozdzielczość i jakość materiałów |
+| **Ultra** | cienie 2048 px, Bloom i mocniejsze refleksy na komputerze |
+| **Ultra+** | cienie do 3072 px, Bloom i SSAO na komputerze |
+
+Wydajność i rzeczywisty efekt zależą od GPU oraz przeglądarki. Na urządzeniach dotykowych kosztowne efekty postprocessingu są domyślnie wyłączone, aby chronić płynność. W razie długotrwałego spadku FPS w Ultra/Ultra+ gra może automatycznie przełączyć się na High; **F9** przywraca Balanced.
+
+### Ulepszenia świata i efektów
+
+- Shaderowe niebo, gwiazdy w nocy oraz cztery pory: **świt, dzień, zachód słońca, noc**.
+- Dokładniejsze mapy miękkich cieni, cienie kontaktowe pod pojazdami.
+- Zapisane w kodzie gradienty i proceduralne mapy materiałów (asfalt, trawa, chodniki) oraz proceduralne środowisko do stylizowanych odbić.
+- Mokre drogi z kałużami podczas deszczu oraz zwiększony połysk asfaltu.
+- Szkło o właściwościach fizycznych, rozświetlone okna i lampy uliczne nocą, światła auta.
+- Poświata **Bloom** (Ultra/Ultra+ na PC) i cieniowanie przestrzenne **SSAO** (Ultra+ na PC).
+- Dodatkowe elementy architektury: urządzenia dachowe, panele słoneczne, detale fasad.
+- Bogatsze umeblowanie wnętrza, podświetlenie pomieszczeń i dekoracje.
+- Animowane kręgi na wodzie w fontannach.
+- Ustawienia zapisywane lokalnie; w panelu widoczny jest przybliżony FPS.
+
+Efekty odbić to przybliżenia PBR i mapa otoczenia generowana kodem, **nie pełne ray tracing ani rzeczywiste odbicia screen-space**. Oprawa pozostaje autorską, stylizowaną grafiką 3D, nie fotorealizmem AAA.
+
+### Testowanie
+
+`npm run build` oraz `node tests/browser-smoke.cjs` sprawdzają grę. `node tests/graphics-smoke.cjs` weryfikuje podstawowe profile jakości i pory dnia. Pełen test na GPU z Ultra/Ultra+ uruchamiany jest opcjonalnie przez `GRAPHICS_STRESS=1 node tests/graphics-smoke.cjs`. W środowiskach bez sprzętowego WebGL tryby najwyższe mogą być bardzo wolne.
 
 ## RP Hub 6.2 — system inspirowany zrzutami ekranu
 
