@@ -2,7 +2,7 @@
 <html lang="pl">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#0b1723"><title>NEXO LIFE RP — Realistic City Update</title>
+<meta name="theme-color" content="#0b1723"><title>NEXO LIFE RP 4.0 — World Reimagined</title>
 <style>
 :root{--card:rgba(8,23,37,.84);--line:rgba(212,245,255,.17);--white:#ecf8ff;--mint:#a8ff73;--soft:#a4bfcd}*{box-sizing:border-box}
 html,body{height:100%;margin:0;overflow:hidden;background:#79b9e4;color:var(--white);font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;user-select:none}
@@ -47,12 +47,72 @@ button{font:inherit;cursor:pointer;color:inherit}#world{width:100%;height:100%;d
 .rp-field{width:100%;background:#071d2e;border:1px solid #ffffff35;border-radius:10px;padding:11px;color:#fff;font:inherit;outline:none}.rp-field:focus{border-color:var(--mint)}
 .panel-caption{font-size:10px;color:var(--mint);font-weight:900;letter-spacing:1px;margin:12px 0 7px}
 #panel .option{min-height:52px}#panel .option button{min-width:68px}
+
+/* Premium v4 visual system, no external UI assets. */
+:root{--card:rgba(8,20,33,.77);--line:rgba(224,247,255,.20);--white:#f7fcff;--mint:#c5ff78;--soft:#bcd1dd}
+#shade{background:linear-gradient(180deg,rgba(2,13,30,.45),transparent 23%,transparent 62%,rgba(2,10,20,.46))}
+#filmgrain{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.045;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.76' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.5'/%3E%3C/svg%3E")}
+.hud{z-index:2}
+.glass{background:linear-gradient(130deg,rgba(13,31,47,.89),rgba(9,20,32,.69));border:1px solid rgba(243,253,255,.20);box-shadow:0 12px 42px #03111b66,inset 0 1px #ffffff16;backdrop-filter:blur(21px) saturate(145%)}
+.head{top:max(18px,env(safe-area-inset-top));left:23px;right:23px}
+.logo i{background:linear-gradient(140deg,#e2ff9d,#98df78);border-radius:15px;box-shadow:0 10px 32px #0b170d55,0 0 0 1px #ffffff46;font-weight:1000}
+.logo b{font-size:21px;letter-spacing:1.3px}.logo small{color:#d1ff9f}
+.cash{background:#071925ce;border:1px solid #b6f38f4d;border-radius:14px;padding:11px 18px;font-variant-numeric:tabular-nums;box-shadow:0 13px 31px #020e1873}
+.smallbtn{background:linear-gradient(160deg,#122c3ac9,#091b2dba);border:1px solid #dceeff36;transition:background .2s,transform .2s}
+.smallbtn:hover,.menu-btn:hover{transform:translateY(-2px);background:#203d46ee}
+.sidebar{left:22px;top:106px;gap:7px}
+.menu-btn{width:180px;min-height:48px;border-radius:14px;transition:background .2s,transform .2s;border-color:#ffffff2d;box-shadow:0 4px 20px #091c2544}
+.menu-btn .ico{background:#ffffff18;border:1px solid #ffffff0c;width:30px;height:30px;font-size:17px}
+.menu-btn.active{background:linear-gradient(110deg,#214534d9,#12372fcf);border-color:#c5ff78af}
+.task{top:105px;right:23px;padding:17px 17px 14px;border-radius:18px}
+.task h3{font-size:18px;letter-spacing:-.4px}.task .progress{height:7px}
+.task .progress i{background:linear-gradient(90deg,#6ecaa3,#c9ff7c)}
+#panel{left:211px;top:106px;box-shadow:0 30px 100px #0009;border:1px solid #c6efff35}
+.map-box{right:23px;bottom:22px;border-radius:19px;box-shadow:0 18px 52px #0008}
+.map-title{color:#c7fda2}
+.minihud{border-radius:18px;padding:15px 18px}.minihud #mode{font-weight:900;letter-spacing:.6px}
+.speed{font-size:46px;line-height:1.05}.speed span{letter-spacing:1px;color:#d6edea}
+.interact{background:#102f32ed;border:1px solid #d5ff9c77;box-shadow:0 14px 45px #051725cc;transition:.15s;cursor:pointer}
+.interact:hover{transform:translateX(-50%) translateY(-2px)}
+.interact kbd{box-shadow:0 0 0 2px #ffffff20}
+.toast{background:#102d37ee;border-color:#d0ffae88;border-radius:16px;box-shadow:0 16px 60px #0008}
+.zonebanner{position:absolute;top:23px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:1px;pointer-events:none;text-shadow:0 2px 12px #030e1cde;letter-spacing:1.5px}
+.zonebanner>span{font-size:9px;color:#caff93;font-weight:1000;letter-spacing:3px}
+.zonebanner>b{font-size:15px;letter-spacing:1.1px}
+.zonebanner>small{font-size:10px;color:#d5e5eb}
+#start{background:linear-gradient(110deg,rgba(3,16,29,.94) 0%,rgba(2,16,29,.79) 46%,rgba(4,19,30,.31) 100%);justify-items:start;padding:clamp(16px,8vw,120px);backdrop-filter:blur(2px)}
+.welcome{width:min(650px,100%);text-align:left;border:none;box-shadow:none;padding:20px 10px;background:transparent}
+.welcome .sup{font-size:10px;letter-spacing:4px;color:#cafca2}
+.welcome-overline{display:flex;gap:11px;align-items:center;color:#eaf4ed;font-size:10px;letter-spacing:2px;font-weight:1000;margin-top:23px}
+.pulse{display:inline-block;width:8px;height:8px;background:var(--mint);border-radius:50%;box-shadow:0 0 0 6px #baff7d24,0 0 15px #d0ff9b}
+.welcome h1{font-size:clamp(49px,6.2vw,92px);letter-spacing:-4.5px;line-height:1.02;font-weight:1000;margin:16px 0 19px}
+.welcome h1 em{background:linear-gradient(90deg,#baff75,#e5ffbc);background-clip:text;-webkit-background-clip:text;color:transparent}
+.welcome p{margin:0 0 25px;max-width:500px;font-size:15px;color:#d5e5ec}
+.chips{justify-content:flex-start;gap:9px;margin-bottom:28px}
+.chips b{background:#0a2835a9;border-color:#cbf7e53b;padding:9px 13px;letter-spacing:.3px}
+.primary{background:linear-gradient(115deg,#daff92,#a6f474);color:#17341e;padding:18px 32px;border-radius:14px;font-size:14px;box-shadow:0 10px 35px #75e49a3d;transition:transform .2s}
+.primary:hover{transform:translateY(-3px)}
+.welcome footer{text-align:left;color:#c3d5db;font-size:11px;margin-top:17px}
+@media(max-width:1050px){.zonebanner{top:78px;left:auto;right:23px;transform:none;align-items:flex-end}.sidebar{top:119px}.task{top:194px}#panel{top:119px}}
+@media(max-width:680px){
+ #start{justify-items:center;padding:22px;background:linear-gradient(180deg,rgba(3,15,28,.67),rgba(3,15,28,.94))}
+ .welcome{padding:20px 7px;max-width:470px}.welcome h1{font-size:clamp(42px,10.5vw,60px);letter-spacing:-2.8px}
+ .welcome p{font-size:13px}.chips b{font-size:9px}.primary{width:100%}
+ .head{top:10px;left:10px;right:10px}.logo b{font-size:13px}.logo small{letter-spacing:.7px}
+ .logo i{width:37px;height:37px}.cash{padding:6px 9px}.smallbtn{padding:7px 9px}
+ .zonebanner{top:59px;left:10px;right:auto;align-items:flex-start}.zonebanner>span{font-size:7px}.zonebanner>b{font-size:11px}.zonebanner>small{font-size:8px}
+ .sidebar{top:104px;left:10px;max-width:calc(100vw - 20px);padding-bottom:3px}.menu-btn{min-width:43px;width:44px;min-height:41px;border-radius:12px}
+ .task{top:155px;right:9px;padding:11px;max-width:42vw}.task h3{font-size:13px}
+ #panel{top:156px;left:10px;width:min(320px,calc(100vw - 20px));max-height:calc(100dvh - 270px)}
+ .bottom{bottom:max(12px,env(safe-area-inset-bottom));left:10px}.map-box{bottom:max(12px,env(safe-area-inset-bottom));right:10px}
+ .interact{bottom:140px}.touch{bottom:205px}
+}
 </style>
 </head>
 <body>
-<canvas id="world"></canvas><div id="shade"></div>
-<div class="hud">
-<header class="head"><div class="logo"><i>N</i><div><b>NEXO LIFE RP</b><small>YOUR CITY • YOUR STORY</small></div></div><div class="header-right"><div class="cash glass"><small>TWOJE PIENIĄDZE</small><span id="cash">$ 2 500</span></div><button class="smallbtn" id="day">☀ DZIEŃ</button><button class="smallbtn" id="sound" title="Wycisz dźwięki">🔊</button><button class="smallbtn" id="pause">Ⅱ</button></div></header>
+<canvas id="world"></canvas><div id="shade"></div><div id="filmgrain" aria-hidden="true"></div>
+<div class="hud"><div id="zonebanner" class="zonebanner"><span>◉ NEXO VALLEY</span><b id="zone">CENTRUM MIASTA</b><small id="clock">12:00 • SŁONECZNIE</small></div>
+<header class="head"><div class="logo"><i>N</i><div><b>NEXO LIFE RP</b><small>WORLD REIMAGINED • ALPHA 4.0</small></div></div><div class="header-right"><div class="cash glass"><small>TWOJE PIENIĄDZE</small><span id="cash">$ 2 500</span></div><button class="smallbtn" id="day">☀ DZIEŃ</button><button class="smallbtn" id="sound" title="Wycisz dźwięki">🔊</button><button class="smallbtn" id="pause">Ⅱ</button></div></header>
 <nav class="sidebar">
 <button class="menu-btn" data-page="phone"><span class="ico">📱</span>Telefon</button>
 <button class="menu-btn" data-page="avatar"><span class="ico">👤</span>Postać</button>
@@ -72,7 +132,7 @@ button{font:inherit;cursor:pointer;color:inherit}#world{width:100%;height:100%;d
 <div class="status">NEXO STUDIOS · PROCEDURAL 3D · NO IMPORTED MODELS · LOCAL SAVE</div>
 <div class="toast" id="toast"></div>
 </div>
-<div id="start"><div class="welcome"><div class="sup">NEXO STUDIOS PRESENTS</div><h1>NEXO <em>LIFE RP.</em></h1><p>Własna postać, samochody, domy, praca i całe miasto 3D wygenerowane kodem. Twoja historia zaczyna się tutaj.</p><div class="chips"><b>🏡 DOMY</b><b>🚘 SAMOCHODY</b><b>💼 PRACE</b><b>👤 POSTACIE</b><b>🌎 OTWARTY ŚWIAT</b></div><button id="startBtn" class="primary">▶ WEJDŹ DO MIASTA</button><footer>Wersja Alpha 3.0 · Realistic City Update · Zapis lokalny</footer></div></div>
+<div id="start"><div class="welcome"><div class="sup">NEXO STUDIOS PRESENTS</div><div class="welcome-overline"><span class="pulse"></span> NOWY WYMIAR ROLEPLAY</div><h1>Twoje miasto.<br><em>Twoja historia.</em></h1><p>Zamieszkaj w NEXO VALLEY. Odkrywaj ulice, prowadź własne auto, wybieraj dom i twórz swoją historię. Cały świat zbudowany wyłącznie kodem.</p><div class="chips"><b>✧ TWOJE ŻYCIE</b><b>🏡 TWOJE DOMY</b><b>🚘 TWOJE POJAZDY</b><b>🌦 ŻYWY ŚWIAT</b></div><button id="startBtn" class="primary">▶ WEJDŹ DO MIASTA</button><footer>Wersja Alpha 4.0 · World Reimagined · Zapis lokalny</footer></div></div>
 <script type="module">
 import * as T from 'https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js';
 const el=id=>document.getElementById(id),W=window;
