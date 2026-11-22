@@ -30,7 +30,7 @@ export class Game {
     this.hud=new Hud(root,{
       onQuality:q=>this.changeQuality(q),
       onColor:hex=>{this.save.shirtColor=hex;this.player.setColor(hex);writeSave(this.save);this.hud.toast('Zmieniono kolor ubrania.');},
-      onHome:()=>{this.player.position.copy(this.world.spawn);this.player.setPose('stand');this.camera.yaw=Math.PI;this.hud.toast('Jesteś przed swoim domem. Podejdź do drzwi.');},
+      onHome:()=>{this.player.position.set(this.world.house.x,0,this.world.house.z-11.8);this.player.setPose('stand');this.camera.yaw=Math.PI;this.hud.toast('Jesteś przed swoim domem. Podejdź do drzwi.');},
       onTime:()=>{this.gameClock=(this.gameClock+.26)%1;this.hud.toast('Zmieniono porę dnia.');},
       onPause:()=>{if(!this.started)return;this.paused=!this.paused;this.hud.setPause(this.paused);},
     });
@@ -103,7 +103,7 @@ export class Game {
   }
   private animate=():void=>{
     requestAnimationFrame(this.animate);
-    const dt=Math.min(this.clock.getDelta(),.045);
+    const dt=Math.min(this.clock.getDelta(),.11);
     if(this.started&&!this.paused){
       this.elapsed+=dt;
       this.gameClock=(this.gameClock+dt/360)%1;
