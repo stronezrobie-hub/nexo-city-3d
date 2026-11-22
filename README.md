@@ -1,122 +1,75 @@
-# NEXO LIFE RP 7.0 — Graphics Edition
+# NEXO LIFE RP — TypeScript / Prototyp 0.1
 
-**Autorska, jednoosobowa gra 3D w przeglądarce. Cały świat powstaje z kodu, bez gotowych modeli 3D.** To niezależna produkcja, która rozwija mechaniki gatunku life RP; nie jest powiązana z Brookhaven ani Roblox.
+**Nowa, niezależna implementacja NEXO LIFE RP od zera**, oparta na Three.js, Vite i TypeScript. Projekt jest rozwijany w gałęzi \`rebuild/phase-1-typescript\` — stabilna gra z gałęzi \`main\` pozostaje bez zmian.
 
-**Zagraj:** https://nexo-life-rp.vercel.app
+## Etap 1 — co działa
 
-**GitHub:** https://github.com/stronezrobie-hub/nexo-city-3d
+- Autorski proceduralny świat 3D: drogi, skrzyżowania, chodniki, zebra, park, budynki i osiedle.
+- Jedna **w pełni wchodzona nieruchomość** (Dom 01) z czterema obszarami: salon, kuchnia, sypialnia i łazienka. Dom i pokoje są w **tej samej scenie 3D**, bez ekranu ładowania.
+- Otwieranie/zamykanie drzwi przyciskiem E, kolizja z zamkniętymi drzwiami, ukrywanie dachu wewnątrz.
+- Meble z działającymi interakcjami: sofa, telewizor, lodówka, łóżko, prysznic.
+- Chodzenie postaci, bieg, skok, animacja ruchu i siadania; ruch względem kamery.
+- NPC, ruch samochodów (uproszczony, dekoracyjny), instancje drzew i latarni.
+- Polski interfejs: saldo, godzina, minimapa, panel domu, postać, mapa, grafika i pomoc.
+- Sterowanie klawiaturą/myszą oraz dotykowe na telefonach.
+- Cykl dzień/noc, mgła i miękkie cienie; trzy poziomy grafiki.
+- Wersjonowany zapis podstawowych danych do localStorage: saldo, kolor ubrania, jakość.
 
-## Graphics 7.0 — realistyczniejszy świat, pełna regulacja jakości
+**Poza zakresem etapu 1:** system pełnej własności/najmu i 10 wchodzonych domów, budowanie, dodatkowe piętro i schody, fizyka jazdy, misje, pełna ekonomia oraz multiplayer. Są to kolejne etapy; ta wersja nie udaje, że już je obsługuje.
 
-**Pięć profili grafiki** dostępnych w menu **Graphics 7.0** oraz przez przycisk 💎 w górnym pasku:
+## Uruchomienie (Windows 11, VS Code)
 
-| Poziom | Efekty renderowania |
-| --- | --- |
-| **Low** | niższa rozdzielczość, bez map cieni i ciężkich efektów |
-| **Balanced** | podstawowe, miękkie cienie, optymalna rozdzielczość |
-| **High** | dokładniejsze cienie, wyższa rozdzielczość i jakość materiałów |
-| **Ultra** | cienie 2048 px, Bloom i mocniejsze refleksy na komputerze |
-| **Ultra+** | cienie do 3072 px, Bloom i SSAO na komputerze |
+Zainstaluj **Node.js 22.12+** (Vite 8 wymaga też nowszej wersji Node 20.19+). Otwórz folder projektu w terminalu:
 
-Wydajność i rzeczywisty efekt zależą od GPU oraz przeglądarki. Na urządzeniach dotykowych kosztowne efekty postprocessingu są domyślnie wyłączone, aby chronić płynność. W razie długotrwałego spadku FPS w Ultra/Ultra+ gra może automatycznie przełączyć się na High; **F9** przywraca Balanced.
+\`\`\`powershell
+npm install
+npm run dev
+\`\`\`
 
-### Ulepszenia świata i efektów
+Otwórz adres wskazany przez Vite, zwykle **http://localhost:5173**. Do korzystania na telefonie w tej samej sieci, otwórz adres LAN wskazany przez Vite (\`--host 0.0.0.0\`), jeżeli zapora i sieć pozwalają.
 
-- Shaderowe niebo, gwiazdy w nocy oraz cztery pory: **świt, dzień, zachód słońca, noc**.
-- Dokładniejsze mapy miękkich cieni, cienie kontaktowe pod pojazdami.
-- Zapisane w kodzie gradienty i proceduralne mapy materiałów (asfalt, trawa, chodniki) oraz proceduralne środowisko do stylizowanych odbić.
-- Mokre drogi z kałużami podczas deszczu oraz zwiększony połysk asfaltu.
-- Szkło o właściwościach fizycznych, rozświetlone okna i lampy uliczne nocą, światła auta.
-- Poświata **Bloom** (Ultra/Ultra+ na PC) i cieniowanie przestrzenne **SSAO** (Ultra+ na PC).
-- Dodatkowe elementy architektury: urządzenia dachowe, panele słoneczne, detale fasad.
-- Bogatsze umeblowanie wnętrza, podświetlenie pomieszczeń i dekoracje.
-- Animowane kręgi na wodzie w fontannach.
-- Ustawienia zapisywane lokalnie; w panelu widoczny jest przybliżony FPS.
+### Kontrola projektu
 
-Efekty odbić to przybliżenia PBR i mapa otoczenia generowana kodem, **nie pełne ray tracing ani rzeczywiste odbicia screen-space**. Oprawa pozostaje autorską, stylizowaną grafiką 3D, nie fotorealizmem AAA.
-
-### Testowanie
-
-`npm run build` oraz `node tests/browser-smoke.cjs` sprawdzają grę. `node tests/graphics-smoke.cjs` weryfikuje podstawowe profile jakości i pory dnia. Pełen test na GPU z Ultra/Ultra+ uruchamiany jest opcjonalnie przez `GRAPHICS_STRESS=1 node tests/graphics-smoke.cjs`. W środowiskach bez sprzętowego WebGL tryby najwyższe mogą być bardzo wolne.
-
-## RP Hub 6.2 — system inspirowany zrzutami ekranu
-
-- **Witaj w NEXO VALLEY:** animowane, oryginalne powitanie uruchamiane po rozpoczęciu gry.
-- **Aktualizacje:** czytelny panel nowości. Możesz go zamknąć i otworzyć ponownie przez przycisk aktualizacji.
-- **Szybki panel RP po prawej:** edytor postaci, narzędzia, animacje, pojazdy i domy. Skróty otwierają istniejące funkcje gry, a nie puste makiety.
-- **Animacje:** machanie, taniec, siadanie, salutowanie, radość oraz powrót do normalnej pozycji.
-- **Rodzina RP:** własna nazwa rodziny i wybór roli (opiekun, dziecko, rodzeństwo, gość) z lokalnym zapisem. **Bez zapraszania innych graczy** — multiplayer nie jest jeszcze zaimplementowany.
-- **Kamery domowe:** trzy przełączane widoki w świecie 3D (wejście, ogród, salon) dostępne po zajęciu domu. Są to symulowane kamery w grze, nie podgląd prawdziwych urządzeń.
-- **Telefon:** nowości RP dostępne również jako pozycje menu wirtualnego telefonu.
-- **Smartfony:** prawy panel skrótów można rozwinąć i zwinąć, by nie zasłaniał gry.
-- Testy Chromium sprawdzają powitanie, aktualizacje, skróty RP, rodzinę, kamery, dotychczasowe mechaniki domów i pojazdów oraz układ mobilny.
-
-Grafika nawiązuje funkcjonalnie do gatunku gier typu city roleplay, ale **nie używa logotypów, chronionych modeli ani materiałów z Brookhaven czy Roblox**.
-
-## City Edition 6.1 — wygląd i obsługa
-
-- **Nowe menu:** duży panel zakładek jest ukryty domyślnie, zastąpił go kompaktowy pasek dolny. Przycisk „Więcej” otwiera pełne menu dopiero na żądanie. Uspójniono również rozmieszczenie elementów na małych ekranach.
-- **Drogi:** wyniesione krawężniki, malowane linie brzegowe i miejsca parkingowe.
-- **Miasto:** fasady budynków mają dodatkowe szyby, ościeżnice, wejścia, ganki, schody, roślinność i przystanki.
-- **Postać:** sylwetka 3D o bardziej naturalnych proporcjach, zaokrąglona głowa i ruchome kończyny, nadal generowane wyłącznie kodem.
-- **Ulice:** zaparkowane samochody i prosty system reagowania ruchu NPC na fazy świateł.
-- **Pogoda i noc:** poprawiona jasność i czytelność świata w trybie nocnym.
-- **Testy mobilne:** kontrola, że główne menu nie zakrywa gry na małym ekranie.
-
-To **stylizowany proceduralny realizm**, nie fotorealizm ani kopia Brookhaven/Roblox.
-
-## Nowości w 6.0
-
-- Chodzenie postacią w stylu trzecioosobowym, **WASD względem kamery** i płynne przesuwanie się wzdłuż przeszkód.
-- **Szybki start jazdy:** z garażu możesz bezpośrednio wsiąść do wybranego samochodu.
-- **Własne dekoracje domu:** roślina, lampa, regał, telewizor, fotel i biurko — maksymalnie 6 mebli jednocześnie.
-- Dekoracje są generowane jako modele 3D w kodzie, zapisują się do `localStorage` i można je usuwać.
-- Interakcje z dekoracjami w domu przyciskiem **E**: włączanie TV i lampy, odpoczynek w fotelu, czytanie i inne działania RP.
-- **Szybkie wejście do własnego domu** bez chodzenia przez całe miasto.
-- Nowe **mobilne menu skrótów**: Telefon, Domy, Pojazdy, RP oraz przycisk Więcej.
-
-## Wcześniejsze funkcje
-
-- Katalog 4 modeli domów, 3 style wnętrz i zmiana kolorów elewacji.
-- 10 rodzajów pojazdów, pojazdy służb, światła syren, klakson.
-- Role i zawody, zadania kurierskie opcjonalne, bank, kawiarnia, szpital, komisariat i inne aktywności miejskie.
-- Postać, zwierzaki, przedmioty, animacje, profil RP.
-- Miasto 3D, pogoda, NPC, ruch uliczny, minimapa i swobodna kamera.
-- Zapisywanie postępów lokalnie w przeglądarce.
+\`\`\`powershell
+npm run typecheck
+npm run build
+npm run preview
+\`\`\`
 
 ## Sterowanie
 
-| Klawisz | Funkcja |
-| --- | --- |
-| WASD / strzałki | Chodzenie lub jazda |
-| Shift | Sprint |
-| E | Interakcja / wejście do auta / budynku / obsługa mebli |
-| F | Telefon |
-| C | Zmiana kamery |
-| H | Klakson |
-| L | Syrena pojazdów służb |
-| P / Esc | Pauza |
-| O | Tryb fotograficzny |
+| Klawisz | Akcja |
+|---|---|
+| W/A/S/D lub strzałki | Chodzenie |
+| Shift | Bieg |
+| Spacja | Skok |
+| E | Użyj przedmiotu / otwórz drzwi |
+| Przeciągnij myszą/palcem | Obracanie kamery |
+| Kółko myszy | Przybliżenie kamery |
+| Menu Dom | Szybki powrót pod pierwszy dom |
 
-Mysz / dotyk na obszarze świata obraca kamerę, kółko myszy zmienia zoom.
+## Moduły
 
-## Uruchomienie
+- \`src/core/Game.ts\` — pętla gry, zarządzanie rendererem i jakością.
+- \`src/world/World.ts\` — miasteczko, instancje roślin, ruch NPC i samochodów.
+- \`src/world/House.ts\` — wchodzone wnętrze, drzwi, meble, interakcje.
+- \`src/player/Player.ts\` — animowana postać, chodzenie, kolizje i grawitacja.
+- \`src/camera/ThirdPersonCamera.ts\` — kamera trzecioosobowa.
+- \`src/controls/Input.ts\` — PC i dotyk w jednym modelu.
+- \`src/systems/Save.ts\` — bezpieczny adapter localStorage; w przyszłości backend.
+- \`src/ui/Hud.ts\` — polski HUD, obsługa menu i minimapa.
+- \`src/world/geometry.ts\` — proceduralne geometrie i współdzielone materiały.
 
-```bash
-npm install
-npm run dev
-```
+## Etapy rozwoju
 
-Test wydania:
+1. **Fundament** (ten prototyp): ruch, kamera, miasto, jeden dom.
+2. **Domy**: dziesięć wchodzonych nieruchomości, kilka kondygnacji, budowanie, koszty i zaproszenia w obrębie rozgrywki lokalnej.
+3. **Postać**: wygląd, akcesoria, emotki, głód, energia, telefon i plecak.
+4. **Pojazdy**: samochody, motocykl, autobus, jazda, garaż i kupno.
+5. **Roleplay i ekonomia**: prace, misje, sklep, płatności i profil.
+6. **Optymalizacja**: system stref, LOD, culling wnętrz, profilowanie FPS na telefonach i komputerach.
+7. **Backend i multiplayer**: Supabase/WebSocket, autorytatywny serwer, synchronizacja i zaproszenia między graczami.
 
-```bash
-npm run build
-```
+**Wydajność:** 60 FPS na średnim sprzęcie jest celem, nie gwarancją. Optymalizacje obejmują instancing roślin, współdzielone geometrie, ograniczony DPR i ukrywanie niewidocznych wnętrz. Docelowa wydajność wymaga pomiarów WebGL na sprzęcie docelowym.
 
-Automatyczny test Chromium (Playwright) w `tests/browser-smoke.cjs` sprawdza uruchomienie gry, wybór domu, dekorowanie, jazdę, dostawy i menu mobilne. CI jest w `.github/workflows/browser-smoke.yml`.
-
-## Ważne ograniczenia
-
-**Nie ma jeszcze multiplayera, czatu sieciowego ani kont użytkowników.** Zapis odbywa się przez `localStorage` na konkretnym urządzeniu. Zamki drzwi i niektóre aktywności to symulacje RP, a nie mechanizmy sieciowe. Ta gra ma stylizowaną, generowaną kodem grafikę, a nie fotorealistyczne zasoby AAA.
-
-© NEXO Studios.
+Projekt niezależny; nie zawiera modeli, map ani logotypów Brookhaven/Roblox.
