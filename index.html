@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b1723"><title>NEXO LIFE RP — Twoje miasto, twoje zasady</title>
+<style>
+:root{--card:rgba(8,23,37,.84);--line:rgba(212,245,255,.17);--white:#ecf8ff;--mint:#a8ff73;--soft:#a4bfcd}*{box-sizing:border-box}
+html,body{height:100%;margin:0;overflow:hidden;background:#79b9e4;color:var(--white);font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;user-select:none}
+button{font:inherit;cursor:pointer;color:inherit}#world{width:100%;height:100%;display:block;touch-action:none}
+#shade{pointer-events:none;position:fixed;inset:0;background:linear-gradient(180deg,#06182c60,transparent 24%,transparent 78%,#00111d45)}
+.hud{pointer-events:none;position:fixed;inset:0}.hud>*{pointer-events:auto}
+.head{position:absolute;top:18px;left:20px;right:20px;display:flex;align-items:start;justify-content:space-between;gap:15px}
+.logo{display:flex;gap:10px;align-items:center;text-shadow:0 3px 16px #082436;pointer-events:none}
+.logo i{width:44px;height:44px;display:grid;place-items:center;background:var(--mint);color:#0a2421;border-radius:13px;transform:rotate(-7deg);font-size:29px;font-weight:1000;font-style:normal;box-shadow:0 10px 25px #08132070}
+.logo b{display:block;font-size:19px;line-height:1;letter-spacing:1px;font-weight:1000}.logo small{display:block;color:var(--mint);font-size:9px;letter-spacing:2.4px;font-weight:900;margin-top:6px}
+.glass{background:var(--card);border:1px solid var(--line);backdrop-filter:blur(18px);box-shadow:0 12px 48px #0714225c;border-radius:18px}
+.header-right{display:flex;gap:8px;align-items:center}.cash{padding:10px 15px;font-weight:950;color:var(--mint);font-size:17px;line-height:1.1}.cash small{display:block;font-size:9px;letter-spacing:1.7px;color:#c6d8e0;margin-bottom:4px}
+.smallbtn{border:1px solid var(--line);border-radius:13px;background:var(--card);padding:10px 13px;min-height:41px;font-weight:800;backdrop-filter:blur(15px)}.smallbtn:hover,.menu-btn:hover{border-color:var(--mint)}
+.sidebar{position:absolute;left:20px;top:94px;display:flex;flex-direction:column;gap:8px}
+.menu-btn{display:flex;align-items:center;gap:12px;width:165px;padding:11px 12px;background:var(--card);border:1px solid var(--line);border-radius:14px;font-weight:800;font-size:12px;text-align:left;backdrop-filter:blur(15px)}.menu-btn .ico{width:26px;height:26px;display:grid;place-items:center;border-radius:8px;background:#ffffff15;font-size:17px}
+.menu-btn.active{border-color:var(--mint);background:#1b4036d9}
+.task{position:absolute;right:20px;top:94px;padding:15px;width:248px}.eyebrow{color:var(--mint);font-size:9px;font-weight:1000;letter-spacing:2.3px}.task h3{margin:8px 0 6px;font-size:16px}.task p{font-size:11px;color:#bfd2dd;line-height:1.5;margin:0}.progress{background:#ffffff20;height:6px;border-radius:20px;margin-top:14px;overflow:hidden}.progress>i{display:block;height:100%;width:0;background:var(--mint);transition:width .25s}.taskfoot{display:flex;justify-content:space-between;margin-top:9px;font-size:10px;font-weight:800;color:#d8e4ef}
+.bottom{position:absolute;bottom:23px;left:20px;display:flex;gap:10px;align-items:end}
+.minihud{padding:12px 15px;font-size:11px;color:#c9dcea;line-height:1.9;min-width:195px}.minihud strong{color:#fff}.speed{font-size:35px;letter-spacing:-2px;font-weight:950;line-height:1.15;color:var(--mint)}
+.interact{position:absolute;bottom:24px;left:50%;transform:translateX(-50%);border:1px solid #c5ff8888;background:#152d32e6;box-shadow:0 10px 45px #0006;border-radius:15px;padding:12px 22px;font-weight:800;font-size:12px;max-width:min(375px,60vw);text-align:center}
+.interact kbd{display:inline-grid;place-items:center;background:var(--mint);color:#17331c;padding:4px 8px;margin-right:9px;border-radius:6px;font-weight:1000}
+.map-box{position:absolute;right:20px;bottom:20px;padding:9px;width:178px}.map-title{font-size:10px;color:#d1ebf4;font-weight:900;letter-spacing:1.1px;margin:3px 4px 7px;display:flex;justify-content:space-between}#map{width:158px;height:158px;display:block;border-radius:12px}
+.status{position:absolute;bottom:9px;left:50%;transform:translateX(-50%);font-size:9px;color:#e5eef0b5;letter-spacing:1px;white-space:nowrap;pointer-events:none}
+#panel{position:absolute;left:196px;top:94px;width:min(360px,calc(100vw - 230px));max-height:calc(100vh - 115px);overflow:auto;padding:17px;display:none}
+#panel.visible{display:block}.panel-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}.panel-head h2{font-size:19px;margin:0}.panel-head button{border:1px solid var(--line);background:#ffffff10;border-radius:9px;width:30px;height:30px}
+.panel-lead{font-size:12px;color:#c1d4df;line-height:1.5;margin:0 0 13px}.option{background:#ffffff0c;border:1px solid #ffffff1e;border-radius:12px;padding:12px;display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
+.option b{display:block;font-size:12px}.option small{font-size:10px;line-height:1.4;color:#a6bfca}.option button,.fullbtn{background:var(--mint);border:0;border-radius:9px;padding:8px 10px;color:#19311b;font-size:11px;font-weight:1000;white-space:nowrap}
+.fullbtn{display:block;width:100%;margin-top:10px;padding:12px}.option button:disabled{background:#3d5f5d;color:#d4e1d4;cursor:default}
+.swatches{display:flex;flex-wrap:wrap;gap:9px;padding:8px 0 5px}.swatch{border:3px solid #ffffff90;width:35px;height:35px;border-radius:11px}.swatch.selected{outline:2px solid var(--mint);outline-offset:3px}
+.toast{position:absolute;left:50%;top:16%;transform:translate(-50%,-16px);padding:13px 18px;background:#092133e8;border:1px solid #b7ff8d88;box-shadow:0 17px 45px #0007;border-radius:14px;font-size:13px;font-weight:850;opacity:0;transition:opacity .2s,transform .2s;text-align:center;min-width:160px;max-width:85vw;pointer-events:none}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+#start{position:fixed;z-index:50;inset:0;display:grid;place-items:center;background:linear-gradient(150deg,#021522dd,#04182dde),radial-gradient(ellipse at 30% 20%,#4ac9ec,#173e54);padding:15px}
+#start.hidden{display:none}.welcome{width:min(540px,100%);padding:37px;text-align:center;border:1px solid #ceffa949;border-radius:26px;background:linear-gradient(145deg,#132f40ed,#0b1c2cf5);box-shadow:0 35px 120px #020d1eab}
+.welcome .sup{font-size:11px;letter-spacing:3px;color:var(--mint);font-weight:1000}.welcome h1{font-size:clamp(45px,8vw,69px);letter-spacing:-3px;line-height:.95;margin:20px 0}.welcome h1 em{font-style:normal;color:var(--mint)}.welcome p{font-size:13px;color:#bad2df;line-height:1.65;margin:0 auto 22px;max-width:420px}
+.chips{display:flex;gap:7px;flex-wrap:wrap;justify-content:center;margin:0 0 21px}.chips b{font-size:10px;border:1px solid #ffffff35;padding:7px 10px;border-radius:30px}
+.primary{padding:15px 30px;background:var(--mint);color:#1a3320;border:0;font-weight:950;border-radius:12px;box-shadow:0 8px 40px #80ff675e}.welcome footer{font-size:10px;color:#9db2c2;margin-top:18px}
+.touch{display:none}.dpad,.actionpad{display:flex;gap:6px}.touch-btn{width:50px;height:54px;border:1px solid #ffffff68;background:#092334bd;border-radius:14px;font-weight:900;font-size:18px;touch-action:none;backdrop-filter:blur(9px)}.touch-btn:active,.touch-btn.down{background:var(--mint);color:#18301d}.touch-btn small{font-size:9px;display:block}
+@media(max-width:950px){.task{top:89px;width:210px}.sidebar{top:87px}.menu-btn{width:135px;padding:8px;font-size:11px}.menu-btn .ico{width:23px;height:23px;font-size:15px}#panel{left:160px;top:87px}.mini-hint{display:none}}
+@media(max-width:680px){.head{top:11px;left:10px;right:10px}.logo i{width:35px;height:35px;font-size:23px}.logo b{font-size:14px}.logo small{font-size:7px;letter-spacing:1px}.cash{padding:7px 9px;font-size:12px}.cash small{font-size:8px}.smallbtn{font-size:11px;min-height:35px;padding:8px}.sidebar{left:9px;top:58px;flex-direction:row;gap:5px;max-width:calc(100vw - 15px);overflow:auto}.menu-btn{width:auto;min-width:44px;padding:7px 8px;font-size:0;gap:0;justify-content:center}.menu-btn .ico{font-size:17px;background:transparent}.task{right:9px;top:109px;width:165px;padding:10px}.task h3{font-size:12px}.task p{font-size:10px}.taskfoot{font-size:9px}#panel{left:9px;top:109px;width:min(320px,calc(100vw - 18px));max-height:calc(100dvh - 235px);z-index:9}.bottom{left:9px;bottom:9px}.minihud{min-width:0;padding:8px 10px;font-size:9px}.speed{font-size:27px}.map-box{right:9px;bottom:9px;width:116px;padding:5px}#map{width:104px;height:104px}.map-title{font-size:8px}.interact{bottom:135px;width:min(340px,92vw);max-width:92vw;padding:8px 11px;font-size:11px}.status{display:none}.welcome{padding:28px 17px}.welcome h1{letter-spacing:-2px}}
+@media(pointer:coarse){.touch{position:absolute;display:flex;bottom:140px;left:10px;right:10px;justify-content:space-between;align-items:end}.actionpad{flex-wrap:wrap;max-width:155px;justify-content:flex-end}.interact{bottom:205px}.touch-btn{width:52px;height:56px}.map-box{bottom:11px}}
+@media(max-height:550px){.sidebar{top:60px}.task{top:60px}.touch{bottom:65px}.interact{bottom:132px}.bottom{bottom:9px}.map-box{bottom:9px}}
+</style>
+</head>
+<body>
+<canvas id="world"></canvas><div id="shade"></div>
+<div class="hud">
+<header class="head"><div class="logo"><i>N</i><div><b>NEXO LIFE RP</b><small>YOUR CITY • YOUR STORY</small></div></div><div class="header-right"><div class="cash glass"><small>TWOJE PIENIĄDZE</small><span id="cash">$ 2 500</span></div><button class="smallbtn" id="day">☀ DZIEŃ</button><button class="smallbtn" id="pause">Ⅱ</button></div></header>
+<nav class="sidebar">
+<button class="menu-btn" data-page="phone"><span class="ico">📱</span>Telefon</button>
+<button class="menu-btn" data-page="avatar"><span class="ico">👤</span>Postać</button>
+<button class="menu-btn" data-page="cars"><span class="ico">🚘</span>Pojazdy</button>
+<button class="menu-btn" data-page="homes"><span class="ico">🏠</span>Domy</button>
+<button class="menu-btn" data-page="jobs"><span class="ico">💼</span>Praca</button>
+</nav>
+<section class="task glass"><span class="eyebrow">● TWOJA PRZYGODA</span><h3 id="taskTitle">Kurier miejski</h3><p id="taskDesc">Odwiedzaj świecące punkty na mapie, by zarabiać pieniądze.</p><div class="progress"><i id="taskProgress"></i></div><div class="taskfoot"><span id="role">Mieszkaniec</span><span id="mission">0/5</span></div></section>
+<section id="panel" class="glass" aria-label="Panel gry"></section>
+<div class="bottom"><div class="minihud glass"><div id="mode">🚶 SPACER</div><div id="speed" class="speed" style="display:none">0 <span style="font-size:10px">KM/H</span></div><div class="mini-hint"><strong>WASD</strong> ruch · <strong>E</strong> interakcja<br><strong>F</strong> telefon · <strong>C</strong> kamera · <strong>SHIFT</strong> sprint</div></div></div>
+<button class="interact" id="interact" style="display:none"><kbd>E</kbd><span id="interactText"></span></button>
+<div class="map-box glass"><div class="map-title"><span>◉ MIASTO</span><span>LIVE</span></div><canvas id="map" width="316" height="316"></canvas></div>
+<div class="touch"><div class="dpad"><button class="touch-btn" data-control="left">◀</button><button class="touch-btn" data-control="forward">▲</button><button class="touch-btn" data-control="back">▼</button><button class="touch-btn" data-control="right">▶</button></div><div class="actionpad"><button class="touch-btn" data-control="run"><small>SPRINT</small>⚡</button><button class="touch-btn" data-shortcut="interact"><small>AKCJA</small>✦</button><button class="touch-btn" data-shortcut="phone"><small>MENU</small>📱</button><button class="touch-btn" data-shortcut="camera"><small>WIDOK</small>📷</button></div></div>
+<div class="status">NEXO STUDIOS · PROCEDURAL 3D · NO IMPORTED MODELS · LOCAL SAVE</div>
+<div class="toast" id="toast"></div>
+</div>
+<div id="start"><div class="welcome"><div class="sup">NEXO STUDIOS PRESENTS</div><h1>NEXO <em>LIFE RP.</em></h1><p>Własna postać, samochody, domy, praca i całe miasto 3D wygenerowane kodem. Twoja historia zaczyna się tutaj.</p><div class="chips"><b>🏡 DOMY</b><b>🚘 SAMOCHODY</b><b>💼 PRACE</b><b>👤 POSTACIE</b><b>🌎 OTWARTY ŚWIAT</b></div><button id="startBtn" class="primary">▶ WEJDŹ DO MIASTA</button><footer>Wersja Alpha 2.0 · Tryb jednoosobowy · Zapis lokalny</footer></div></div>
+<script type="module">
+import * as T from 'https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js';
+const el=id=>document.getElementById(id),W=window;
+const scene=new T.Scene();scene.background=new T.Color('#93ccf5');scene.fog=new T.Fog('#93ccf5',125,380);
+const renderer=new T.WebGLRenderer({canvas:el('world'),antialias:true,powerPreference:'high-performance'});
+renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.5));renderer.setSize(innerWidth,innerHeight);
+renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;
+renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1.3;
+const cam=new T.PerspectiveCamera(65,innerWidth/innerHeight,.1,800),clock=new T.Clock();
+const amb=new T.HemisphereLight(0xe2f6ff,0x72906b,2.1);scene.add(amb);
+const sun=new T.DirectionalLight(0xffe9c9,2.65);sun.position.set(-75,140,90);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);sun.shadow.camera.left=-105;sun.shadow.camera.right=105;sun.shadow.camera.top=105;sun.shadow.camera.bottom=-105;sun.shadow.camera.far=350;scene.add(sun);
+const mat=(c,roughness=.8)=>new T.MeshStandardMaterial({color:c,roughness});
+const m={grass:mat(0x66a46c),road:mat(0x3c4856),side:mat(0xa3adb3),stripe:mat(0xe5dcad),glass:mat(0x80c1d9,.25),dark:mat(0x243442),tree:mat(0x52895d),leaf2:mat(0x75a96b),wood:mat(0x73543c),roof:mat(0x445d65),trim:mat(0xe7e1d1),yellow:new T.MeshBasicMaterial({color:0xc4ff63}),white:mat(0xf5eee3)};
+const colliders=[],homes=[],businesses=[],trees=[],traffic=[];
+function cube(parent,x,y,z,w,h,d,material,shadow=true){const o=new T.Mesh(new T.BoxGeometry(w,h,d),material);o.position.set(x,y,z);o.castShadow=shadow;o.receiveShadow=true;parent.add(o);return o}
+function prism(parent,x,y,z,r,h,material,sides=6){const o=new T.Mesh(new T.ConeGeometry(r,h,sides),material);o.position.set(x,y,z);o.castShadow=true;parent.add(o);return o}
+let rng=2941;function random(){rng=(1664525*rng+1013904223)>>>0;return rng/4294967296}function rr(a,b){return a+(b-a)*random()}
+function addCollider(x,z,w,d){colliders.push({x1:x-w/2-.3,x2:x+w/2+.3,z1:z-d/2-.3,z2:z+d/2+.3})}
+cube(scene,0,-.12,0,420,.2,420,m.grass,false);
+for(let k=-3;k<=3;k++){
+ cube(scene,k*60,0,0,14,.13,420,m.road,false);cube(scene,0,.01,k*60,420,.13,14,m.road,false);
+ for(let v=-195;v<=195;v+=9){if(Math.abs((v+180)%60)<10)continue;
+ cube(scene,k*60,.092,v,.17,.016,3.3,m.stripe,false);cube(scene,v,.093,k*60,3.3,.016,.17,m.stripe,false)}
+}
+const palettes=[0xf9d28f,0xcbeaf0,0xe7b7aa,0xc5d4b9,0xcdbfe4,0xe9e9d5,0xc5cfdd].map(mat);
+function plant(x,z,s=1){cube(scene,x,1.65*s,z,.6*s,3.3*s,.6*s,m.wood);const top=prism(scene,x,5*s,z,2.4*s,6*s,random()<.5?m.tree:m.leaf2,7);top.castShadow=false}
+function streetLight(x,z){cube(scene,x,4,z,.2,8,.2,m.dark,false);cube(scene,x+1,8,z,2,.22,.22,m.dark,false);cube(scene,x+2,7.82,z,.8,.15,.7,m.white,false)}
+function windows(x,y,z,ww,levels,front=1){for(let a=0;a<levels;a++)for(let b=0;b<3;b++)cube(scene,x+(b-1)*(ww/3.6),y+3+a*3.7,z+front*.16,1.65,1.65,.18,m.glass,false)}
+function home(x,z,id){
+ const color=palettes[Math.floor(random()*palettes.length)],height=rr(8,11);
+ cube(scene,x,.15,z+2,48,.27,45,m.side,false);
+ cube(scene,x,height/2+.3,z-7,20,height,20,color);addCollider(x,z-7,20,20);
+ cube(scene,x,height+.4,z-7,22,.3,22,m.roof);
+ prism(scene,x,height+4.1,z-7,15.6,7.4,m.roof,4).rotation.y=Math.PI/4;
+ cube(scene,x,.95,z+3,3.6,1.9,.2,m.wood,false);
+ for(const dx of [-6,6])for(const zz of [-1,-13])cube(scene,x+dx,5,z+zz,3.1,3.1,.2,m.glass,false);
+ for(let t=0;t<2;t++)plant(x+(t?18:-18),z+rr(4,13),rr(.55,.85));
+ const pos=new T.Vector3(x,0,z+11),sign=cube(scene,x-9,1.4,z+11,.3,2.5,.3,m.dark,false);
+ cube(scene,x-9,2.65,z+11,3,.9,.26,m.yellow,false);
+ homes.push({id,x,z,entry:pos});
+}
+function business(x,z,name,kind,color){
+ cube(scene,x,.13,z+2,49,.22,46,m.side,false);
+ const mm=mat(color),height=kind==='hospital'?27:kind==='school'?20:16;
+ cube(scene,x,height/2+.2,z-7,36,height,23,mm);addCollider(x,z-7,36,23);
+ cube(scene,x,height+.4,z-7,37,.5,24,m.dark);
+ cube(scene,x,2.9,z+4.65,7,5.5,.22,m.glass,false);
+ for(let y=7;y<height-2;y+=4.5)for(const dx of [-13,-8,0,8,13])cube(scene,x+dx,y,z+4.75,2.5,2.3,.22,m.glass,false);
+ cube(scene,x,height-1,z+5.1,17,2.0,.3,m.trim,false);
+ businesses.push({name,kind,x,z,entry:new T.Vector3(x,0,z+13)});
+}
+const plots=[
+['park','home','school','home','home','park'],
+['home','home','police','home','hospital','home'],
+['home','cafe','park','home','home','home'],
+['home','home','shop','park','home','home'],
+['home','home','home','home','garage','home'],
+['park','home','home','home','home','park']];
+const shopInfo={school:['Szkoła','school',0xe4c47a],police:['Komisariat','police',0x7a9ec2],hospital:['Szpital','hospital',0xe2e7ee],cafe:['Kawiarnia','cafe',0xd9a582],shop:['Sklep','shop',0x91b2bf],garage:['Salon aut','garage',0x6c9c9c]};
+let homeId=0;
+for(let iz=0;iz<6;iz++)for(let ix=0;ix<6;ix++){
+ const x=-150+ix*60,z=-150+iz*60;
+ const type=plots[iz][ix];
+ if(type==='home')home(x,z,++homeId);
+ else if(type==='park'){cube(scene,x,.13,z,47,.22,47,mat(0x8bb97b),false);for(let q=0;q<9;q++){const a=q/9*Math.PI*2;plant(x+Math.cos(a)*16,z+Math.sin(a)*16,rr(.65,1))}cube(scene,x,.48,z,7,.7,7,mat(0xcbd8d4),false)}
+ else{const data=shopInfo[type];business(x,z,...data)}
+}
+for(let k=-3;k<=3;k++)for(let j=-3;j<=3;j++)if((k+j)%2===0)streetLight(k*60+10,j*60+10);
+const indoor=new T.Group();scene.add(indoor);indoor.position.set(0,0,620);
+const floor=mat(0xbab5aa),walls=mat(0xf0e7d8),couch=mat(0x5c8a9d),rug=mat(0x9cbbc0);
+cube(indoor,0,-.1,0,26,.25,26,floor);
+cube(indoor,-13,5,0,.4,10,26,walls);cube(indoor,13,5,0,.4,10,26,walls);cube(indoor,0,5,-13,26,10,.4,walls);cube(indoor,0,5,13,26,10,.4,walls);
+cube(indoor,0,.08,-2,12,.11,9,rug,false);cube(indoor,0,1.1,-6,9,1.4,3.6,couch);
+cube(indoor,0,1.7,-7.4,9,1.5,.55,couch);cube(indoor,0,.6,1,4.3,1.1,2.4,m.wood);
+cube(indoor,-8,2,-8,3,4,3,m.wood);cube(indoor,9,2.2,-9,3,4.2,3,m.trim);
+cube(indoor,0,3,12.6,3,6,.28,m.wood,false);
+const indoorLight=new T.PointLight(0xffedcf,100,40);indoorLight.position.set(0,7,0);indoor.add(indoorLight);
+const clothes=[0x8bdeff,0xf9a7af,0xa9ff86,0xdfbbff,0xffcd7b,0xffffff,0x454d6d];
+const skin=mat(0xf0c39b),hair=mat(0x342a29),pants=mat(0x293b52),shoes=mat(0x202b37);
+const avatar=new T.Group(),torso=mat(clothes[0]),head=new T.Group();scene.add(avatar);
+cube(avatar,0,1.75,0,1.45,1.8,.75,torso);cube(avatar,0,.55,-.04,1.25,1.0,.68,pants);
+cube(avatar,-.39,.15,-.04,.46,.55,.57,shoes);cube(avatar,.39,.15,-.04,.46,.55,.57,shoes);
+const leftArm=cube(avatar,-1,1.7,0,.45,1.6,.48,torso);const rightArm=cube(avatar,1,1.7,0,.45,1.6,.48,torso);
+cube(avatar,0,3,.0,1.13,1.1,1.03,skin);cube(avatar,0,3.54,-.08,1.2,.3,1.1,hair);
+for(const x of [-.27,.27])cube(avatar,x,3.13,-.53,.15,.12,.07,m.dark,false);
+const legs=[...avatar.children].filter(a=>a.position.y<.23&&a!==leftArm&&a!==rightArm);
+avatar.castShadow=true;
+function carModel(color){
+ const grp=new T.Group(),coat=mat(color,.4),tyre=mat(0x141e2a),glass=mat(0x486a7a,.2),light=new T.MeshBasicMaterial({color:0xfff5cf}),tail=new T.MeshBasicMaterial({color:0xfa5155});
+ cube(grp,0,.95,0,3.5,.85,6.5,coat);cube(grp,0,1.84,.35,3.05,1.15,3.2,coat);
+ cube(grp,0,2.03,-.35,3.07,.67,2.2,glass);
+ for(const x of [-1.91,1.91])for(const z of [-1.9,2.05]){
+ const wheel=new T.Mesh(new T.CylinderGeometry(.65,.65,.39,12),tyre);wheel.rotation.z=Math.PI/2;wheel.position.set(x,.65,z);wheel.castShadow=true;grp.add(wheel)}
+ for(const x of [-1.17,1.17]){cube(grp,x,1.11,-3.28,.55,.27,.12,light,false);cube(grp,x,1.1,3.3,.55,.25,.12,tail,false)}
+ return{root:grp,coat};
+}
+let save={cash:2500,job:'Mieszkaniec',color:0,house:0,delivery:0};
+try{const data=JSON.parse(localStorage.getItem('nexo-life-rp-alpha2')||'{}');if(data&&typeof data==='object')Object.assign(save,{cash:Number(data.cash)||2500,job:typeof data.job==='string'?data.job:'Mieszkaniec',color:Math.max(0,Number(data.color)||0)%clothes.length,house:Number(data.house)||0,delivery:Math.min(4,Math.max(0,Number(data.delivery)||0))})}catch{}
+torso.color.setHex(clothes[save.color]);
+function persist(){try{localStorage.setItem('nexo-life-rp-alpha2',JSON.stringify(save))}catch{}}
+const car=carModel(0xa6e7fc);car.root.position.set(6,0,-12);scene.add(car.root);
+for(let i=0;i<15;i++){const model=carModel([0xeecc70,0xec998a,0xb3d2d6,0xbca5f0,0xa5d7a9][Math.floor(rr(0,5))]);model.root.scale.setScalar(.78);scene.add(model.root);traffic.push({model,vertical:random()>.5,lane:Math.floor(rr(-3,4))*60+(random()>.5?3.2:-3.2),t:rr(-185,185),dir:random()>.5?1:-1,speed:rr(7,14)})}
+const npc=[];
+for(let i=0;i<13;i++){const g=new T.Group();cube(g,0,1.45,0,.85,1.3,.7,mat(clothes[i%clothes.length]),false);cube(g,0,2.36,0,.74,.8,.72,skin,false);cube(g,0,.45,0,.7,.75,.5,pants,false);scene.add(g);const px=[-30,90,30,-90][i%4],pz=[-30,30,-90,90][Math.floor(i/4)%4];npc.push({g,x:px,z:pz,seed:rr(0,20)})}
+let playerPos=new T.Vector3(8,0,19),charYaw=0,carYaw=0,carSpeed=0,driving=false,inside=false,night=false,started=false,paused=true,highView=false,activePage=null,exitPosition=null,payTick=0,stepTime=0,uiTick=0;
+function showToast(txt){const e=el('toast');e.textContent=txt;e.classList.add('on');clearTimeout(showToast.id);showToast.id=setTimeout(()=>e.classList.remove('on'),2400)}
+const key=new Set(),mapped={w:'forward',arrowup:'forward',s:'back',arrowdown:'back',a:'left',arrowleft:'left',d:'right',arrowright:'right',shift:'run'};
+document.addEventListener('keydown',e=>{const k=e.key.toLowerCase();if(mapped[k]){key.add(mapped[k]);e.preventDefault()}if(e.repeat)return;if(k==='e')interact();if(k==='f')togglePanel('phone');if(k==='c'){highView=!highView;showToast(highView?'Kamera z góry':'Kamera zza pleców')}if(k==='p'||k==='escape')togglePause()});
+document.addEventListener('keyup',e=>{const k=e.key.toLowerCase();if(mapped[k])key.delete(mapped[k])});W.addEventListener('blur',()=>key.clear());
+document.querySelectorAll('[data-control]').forEach(b=>{const action=b.dataset.control;b.addEventListener('pointerdown',e=>{e.preventDefault();b.setPointerCapture(e.pointerId);key.add(action);b.classList.add('down')});for(const ev of ['pointerup','pointercancel','lostpointercapture'])b.addEventListener(ev,()=>{key.delete(action);b.classList.remove('down')})});
+document.querySelectorAll('[data-shortcut]').forEach(b=>b.addEventListener('click',()=>{const action=b.dataset.shortcut;if(action==='interact')interact();if(action==='phone')togglePanel('phone');if(action==='camera'){highView=!highView;showToast('Zmieniono kamerę')}}));
+function togglePause(){if(!started)return;paused=!paused;el('pause').textContent=paused?'▶':'Ⅱ';showToast(paused?'Pauza':'Wracamy do miasta!')}
+el('pause').onclick=togglePause;
+el('startBtn').onclick=()=>{started=true;paused=false;el('start').classList.add('hidden');showToast('Witaj w NEXO LIFE RP!')}
+el('day').onclick=()=>{night=!night;scene.background.set(night?0x152b48:0x93ccf5);scene.fog.color.set(night?0x152b48:0x93ccf5);amb.intensity=night?.7:2.1;sun.intensity=night?.4:2.65;renderer.toneMappingExposure=night?1.04:1.3;el('day').textContent=night?'☾ NOC':'☀ DZIEŃ';showToast(night?'Zapadła noc':'Nastał dzień')};
+function togglePanel(p){if(activePage===p){activePage=null;el('panel').classList.remove('visible')}else{activePage=p;renderPanel()}document.querySelectorAll('[data-page]').forEach(e=>e.classList.toggle('active',e.dataset.page===activePage))}
+document.querySelectorAll('[data-page]').forEach(e=>e.onclick=()=>togglePanel(e.dataset.page));
+function pageText(){if(activePage==='phone')return {title:'📱 NEXO PHONE',lead:'Twoje miasto w kieszeni. Wybierz, co chcesz robić.',body:'<div class="option"><div><b>👤 Mój profil</b><small>Wybierz wygląd postaci</small></div><button data-open="avatar">OTWÓRZ</button></div><div class="option"><div><b>🚘 Garaż</b><small>Przywołaj samochód</small></div><button data-open="cars">OTWÓRZ</button></div><div class="option"><div><b>🏠 Nieruchomości</b><small>Zajmij dom i wejdź do środka</small></div><button data-open="homes">OTWÓRZ</button></div><div class="option"><div><b>💼 Mój zawód</b><small>Zmień pracę i otrzymuj wypłaty</small></div><button data-open="jobs">OTWÓRZ</button></div>'};
+if(activePage==='avatar')return{title:'👤 TWOJA POSTAĆ',lead:'Zmieniaj kolory ubrań. Wszystko rysuje się automatycznie za pomocą kodu.',body:'<div class="eyebrow">KOLOR STROJU</div><div class="swatches">'+clothes.map((c,i)=>'<button class="swatch '+(save.color===i?'selected':'')+'" style="background:#'+c.toString(16).padStart(6,'0')+'" data-color="'+i+'" aria-label="Kolor '+(i+1)+'"></button>').join('')+'</div><p class="panel-lead">Zmiana zapisuje się automatycznie w tej przeglądarce.</p>'};
+if(activePage==='cars')return{title:'🚘 GARAŻ',lead:'Przywołaj samochód na pobliską ulicę. Wciśnij E obok auta, żeby do niego wsiąść.',body:'<div class="option"><div><b>🚙 City Cruiser</b><small>Samochód miejski · darmowy</small></div><button data-spawn="0">PRZYWOŁAJ</button></div><div class="option"><div><b>🎨 Lakier samochodu</b><small>Wybierz kolejny dostępny kolor</small></div><button data-paint="1">ZMIANA</button></div>'};
+if(activePage==='homes')return{title:'🏠 DOMY I MIESZKANIA',lead:'Podejdź do dowolnego domu oznaczonego żółtą tabliczką i naciśnij E, aby go zająć.',body:'<div class="option"><div><b>🏡 Twój dom</b><small>'+(save.house?'Dom numer '+save.house:'Nie wybrano domu')+'</small></div><button data-home="1" '+(save.house?'':'disabled')+'>NAWIGUJ</button></div><p class="panel-lead">Możesz zmienić dom w dowolnym momencie. W środku jest salon z meblami generowanymi kodem.</p>'};
+if(activePage==='jobs')return{title:'💼 ZNAJDŹ PRACĘ',lead:'Wybierz zawód i zarabiaj regularnie podczas rozgrywki. Dostawy dają dodatkowe premie.',body:['Mieszkaniec','Kurier','Policjant','Lekarz','Strażak','Sprzedawca'].map(name=>'<div class="option"><div><b>'+name+'</b><small>'+(name==='Mieszkaniec'?'Odkrywaj miasto':name==='Kurier'?'Dostawy + 250 $ za punkt':'Wypłata co 60 sekund')+'</small></div><button data-job="'+name+'" '+(save.job===name?'disabled':'')+'>'+(save.job===name?'WYBRANO':'WYBIERZ')+'</button></div>').join('')};
+return{title:'NEXO LIFE RP',lead:'',body:''}
+}
+function renderPanel(){const data=pageText(),p=el('panel');p.innerHTML='<div class="panel-head"><h2>'+data.title+'</h2><button data-close="1">✕</button></div><p class="panel-lead">'+data.lead+'</p>'+data.body;p.classList.add('visible')}
+el('panel').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
+if(b.dataset.close)togglePanel(activePage);
+if(b.dataset.open){activePage=b.dataset.open;renderPanel();document.querySelectorAll('[data-page]').forEach(e=>e.classList.toggle('active',e.dataset.page===activePage))}
+if(b.dataset.color!==undefined){save.color=Number(b.dataset.color);torso.color.setHex(clothes[save.color]);persist();renderPanel();showToast('Zmieniono styl postaci!')}
+if(b.dataset.job){save.job=b.dataset.job;persist();renderPanel();updateHud();showToast('Nowa praca: '+save.job)}
+if(b.dataset.paint){car.coat.color.setHex([0xa6e7fc,0xf49aab,0xb4ff91,0xe0c2ff,0xf4db90][Math.floor(rr(0,5))]);showToast('Zmieniono lakier')}
+if(b.dataset.spawn){if(inside){showToast('Wyjdź z domu, żeby przywołać auto');return}
+const roadX=Math.round(playerPos.x/60)*60,roadZ=Math.round(playerPos.z/60)*60;
+if(Math.abs(roadX-playerPos.x)<Math.abs(roadZ-playerPos.z)){car.root.position.set(roadX+4,0,playerPos.z+6);carYaw=0}
+else{car.root.position.set(playerPos.x+6,0,roadZ+4);carYaw=Math.PI/2}
+driving=false;carSpeed=0;car.root.rotation.y=carYaw;avatar.visible=true;showToast('Auto jest na najbliższej ulicy!')}
+if(b.dataset.home){if(!save.house)return;const h=homes.find(h=>h.id===save.house);if(h){if(driving){driving=false;avatar.visible=true;playerPos.set(car.root.position.x+4,0,car.root.position.z+4)}if(inside){inside=false}playerPos.copy(h.entry);showToast('Jesteś przy swoim domu!');togglePanel(activePage)}}
+});
+function updateHud(){el('cash').textContent='$ '+save.cash.toLocaleString('pl-PL');el('role').textContent=save.job;el('mission').textContent=save.delivery+'/5';el('taskProgress').style.width=(save.delivery/5*100)+'%'}
+updateHud();
+let points=[[0,-60],[120,0],[0,120],[-120,0],[180,120]],destinationIndex=0;
+const marker=new T.Group();scene.add(marker);
+const torus=new T.Mesh(new T.TorusGeometry(2.8,.25,9,36),m.yellow);torus.position.y=3.3;marker.add(torus);
+const beamMat=new T.MeshBasicMaterial({color:0xcaff60,transparent:true,opacity:.18,side:T.DoubleSide,depthWrite:false});
+const beam=new T.Mesh(new T.CylinderGeometry(2.5,2.5,6.5,18,1,true),beamMat);beam.position.y=3.35;marker.add(beam);
+function setMarker(){const p=points[save.delivery%points.length];marker.position.set(p[0],0,p[1])}setMarker();
+function nearObj(){if(inside){if(playerPos.distanceTo(new T.Vector3(0,0,630))<8)return {kind:'exit',label:'Wyjdź z domu'};return null}
+if(driving)return{kind:'leave',label:'Wysiądź z samochodu'};
+const distance=playerPos.distanceTo(car.root.position);if(distance<7)return{kind:'enter',label:'Wsiądź do samochodu'};
+let chosen=null,best=7;
+for(const h of homes){const d=playerPos.distanceTo(h.entry);if(d<best){best=d;chosen={kind:'home',value:h,label:save.house===h.id?'Wejdź do swojego domu':'Zajmij dom nr '+h.id}}}
+for(const b of businesses){const d=playerPos.distanceTo(b.entry);if(d<best){best=d;chosen={kind:'business',value:b,label:'Odwiedź: '+b.name}}}
+return chosen;
+}
+function interact(){if(!started||paused)return;const obj=nearObj();if(!obj){showToast('Podejdź do samochodu, domu lub budynku');return}
+if(obj.kind==='leave'){driving=false;avatar.visible=true;playerPos.set(car.root.position.x+4,0,car.root.position.z+3);carSpeed=0;showToast('Wysiadłeś z samochodu')}
+if(obj.kind==='enter'){driving=true;avatar.visible=false;carYaw=car.root.rotation.y;carSpeed=0;showToast('Witaj za kierownicą!')}
+if(obj.kind==='home'){const h=obj.value;if(save.house!==h.id){save.house=h.id;persist();showToast('Zajęto dom numer '+h.id)}else showToast('Witaj w swoim domu');exitPosition=h.entry.clone();inside=true;driving=false;avatar.visible=true;playerPos.set(0,0,629);charYaw=Math.PI}
+if(obj.kind==='exit'){inside=false;playerPos.copy(exitPosition||new T.Vector3(8,0,19));playerPos.z+=3;charYaw=Math.PI;showToast('Wróciłeś do miasta')}
+if(obj.kind==='business'){const b=obj.value;if(b.kind==='hospital')save.job='Lekarz';if(b.kind==='police')save.job='Policjant';if(b.kind==='cafe'||b.kind==='shop')save.job='Sprzedawca';if(b.kind==='garage'){togglePanel('cars');showToast('Witamy w salonie!');return}if(b.kind==='school'){showToast('Witaj w szkole!');return}persist();updateHud();showToast('Odwiedzono: '+b.name+' · zawód: '+save.job)}
+}
+el('interact').onclick=interact;
+function blocked(x,z){if(Math.abs(x)>198||Math.abs(z)>198)return true;for(const b of colliders)if(x>b.x1-1.1&&x<b.x2+1.1&&z>b.z1-1.1&&z<b.z2+1.1)return true;return false}
+function moveCharacter(dt){const f=(key.has('forward')?1:0)-(key.has('back')?1:0),turn=(key.has('left')?1:0)-(key.has('right')?1:0);charYaw+=turn*dt*2.2;let speed=(key.has('run')?12:7)*f;
+const nx=playerPos.x-Math.sin(charYaw)*speed*dt,nz=playerPos.z-Math.cos(charYaw)*speed*dt;
+if(inside){if(Math.abs(nx)<11&&Math.abs(nz-620)<11){playerPos.x=nx;playerPos.z=nz}}
+else if(!blocked(nx,nz)){playerPos.x=nx;playerPos.z=nz}
+avatar.position.copy(playerPos);avatar.rotation.y=charYaw;
+if(Math.abs(speed)>0){stepTime+=dt*10;leftArm.rotation.x=Math.sin(stepTime)*.25;rightArm.rotation.x=-Math.sin(stepTime)*.25;for(let i=0;i<legs.length;i++)legs[i].rotation.x=Math.sin(stepTime+i*Math.PI)*.11}
+else{leftArm.rotation.x*=.8;rightArm.rotation.x*=.8;for(const l of legs)l.rotation.x*=.8}
+}
+function moveCar(dt){let gas=(key.has('forward')?1:0),reverse=key.has('back')?1:0;
+if(gas)carSpeed+=24*dt;else if(reverse)carSpeed-=30*dt;else carSpeed*=Math.exp(-1.6*dt);
+carSpeed=Math.max(-12,Math.min(37,carSpeed));if(Math.abs(carSpeed)<.08)carSpeed=0;
+const steering=(key.has('left')?1:0)-(key.has('right')?1:0);
+if(Math.abs(carSpeed)>.3)carYaw+=steering*dt*(.8+Math.min(Math.abs(carSpeed),24)*.017)*Math.sign(carSpeed);
+const nx=car.root.position.x-Math.sin(carYaw)*carSpeed*dt,nz=car.root.position.z-Math.cos(carYaw)*carSpeed*dt;
+if(blocked(nx,nz)){carSpeed*=-.18}else{car.root.position.x=nx;car.root.position.z=nz}
+car.root.rotation.y=carYaw;
+playerPos.set(car.root.position.x,0,car.root.position.z);charYaw=carYaw;
+}
+function updateTraffic(dt){for(const t of traffic){t.t+=dt*t.speed*t.dir;if(t.t>192)t.t=-192;if(t.t< -192)t.t=192;
+const x=t.vertical?t.lane:t.t,z=t.vertical?t.t:t.lane;t.model.root.position.set(x,0,z);t.model.root.rotation.y=t.vertical?(t.dir===1?Math.PI:0):(t.dir===1?-Math.PI/2:Math.PI/2);
+if(driving&&Math.hypot(x-car.root.position.x,z-car.root.position.z)<4){carSpeed*=-.2}
+}}
+function progress(dt){if(inside)return;const t=driving?car.root.position:playerPos;if(Math.hypot(t.x-marker.position.x,t.z-marker.position.z)<5.4){save.cash+=250;save.delivery++;if(save.delivery>=5){save.cash+=650;save.delivery=0;showToast('Ukończono trasę! +$900')}else showToast('Dostawa zakończona! +$250');persist();setMarker();updateHud()}}
+function cameraUpdate(dt){const target=driving?car.root.position:playerPos,rot=driving?carYaw:charYaw;
+const dist=highView?31:driving?19:11,height=highView?32:driving?11:7;
+const p=new T.Vector3(target.x+Math.sin(rot)*dist,height+(inside?620:0),target.z+Math.cos(rot)*dist);
+if(inside){p.x=target.x+Math.sin(rot)*9;p.y=5;p.z=target.z+Math.cos(rot)*9}
+cam.position.lerp(p,1-Math.exp(-5*dt));cam.lookAt(target.x,driving?1.7:2,target.z);
+sun.position.set(target.x-75,140,target.z+90);sun.target.position.set(target.x,0,target.z);sun.target.updateMatrixWorld()
+}
+const mc=el('map'),ctx=mc.getContext('2d');
+function minimap(){
+const s=316,scale=.64;ctx.fillStyle='#203f43';ctx.fillRect(0,0,s,s);
+if(inside){ctx.fillStyle='#a4b4ac';ctx.fillRect(60,60,196,196);ctx.fillStyle='#405564';ctx.fillRect(78,78,160,160);ctx.fillStyle='#aeff79';ctx.beginPath();ctx.arc(s/2,s/2,8,0,Math.PI*2);ctx.fill();return}
+ctx.save();ctx.translate(s/2,s/2);ctx.rotate(driving?carYaw:charYaw);ctx.translate(-playerPos.x*scale,-playerPos.z*scale);
+ctx.fillStyle='#566b73';for(let k=-3;k<=3;k++){ctx.fillRect(k*60*scale-5,-205*scale,10,410*scale);ctx.fillRect(-205*scale,k*60*scale-5,410*scale,10)}
+ctx.fillStyle='#8b9fa2';for(const b of colliders)ctx.fillRect(b.x1*scale,b.z1*scale,(b.x2-b.x1)*scale,(b.z2-b.z1)*scale);
+ctx.fillStyle='#d1ff83';ctx.beginPath();ctx.arc(marker.position.x*scale,marker.position.z*scale,6,0,Math.PI*2);ctx.fill();
+ctx.fillStyle='#ffdaa0';for(const h of homes)if(h.id===save.house){ctx.beginPath();ctx.arc(h.x*scale,h.z*scale,5,0,Math.PI*2);ctx.fill()}ctx.restore();
+ctx.fillStyle='#baff6b';ctx.beginPath();ctx.moveTo(s/2,s/2-10);ctx.lineTo(s/2-7,s/2+9);ctx.lineTo(s/2+7,s/2+9);ctx.closePath();ctx.fill()
+}
+function renderHUD(){const a=nearObj();el('interact').style.display=a&&!paused?'block':'none';el('interactText').textContent=a?a.label:'';
+el('mode').textContent=inside?'🏠 W DOMU':driving?'🚘 PROWADZENIE AUTA':'🚶 SPACER PO MIEŚCIE';el('speed').style.display=driving?'block':'none';
+el('speed').firstChild.textContent=String(Math.round(Math.abs(carSpeed)*3.2))+' ';
+minimap()}
+W.addEventListener('resize',()=>{cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
+cam.position.set(8,8,35);cam.lookAt(8,1,19);
+function loop(){requestAnimationFrame(loop);let dt=Math.min(.045,clock.getDelta());if(!paused){if(driving)moveCar(dt);else moveCharacter(dt);updateTraffic(dt);progress(dt);payTick+=dt;if(payTick>60){payTick-=60;if(save.job!=='Mieszkaniec'){save.cash+=500;persist();updateHud();showToast('Wypłata za pracę: +$500')}}marker.rotation.y+=dt*.65;torus.rotation.z+=dt*.7;
+for(const n of npc){n.g.position.set(n.x+Math.cos(clock.elapsedTime*.45+n.seed)*3,0,n.z+Math.sin(clock.elapsedTime*.45+n.seed)*3)}
+}
+cameraUpdate(dt);renderer.render(scene,cam);uiTick+=dt;if(uiTick>.17){renderHUD();uiTick=0}}
+loop();
+</script>
+</body></html>
