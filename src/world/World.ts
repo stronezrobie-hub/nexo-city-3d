@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { box, material, sign, sphere } from './geometry';
+import { box, material, sign } from './geometry';
 import { House } from './House';
 import type { CollisionRect, GameInteraction } from '../core/types';
 
