@@ -44,6 +44,9 @@ button{font:inherit;cursor:pointer;color:inherit}#world{width:100%;height:100%;d
 @media(max-width:680px){.head{top:11px;left:10px;right:10px}.logo i{width:35px;height:35px;font-size:23px}.logo b{font-size:14px}.logo small{font-size:7px;letter-spacing:1px}.cash{padding:7px 9px;font-size:12px}.cash small{font-size:8px}.smallbtn{font-size:11px;min-height:35px;padding:8px}.sidebar{left:9px;top:58px;flex-direction:row;gap:5px;max-width:calc(100vw - 15px);overflow:auto}.menu-btn{width:auto;min-width:44px;padding:7px 8px;font-size:0;gap:0;justify-content:center}.menu-btn .ico{font-size:17px;background:transparent}.task{right:9px;top:109px;width:165px;padding:10px}.task h3{font-size:12px}.task p{font-size:10px}.taskfoot{font-size:9px}#panel{left:9px;top:109px;width:min(320px,calc(100vw - 18px));max-height:calc(100dvh - 235px);z-index:9}.bottom{left:9px;bottom:9px}.minihud{min-width:0;padding:8px 10px;font-size:9px}.speed{font-size:27px}.map-box{right:9px;bottom:9px;width:116px;padding:5px}#map{width:104px;height:104px}.map-title{font-size:8px}.interact{bottom:135px;width:min(340px,92vw);max-width:92vw;padding:8px 11px;font-size:11px}.status{display:none}.welcome{padding:28px 17px}.welcome h1{letter-spacing:-2px}}
 @media(pointer:coarse){.touch{position:absolute;display:flex;bottom:140px;left:10px;right:10px;justify-content:space-between;align-items:end}.actionpad{flex-wrap:wrap;max-width:155px;justify-content:flex-end}.interact{bottom:205px}.touch-btn{width:52px;height:56px}.map-box{bottom:11px}}
 @media(max-height:550px){.sidebar{top:60px}.task{top:60px}.touch{bottom:65px}.interact{bottom:132px}.bottom{bottom:9px}.map-box{bottom:9px}}
+.rp-field{width:100%;background:#071d2e;border:1px solid #ffffff35;border-radius:10px;padding:11px;color:#fff;font:inherit;outline:none}.rp-field:focus{border-color:var(--mint)}
+.panel-caption{font-size:10px;color:var(--mint);font-weight:900;letter-spacing:1px;margin:12px 0 7px}
+#panel .option{min-height:52px}#panel .option button{min-width:68px}
 </style>
 </head>
 <body>
@@ -56,6 +59,9 @@ button{font:inherit;cursor:pointer;color:inherit}#world{width:100%;height:100%;d
 <button class="menu-btn" data-page="cars"><span class="ico">🚘</span>Pojazdy</button>
 <button class="menu-btn" data-page="homes"><span class="ico">🏠</span>Domy</button>
 <button class="menu-btn" data-page="jobs"><span class="ico">💼</span>Praca</button>
+<button class="menu-btn" data-page="rp"><span class="ico">🎭</span>Roleplay</button>
+<button class="menu-btn" data-page="bag"><span class="ico">🎒</span>Plecak</button>
+<button class="menu-btn" data-page="weather"><span class="ico">🌦</span>Pogoda</button>
 </nav>
 <section class="task glass"><span class="eyebrow">● TWOJA PRZYGODA</span><h3 id="taskTitle">Kurier miejski</h3><p id="taskDesc">Odwiedzaj świecące punkty na mapie, by zarabiać pieniądze.</p><div class="progress"><i id="taskProgress"></i></div><div class="taskfoot"><span id="role">Mieszkaniec</span><span id="mission">0/5</span></div></section>
 <section id="panel" class="glass" aria-label="Panel gry"></section>
@@ -249,15 +255,97 @@ function carModel(color){
  for(const x of [-1.17,1.17]){cube(grp,x,1.11,-3.28,.55,.27,.12,light,false);cube(grp,x,1.1,3.3,.55,.25,.12,tail,false)}
  return{root:grp,coat};
 }
-let save={cash:2500,job:'Mieszkaniec',color:0,house:0,delivery:0};
-try{const data=JSON.parse(localStorage.getItem('nexo-life-rp-alpha2')||'{}');if(data&&typeof data==='object')Object.assign(save,{cash:Number(data.cash)||2500,job:typeof data.job==='string'?data.job:'Mieszkaniec',color:Math.max(0,Number(data.color)||0)%clothes.length,house:Number(data.house)||0,delivery:Math.min(4,Math.max(0,Number(data.delivery)||0))})}catch{}
-torso.color.setHex(clothes[save.color]);
+let save={cash:2500,job:'Mieszkaniec',color:0,house:0,delivery:0,rpName:'Gracz',bio:'Nowy mieszkaniec NEXO CITY',skin:0,hair:0,vehicle:0,prop:'none',pet:'none',locked:false,homeColor:0,weather:'clear'};
+try{const data=JSON.parse(localStorage.getItem('nexo-life-rp-alpha2')||'{}');if(data&&typeof data==='object')Object.assign(save,{cash:Number(data.cash)||2500,job:typeof data.job==='string'?data.job:'Mieszkaniec',color:Math.max(0,Number(data.color)||0)%clothes.length,house:Number(data.house)||0,delivery:Math.min(4,Math.max(0,Number(data.delivery)||0)),rpName:typeof data.rpName==='string'?data.rpName.slice(0,24):'Gracz',bio:typeof data.bio==='string'?data.bio.slice(0,80):'Nowy mieszkaniec NEXO CITY',skin:Math.max(0,Number(data.skin)||0)%5,hair:Math.max(0,Number(data.hair)||0)%5,vehicle:Math.max(0,Number(data.vehicle)||0)%4,prop:typeof data.prop==='string'?data.prop:'none',pet:typeof data.pet==='string'?data.pet:'none',locked:!!data.locked,homeColor:Math.max(0,Number(data.homeColor)||0)%5,weather:['clear','rain','fog'].includes(data.weather)?data.weather:'clear'})}catch{}
+const skinColors=[0xf0c39b,0xf9d8bc,0xb98462,0x80543e,0xc7a68c],hairColors=[0x342a29,0xe5bd76,0x644734,0x1a2430,0xb5543d];
+torso.color.setHex(clothes[save.color]);skin.color.setHex(skinColors[save.skin]);hair.color.setHex(hairColors[save.hair]);
 function persist(){try{localStorage.setItem('nexo-life-rp-alpha2',JSON.stringify(save))}catch{}}
-const car=carModel(0xa6e7fc);car.root.position.set(6,0,-12);scene.add(car.root);
+let car=carModel(0xa6e7fc);car.root.position.set(6,0,-12);scene.add(car.root);
+const vehicleModels=[{name:'City Cruiser',speed:36,color:0xa6e7fc},{name:'Family SUV',speed:30,color:0xe0d6bd},{name:'Street Sport',speed:47,color:0xd95765},{name:'Police Unit',speed:42,color:0xe2e8ee}];
+function replaceVehicle(type){
+ const v=vehicleModels[type]||vehicleModels[0],old=car.root,oldPos=old.position.clone(),oldYaw=old.rotation.y;
+ scene.remove(old);old.traverse(obj=>{if(obj.isMesh){obj.geometry.dispose();if(Array.isArray(obj.material))obj.material.forEach(mat=>mat.dispose());else obj.material.dispose()}});
+ car=carModel(v.color);scene.add(car.root);car.root.position.copy(oldPos);car.root.rotation.y=oldYaw;
+ if(type===1){car.root.scale.set(1.08,1.24,1.08);cube(car.root,0,2.7,.4,2.8,.25,3,m.dark,false);for(const x of [-1.25,1.25])cube(car.root,x,2.98,.45,.22,.2,3.5,m.dark,false)}
+ if(type===2){car.root.scale.set(1.04,.86,1.08);cube(car.root,0,1.75,3.36,3.2,.22,.85,car.coat,false)}
+ if(type===3){cube(car.root,-.65,2.55,-.15,1.1,.35,.75,mat(0xd83142),false);cube(car.root,.65,2.55,-.15,1.1,.35,.75,mat(0x2c7fd6),false)}
+ save.vehicle=type;persist();
+}
+replaceVehicle(save.vehicle);
 for(let i=0;i<15;i++){const model=carModel([0xeecc70,0xec998a,0xb3d2d6,0xbca5f0,0xa5d7a9][Math.floor(rr(0,5))]);model.root.scale.setScalar(.78);scene.add(model.root);traffic.push({model,vertical:random()>.5,lane:Math.floor(rr(-3,4))*60+(random()>.5?3.2:-3.2),t:rr(-185,185),dir:random()>.5?1:-1,speed:rr(7,14)})}
 const npc=[];
 for(let i=0;i<13;i++){const g=new T.Group();cube(g,0,1.45,0,.85,1.3,.7,mat(clothes[i%clothes.length]),false);cube(g,0,2.36,0,.74,.8,.72,skin,false);cube(g,0,.45,0,.7,.75,.5,pants,false);scene.add(g);const px=[-30,90,30,-90][i%4],pz=[-30,30,-90,90][Math.floor(i/4)%4];npc.push({g,x:px,z:pz,seed:rr(0,20)})}
 let playerPos=new T.Vector3(8,0,19),charYaw=0,carYaw=0,carSpeed=0,driving=false,inside=false,night=false,started=false,paused=true,highView=false,activePage=null,exitPosition=null,payTick=0,stepTime=0,uiTick=0;
+const esc=text=>String(text).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+let emote='none',emoteClock=0,weather=save.weather;
+const propHolder=new T.Group();propHolder.position.set(0,-.75,-.15);rightArm.add(propHolder);
+const propMats={pink:mat(0xf59bbc),blue:mat(0x6fbddd),gold:mat(0xe3c86f)};
+function equipProp(name){
+ while(propHolder.children.length){const c=propHolder.children[0];propHolder.remove(c);c.traverse(o=>{if(o.geometry)o.geometry.dispose()})}
+ const handle=mat(0x3f4b56),plastic=mat(0x8d929c);
+ if(name==='flashlight'){
+  const body=new T.Mesh(new T.CylinderGeometry(.16,.20,.8,9),handle);body.rotation.x=Math.PI/2;propHolder.add(body);
+  cube(propHolder,0,0,-.46,.35,.35,.25,propMats.gold,false);
+  const light=new T.SpotLight(0xfff0c5,18,22,.38,.45,1);light.position.set(0,0,-.4);light.target.position.set(0,0,-4);propHolder.add(light,light.target);
+ }else if(name==='balloon'){
+  const string=new T.Mesh(new T.CylinderGeometry(.02,.02,3.5,6),plastic);string.position.y=1.8;propHolder.add(string);
+  const balloon=new T.Mesh(new T.SphereGeometry(.8,12,10),propMats.pink);balloon.scale.set(.9,1.2,.9);balloon.position.y=4;propHolder.add(balloon);
+ }else if(name==='coffee'){
+  const cup=new T.Mesh(new T.CylinderGeometry(.3,.24,.65,12),propMats.blue);propHolder.add(cup);cube(propHolder,0,.38,0,.6,.06,.6,m.white,false);
+ }else if(name==='phone'){
+  cube(propHolder,0,0,-.2,.45,.8,.11,m.dark,false);cube(propHolder,0,0,-.29,.38,.65,.05,propMats.blue,false);
+ }else if(name==='umbrella'){
+  const stick=new T.Mesh(new T.CylinderGeometry(.055,.055,3.6,6),handle);stick.position.y=1.6;propHolder.add(stick);
+  const top=new T.Mesh(new T.ConeGeometry(2.2,1,12),propMats.blue);top.position.y=3.8;propHolder.add(top);
+ }
+ save.prop=name;persist();
+}
+equipProp(save.prop);
+const petGroup=new T.Group();scene.add(petGroup);
+function buildPet(kind){
+ while(petGroup.children.length){const child=petGroup.children[0];petGroup.remove(child);child.traverse(o=>{if(o.geometry)o.geometry.dispose()})}
+ petGroup.visible=kind!=='none';if(kind==='none')return;
+ const coat=mat(kind==='dog'?0xa7774e:0xa5acba),dark=mat(0x303334);
+ cube(petGroup,0,.65,0,.8,.8,1.4,coat,false);cube(petGroup,0,1.2,-.68,.72,.72,.72,coat,false);
+ for(const x of [-.27,.27])for(const z of [-.48,.47])cube(petGroup,x,.18,z,.23,.4,.24,coat,false);
+ for(const x of [-.25,.25])cube(petGroup,x,1.32,-1.08,.1,.1,.11,dark,false);
+ cube(petGroup,0,1.13,-1.1,.14,.12,.1,dark,false);
+ cube(petGroup,0,1.05,1.04,.16,.18,.7,coat,false).rotation.x=-.45;
+}
+buildPet(save.pet);petGroup.position.set(8,0,23);
+function animateRoleplay(dt){
+ if(driving){avatar.visible=false;petGroup.visible=false;return}
+ avatar.visible=true;petGroup.visible=save.pet!=='none';
+ const to=playerPos.clone().add(new T.Vector3(Math.sin(charYaw)*2.8,0,Math.cos(charYaw)*2.8));
+ petGroup.position.lerp(to,Math.min(1,dt*3.3));petGroup.rotation.y=charYaw;
+ const walking=key.has('forward')||key.has('back')||key.has('left')||key.has('right');
+ if(emote!=='none'&&walking)emote='none';
+ if(emote==='wave'){emoteClock+=dt;rightArm.rotation.z=-2.2;rightArm.rotation.x=Math.sin(emoteClock*9)*.5}
+ if(emote==='dance'){emoteClock+=dt;avatar.rotation.z=Math.sin(emoteClock*8)*.18;leftArm.rotation.x=Math.sin(emoteClock*7);rightArm.rotation.x=-Math.sin(emoteClock*7)}
+ if(emote==='sit'){avatar.position.y=-.5;leftArm.rotation.x=-.25;rightArm.rotation.x=-.25}
+ if(emote==='none'){avatar.rotation.z*=.7;rightArm.rotation.z*=.65}
+ if(emote!=='sit')avatar.position.y=0;
+}
+const weatherPositions=new Float32Array(330*3);
+for(let i=0;i<330;i++){weatherPositions[i*3]=(Math.random()-.5)*100;weatherPositions[i*3+1]=Math.random()*44;weatherPositions[i*3+2]=(Math.random()-.5)*100}
+const rainGeo=new T.BufferGeometry();rainGeo.setAttribute('position',new T.BufferAttribute(weatherPositions,3));
+const rainCloud=new T.Points(rainGeo,new T.PointsMaterial({color:0xc5e7ff,size:.18,transparent:true,opacity:.76,depthWrite:false}));scene.add(rainCloud);
+function applyAtmosphere(){
+ const foggy=weather==='fog',raining=weather==='rain';
+ const bg=night?(foggy?0x263546:0x172a45):foggy?0x8e9da6:raining?0x829fb8:0x93ccf5;
+ scene.background.setHex(bg);scene.fog.color.setHex(bg);scene.fog.near=foggy?40:raining?85:125;scene.fog.far=foggy?215:raining?315:380;
+ amb.intensity=night?.7:raining?1.4:2.1;sun.intensity=night?.4:raining?1.3:2.65;renderer.toneMappingExposure=night?1.04:1.3;
+ rainCloud.visible=raining;m.road.roughness=raining?.31:.8;m.road.needsUpdate=true;
+}
+applyAtmosphere();
+function animateWeather(dt){
+ if(rainCloud.visible){rainCloud.position.set(playerPos.x,0,playerPos.z);
+  for(let i=0;i<330;i++){const a=i*3;weatherPositions[a+1]-=dt*32;if(weatherPositions[a+1]<0){weatherPositions[a+1]=44;weatherPositions[a]=(Math.random()-.5)*100;weatherPositions[a+2]=(Math.random()-.5)*100}}
+  rainGeo.attributes.position.needsUpdate=true;
+ }
+ for(const c of clouds){c.position.x+=dt*.45;if(c.position.x>205)c.position.x=-205}
+ for(const o of signals){const phase=(Math.floor(clock.elapsedTime/7+o.offset*.3)%3+3)%3;o.bulb.material.color.setHex(phase===o.i?[0xff6864,0xffd166,0x79ff88][o.i]:[0x4c2729,0x5c4f2b,0x24492f][o.i])}
+}
 function showToast(txt){const e=el('toast');e.textContent=txt;e.classList.add('on');clearTimeout(showToast.id);showToast.id=setTimeout(()=>e.classList.remove('on'),2400)}
 const key=new Set(),mapped={w:'forward',arrowup:'forward',s:'back',arrowdown:'back',a:'left',arrowleft:'left',d:'right',arrowright:'right',shift:'run'};
 document.addEventListener('keydown',e=>{const k=e.key.toLowerCase();if(mapped[k]){key.add(mapped[k]);e.preventDefault()}if(e.repeat)return;if(k==='e')interact();if(k==='f')togglePanel('phone');if(k==='c'){highView=!highView;showToast(highView?'Kamera z góry':'Kamera zza pleców')}if(k==='p'||k==='escape')togglePause()});
@@ -267,7 +355,7 @@ document.querySelectorAll('[data-shortcut]').forEach(b=>b.addEventListener('clic
 function togglePause(){if(!started)return;paused=!paused;el('pause').textContent=paused?'▶':'Ⅱ';showToast(paused?'Pauza':'Wracamy do miasta!')}
 el('pause').onclick=togglePause;
 el('startBtn').onclick=()=>{started=true;paused=false;el('start').classList.add('hidden');showToast('Witaj w NEXO LIFE RP!')}
-el('day').onclick=()=>{night=!night;scene.background.set(night?0x152b48:0x93ccf5);scene.fog.color.set(night?0x152b48:0x93ccf5);amb.intensity=night?.7:2.1;sun.intensity=night?.4:2.65;renderer.toneMappingExposure=night?1.04:1.3;el('day').textContent=night?'☾ NOC':'☀ DZIEŃ';showToast(night?'Zapadła noc':'Nastał dzień')};
+el('day').onclick=()=>{night=!night;applyAtmosphere();el('day').textContent=night?'☾ NOC':'☀ DZIEŃ';showToast(night?'Zapadła noc':'Nastał dzień')};
 function togglePanel(p){if(activePage===p){activePage=null;el('panel').classList.remove('visible')}else{activePage=p;renderPanel()}document.querySelectorAll('[data-page]').forEach(e=>e.classList.toggle('active',e.dataset.page===activePage))}
 document.querySelectorAll('[data-page]').forEach(e=>e.onclick=()=>togglePanel(e.dataset.page));
 function pageText(){if(activePage==='phone')return {title:'📱 NEXO PHONE',lead:'Twoje miasto w kieszeni. Wybierz, co chcesz robić.',body:'<div class="option"><div><b>👤 Mój profil</b><small>Wybierz wygląd postaci</small></div><button data-open="avatar">OTWÓRZ</button></div><div class="option"><div><b>🚘 Garaż</b><small>Przywołaj samochód</small></div><button data-open="cars">OTWÓRZ</button></div><div class="option"><div><b>🏠 Nieruchomości</b><small>Zajmij dom i wejdź do środka</small></div><button data-open="homes">OTWÓRZ</button></div><div class="option"><div><b>💼 Mój zawód</b><small>Zmień pracę i otrzymuj wypłaty</small></div><button data-open="jobs">OTWÓRZ</button></div>'};
