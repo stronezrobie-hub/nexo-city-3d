@@ -107,6 +107,7 @@ for(let iz=0;iz<6;iz++)for(let ix=0;ix<6;ix++){
 
 /* Public spaces: fountains, low-maintenance greenery, benches, plaza accents. */
 const waterMaterial=new T.MeshPhysicalMaterial({color:0x59b7ca,metalness:.15,roughness:.18,transparent:true,opacity:.84,clearcoat:1});
+const urban={curb:mat(0xbcc5c6),zebra:new T.MeshBasicMaterial({color:0xeceadf}),metal:mat(0x384958),red:mat(0xc85550),hedge:mat(0x477b50),sand:mat(0xd1c5a6),bench:mat(0x7d5d43)};
 const stone=mat(0xd7d2c1),stoneDark=mat(0x9aabb2),flowers=[mat(0xf0ad80),mat(0xe4c1e8),mat(0xffdb79),mat(0xf4edef)];
 function cylinder(x,y,z,top,bottom,height,material,segments=20,parent=scene){
  const o=new T.Mesh(new T.CylinderGeometry(top,bottom,height,segments),material);o.position.set(x,y,z);o.receiveShadow=true;parent.add(o);return o;
@@ -160,7 +161,6 @@ for(let k=-3;k<=3;k++)for(let j=-3;j<=3;j++)if((k+j)%2===0)streetLight(k*60+10,j
 
 /* Architectural detailing, readable procedural signage and street infrastructure.
    Entirely generated in JS: no imported textures, models or images. */
-const urban={curb:mat(0xbcc5c6),zebra:new T.MeshBasicMaterial({color:0xeceadf}),metal:mat(0x384958),red:mat(0xc85550),hedge:mat(0x477b50),sand:mat(0xd1c5a6),bench:mat(0x7d5d43)};
 const crossing=new T.InstancedMesh(new T.BoxGeometry(1.2,.025,3.3),urban.zebra,1250);
 const temp=new T.Object3D();let ci=0;
 for(let a=-3;a<=3;a++)for(let b=-3;b<=3;b++)for(const offset of [-9,9])for(let q=0;q<6;q++){
