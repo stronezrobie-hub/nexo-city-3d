@@ -57,7 +57,7 @@ const {chromium}=require('playwright');
   if(errors.length)throw Error(errors.join('\n'));
   console.log('PASS: All desktop interactions without JavaScript errors');
   await page.close(); // Release the WebGL context before starting the mobile GPU test.
-  const mobile=await browser.newPage({viewport:{width:390,height:844},isMobile:true,hasTouch:true,ignoreHTTPSErrors:true});
+  const mobile=await browser.newPage({viewport:{width:420,height:903},isMobile:true,hasTouch:true,ignoreHTTPSErrors:true});
   const mobileErrors=[];
   mobile.on('pageerror',e=>mobileErrors.push(e.stack||e.message));
   await mobile.goto(base,{waitUntil:'networkidle',timeout:40000});
