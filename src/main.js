@@ -843,7 +843,7 @@ function togglePhoto(){
 el('photo').onclick=togglePhoto;
 el('photoExit').onclick=togglePhoto;
 const key=new Set(),mapped={w:'forward',arrowup:'forward',s:'back',arrowdown:'back',a:'left',arrowleft:'left',d:'right',arrowright:'right',shift:'run'};
-document.addEventListener('keydown',e=>{if(e.target?.matches?.('input, textarea, select, [contenteditable]'))return;const k=e.key.toLowerCase();if(mapped[k]){key.add(mapped[k]);e.preventDefault()}if(e.repeat)return;if(photoMode){if(k==='o'||k==='escape')togglePhoto();return}if(k==='o')togglePhoto();if(k==='e')interact();if(k==='f')togglePanel('phone');if(k==='h')honk();if(k==='l')toggleSiren();if(k==='c'){highView=!highView;showToast(highView?'Kamera z góry':'Kamera zza pleców')}if(k==='escape'&&homeCamera){setHomeCamera(null);return}if(k==='p'||k==='escape')togglePause()});
+document.addEventListener('keydown',e=>{if(e.target?.matches?.('input, textarea, select, [contenteditable]'))return;const k=e.key.toLowerCase();if(k==='f9'){e.preventDefault();setQuality('balanced');showToast('Przywrócono BALANCED');return}if(mapped[k]){key.add(mapped[k]);e.preventDefault()}if(e.repeat)return;if(photoMode){if(k==='o'||k==='escape')togglePhoto();return}if(k==='o')togglePhoto();if(k==='e')interact();if(k==='f')togglePanel('phone');if(k==='h')honk();if(k==='l')toggleSiren();if(k==='c'){highView=!highView;showToast(highView?'Kamera z góry':'Kamera zza pleców')}if(k==='escape'&&homeCamera){setHomeCamera(null);return}if(k==='p'||k==='escape')togglePause()});
 document.addEventListener('keyup',e=>{const k=e.key.toLowerCase();if(mapped[k])key.delete(mapped[k])});W.addEventListener('blur',()=>key.clear());
 document.querySelectorAll('[data-control]').forEach(b=>{const action=b.dataset.control;b.addEventListener('pointerdown',e=>{e.preventDefault();b.setPointerCapture(e.pointerId);key.add(action);b.classList.add('down')});for(const ev of ['pointerup','pointercancel','lostpointercapture'])b.addEventListener(ev,()=>{key.delete(action);b.classList.remove('down')})});
 document.querySelectorAll('[data-shortcut]').forEach(b=>b.addEventListener('click',()=>{const action=b.dataset.shortcut;if(action==='interact')interact();if(action==='phone')togglePanel('phone');if(action==='camera'){highView=!highView;showToast('Zmieniono kamerę')}if(action==='honk')honk()}));
@@ -1025,7 +1025,7 @@ if(activePage==='settings')return{title:'💎 GRAPHICS 7.0',lead:'Prawdziwe prof
  [['low','⚡ LOW','Płynność · bez dynamicznych cieni'],['balanced','🌿 BALANCED','Dobra równowaga jakości i wydajności'],['high','✨ HIGH','Dokładniejsze cienie i materiały'],['ultra','💎 ULTRA','Duże mapy cieni, bloom i szkło'],['ultraPlus','🔥 ULTRA+','Maksymalne cienie · bloom · SSAO (na PC)']]
  .map(x=>'<div class="option"><div><b>'+x[1]+'</b><small>'+x[2]+'</small></div><button data-quality="'+x[0]+'" '+(save.quality===x[0]?'disabled':'')+'>'+(save.quality===x[0]?'AKTYWNY':'USTAW')+'</button></div>').join('')+
  '<div class="option"><div><b>🎮 Tryb aktywny</b><small id="qualityDescription">'+qualityPresets[save.quality].label+' · FPS: <span id="qualityFps">'+graphics.fps+'</span> · rozdzielczość '+Math.round(graphics.dpr*100)+'%</small></div></div>'+
- '<p class="panel-lead">Ultra i Ultra+ bardziej obciążają kartę graficzną. Na urządzeniach dotykowych efekty bloom/SSAO są ograniczone dla płynności. W razie spadków FPS wybierz HIGH lub BALANCED.</p>'+
+ '<p class="panel-lead">Ultra i Ultra+ bardziej obciążają kartę graficzną. Na telefonach efekty bloom/SSAO są ograniczone. Gdy FPS jest bardzo niski, gra automatycznie wybierze HIGH. Awaryjnie naciśnij F9, aby przywrócić BALANCED.</p>'+
  '<div class="option"><div><b>📷 Tryb fotograficzny</b><small>Ukryj HUD i zrób zdjęcie świata</small></div><button data-photo="1">WŁĄCZ</button></div>'+
  '<p class="panel-lead">Obracaj kamerę przeciągnięciem, a kółkiem myszy zmieniaj zoom. Klawisz O uruchamia tryb foto.</p>'};
 if(activePage==='weather')return{title:'🌦 POGODA I ATMOSFERA',lead:'Zmiana pogody wpływa na widoczność i wygląd miasta.',body:
@@ -1406,8 +1406,19 @@ el('speed').firstChild.textContent=String(Math.round(Math.abs(carSpeed)*3.2))+' 
 minimap()}
 W.addEventListener('resize',()=>{cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);graphics.composer?.setSize(innerWidth,innerHeight)});
 cam.position.set(8,8,35);cam.lookAt(8,1,19);
-let fpsInterval=0,fpsFrames=0;
-function loop(){requestAnimationFrame(loop);const frameDt=clock.getDelta();let dt=Math.min(.045,frameDt);fpsInterval+=frameDt;fpsFrames++;if(fpsInterval>=1){graphics.fps=Math.round(fpsFrames/fpsInterval);fpsInterval=0;fpsFrames=0;refreshGraphicsHud();}if(!paused&&!photoMode){if(!homeCamera){if(driving)moveCar(dt);else moveCharacter(dt)}animateRoleplay(dt);animateWeather(dt);updateTraffic(dt);progress(dt);payTick+=dt;if(payTick>60){payTick-=60;if(save.job!=='Mieszkaniec'){save.cash+=500;persist();updateHud();showToast('Wypłata za pracę: +$500')}}marker.rotation.y+=dt*.65;torus.rotation.z+=dt*.7;
+let fpsInterval=0,fpsFrames=0,slowGraphicsTicks=0;
+function loop(){requestAnimationFrame(loop);const frameDt=clock.getDelta();let dt=Math.min(.045,frameDt);fpsInterval+=frameDt;fpsFrames++;if(fpsInterval>=1){
+ graphics.fps=Math.round(fpsFrames/fpsInterval);
+ fpsInterval=0;fpsFrames=0;refreshGraphicsHud();
+ if((graphics.mode==='ultra'||graphics.mode==='ultraPlus')&&graphics.fps>0&&graphics.fps<14){
+  slowGraphicsTicks++;
+  if(slowGraphicsTicks>=5){
+   slowGraphicsTicks=0;setQuality('high');
+   if(activePage==='settings')renderPanel();
+   showToast('Dla płynności zmieniono grafikę na HIGH. Możesz wybrać ULTRA ponownie.');
+  }
+ }else slowGraphicsTicks=0;
+}if(!paused&&!photoMode){if(!homeCamera){if(driving)moveCar(dt);else moveCharacter(dt)}animateRoleplay(dt);animateWeather(dt);updateTraffic(dt);progress(dt);payTick+=dt;if(payTick>60){payTick-=60;if(save.job!=='Mieszkaniec'){save.cash+=500;persist();updateHud();showToast('Wypłata za pracę: +$500')}}marker.rotation.y+=dt*.65;torus.rotation.z+=dt*.7;
 for(const n of npc){const tt=clock.elapsedTime*.45+n.seed;n.g.position.set(n.x+Math.cos(tt)*3,0,n.z+Math.sin(tt)*3);n.g.rotation.y=-tt;n.l.rotation.x=Math.sin(tt*6)*.27;n.r.rotation.x=-Math.sin(tt*6)*.27}
 }
 updateSiren();cameraUpdate(dt);updateWorldLighting();skyDome.position.copy(driving?car.root.position:playerPos);skyDome.visible=homeCamera?homeCamera!=='salon':!inside;updateStreetLights();updateAudio();renderGraphics(dt);uiTick+=dt;if(uiTick>.17){renderHUD();uiTick=0}}
