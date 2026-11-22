@@ -4,7 +4,7 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0b1723">
 <meta name="description" content="NEXO LIFE RP — twoje własne miasto 3D. Domy, samochody, roleplay i otwarty świat zbudowany w 100% z kodu.">
-<meta property="og:title" content="NEXO LIFE RP 6.1 — City Edition">
+<meta property="og:title" content="NEXO LIFE RP 6.2 — RP Hub">
 <meta property="og:description" content="Wkrocz do NEXO Valley. Twoje miasto, twoja historia.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%230a2430'/%3E%3Cpath fill='%23c5ff78' d='M13 49V15h9l20 22V15h9v34h-9L22 27v22z'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
@@ -193,12 +193,78 @@ button{font:inherit;cursor:pointer;color:inherit}#world{width:100%;height:100%;d
  .map-box{top:83px!important}
 }
 
+
+/* RP HUB 6.2 — original NEXO controls inspired by the usability of city RP games */
+.rp-tools{position:fixed;right:20px;top:clamp(342px,42vh,440px);display:flex;flex-direction:column;align-items:stretch;gap:8px;width:179px;z-index:12}
+.rp-launch{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;height:52px;border:1px solid rgba(255,255,255,.27);border-radius:15px;padding:6px 8px 6px 12px;background:linear-gradient(115deg,rgba(12,27,43,.88),rgba(13,26,38,.72));backdrop-filter:blur(16px);box-shadow:0 8px 22px #0004;transition:background .16s,transform .16s}
+.rp-launch:hover,.rp-launch:focus-visible{background:rgba(38,69,76,.96);transform:translateX(-3px);outline:none;border-color:#ceffaa7a}
+.rp-launch b{font-size:11px;font-weight:900;text-align:left;color:#edfaff;line-height:1.15;flex:1}
+.rp-launch .rp-arrow{color:#beff80;font-size:18px;font-weight:900}
+.rp-launch .rp-launch-icon{display:grid;place-items:center;width:38px;height:38px;border-radius:11px;font-size:23px;flex-shrink:0;background:linear-gradient(145deg,#d8e8dddb,#7ea89d85);border:1px solid #ffffff66;box-shadow:inset 0 1px #ffffff50}
+.rp-tools-toggle{display:none}
+.rp-utilities{position:fixed;top:100px;left:22px;z-index:12;display:flex;flex-direction:column;gap:7px;max-width:210px}
+.rp-utility{display:flex;align-items:center;gap:9px;min-height:37px;padding:8px 12px;border-radius:12px;border:1px solid #ffffff43;background:rgba(9,23,34,.83);color:#eaf6f7;font-weight:800;font-size:11px;backdrop-filter:blur(15px);text-align:left;box-shadow:0 8px 26px #0004}
+.rp-utility .rp-small-icon{font-size:18px}
+.rp-utility:hover,.rp-utility:focus-visible{background:#27464dea;border-color:#c2fca9a1;outline:none}
+.rp-news{position:fixed;right:22px;top:104px;z-index:13;width:min(302px,calc(100vw - 44px));background:rgba(235,244,239,.92);color:#1b3039;border:1px solid #ffffffd8;border-radius:17px;box-shadow:0 22px 60px #0007;overflow:hidden;backdrop-filter:blur(20px)}
+.rp-news[hidden]{display:none!important}
+.rp-news-header{display:flex;justify-content:space-between;align-items:center;padding:14px 14px 8px;gap:10px}
+.rp-news-header strong{font-size:17px;letter-spacing:.9px;font-weight:950}
+.rp-news-header button{border:0;border-radius:9px;background:#2e4142;color:#fff;font-size:16px;width:28px;height:28px;font-weight:bold}
+.rp-news-body{padding:0 15px 15px}
+.rp-news-body b{font-size:13px;color:#274b40}
+.rp-news-body p{font-size:11px;line-height:1.48;margin:5px 0 9px;color:#354a4b}
+.rp-news-chips{display:flex;flex-wrap:wrap;gap:4px}
+.rp-news-chips span{background:#d3e3dc;color:#355044;padding:6px 8px;border-radius:9px;font-size:10px;font-weight:800}
+.rp-welcome-flash{display:none;position:fixed;left:50%;top:15%;transform:translateX(-50%);z-index:8;pointer-events:none;text-align:center;text-shadow:0 5px 26px #000c}
+.rp-welcome-flash.show{display:block;animation:rp-fade 4.4s ease both}
+.rp-welcome-flash small{display:block;font-size:14px;font-weight:950;letter-spacing:3px;color:#f1f7ff;margin-bottom:8px}
+.rp-welcome-flash strong{display:block;padding:12px 35px;font-size:clamp(29px,4vw,51px);font-weight:1000;letter-spacing:2px;line-height:1.06;color:#fff;border:3px solid #ffffff9e;border-radius:16px;background:linear-gradient(140deg,#1eaf91,#16646f 55%,#174056);box-shadow:0 14px 50px #0009,0 0 0 4px #003b3470}
+@keyframes rp-fade{0%{opacity:0;transform:translate(-50%,-12px)}12%,76%{opacity:1;transform:translate(-50%,0)}100%{opacity:0;transform:translate(-50%,-12px)}}
+.rp-camera-overlay{position:fixed;left:50%;top:94px;transform:translateX(-50%);z-index:30;display:none;align-items:center;gap:10px;background:rgba(8,24,34,.9);border:1px solid #bcefff61;border-radius:14px;backdrop-filter:blur(18px);padding:8px 10px 8px 15px;box-shadow:0 12px 40px #000a}
+.rp-camera-overlay.visible{display:flex}
+.rp-camera-overlay span{font-size:11px;font-weight:950;white-space:nowrap;letter-spacing:.7px;color:#d5fbee}
+.rp-camera-overlay button{border:0;border-radius:9px;background:#c6ff8f;color:#152d20;font-weight:1000;padding:8px 10px;font-size:10px;white-space:nowrap}
+.task{top:294px!important;left:22px!important;right:auto!important;width:215px!important}
+@media(max-width:1080px){
+ .rp-news{top:150px;right:15px;width:255px}
+ .rp-tools{right:14px;top:385px;width:155px}
+ .rp-launch{height:48px}.rp-launch .rp-launch-icon{width:34px;height:34px}
+ .rp-utilities{top:105px;left:12px}
+ .task{display:none!important}
+}
+@media(max-width:680px){
+ .rp-utilities{top:107px;left:9px;gap:5px;flex-direction:row;max-width:calc(100vw - 145px)}
+ .rp-utility{min-height:30px;padding:5px 9px;border-radius:10px;font-size:0;gap:0}
+ .rp-utility .rp-small-icon{font-size:17px}
+ .rp-news{top:145px;right:9px;width:min(264px,calc(100vw - 18px));max-height:calc(100dvh - 280px);overflow:auto}
+ .rp-news-header{padding:11px 11px 6px}.rp-news-header strong{font-size:15px}
+ .rp-news-body{padding:0 12px 12px}
+ .rp-tools{top:auto;bottom:232px;right:9px;width:164px;align-items:flex-end;gap:5px}
+ .rp-tools-toggle{display:flex;align-items:center;justify-content:center;gap:6px;border-radius:13px;width:105px;height:38px;color:#eaffec;border:1px solid #dcffbb7d;background:#0c3040e8;box-shadow:0 8px 26px #0009;font-size:12px;font-weight:950}
+ .rp-launch{display:none;width:164px;height:44px;padding:5px 7px}
+ .rp-tools.open .rp-launch{display:flex}
+ .rp-tools.open .rp-tools-toggle{background:#285549e8}
+ .rp-launch b{font-size:10px}.rp-launch .rp-arrow{font-size:14px}.rp-launch .rp-launch-icon{width:32px;height:32px;font-size:19px}
+ .rp-welcome-flash{top:19%;width:96%}.rp-welcome-flash small{font-size:10px}.rp-welcome-flash strong{font-size:26px;padding:12px 12px}
+ .rp-camera-overlay{top:87px;max-width:92vw}
+ .rp-camera-overlay span{font-size:9px}
+}
+@media(max-height:620px) and (min-width:681px){
+ .rp-tools{top:126px;right:15px;gap:3px}
+ .rp-launch{height:40px}
+ .rp-news{display:none}
+}
+@media(prefers-reduced-motion:reduce){
+ .rp-welcome-flash.show{animation:none;opacity:1}
+ .rp-launch{transition:none}
+}
 </style>
 </head>
 <body>
 <canvas id="world"></canvas><div id="shade"></div><div id="filmgrain" aria-hidden="true"></div>
 <div class="hud"><div id="zonebanner" class="zonebanner"><span>◉ NEXO VALLEY</span><b id="zone">CENTRUM MIASTA</b><small id="clock">12:00 • SŁONECZNIE</small></div>
-<header class="head"><div class="logo"><i>N</i><div><b>NEXO LIFE RP</b><small>CITY EDITION • ALPHA 6.1</small></div></div><div class="header-right"><div class="cash glass"><small>TWOJE PIENIĄDZE</small><span id="cash">$ 2 500</span></div><button class="smallbtn" id="day">☀ DZIEŃ</button><button class="smallbtn" id="sound" title="Wycisz dźwięki">🔊</button><button class="smallbtn" id="photo" title="Tryb fotograficzny">📷</button><button class="smallbtn" id="pause">Ⅱ</button></div></header>
+<header class="head"><div class="logo"><i>N</i><div><b>NEXO LIFE RP</b><small>RP HUB • ALPHA 6.2</small></div></div><div class="header-right"><div class="cash glass"><small>TWOJE PIENIĄDZE</small><span id="cash">$ 2 500</span></div><button class="smallbtn" id="day">☀ DZIEŃ</button><button class="smallbtn" id="sound" title="Wycisz dźwięki">🔊</button><button class="smallbtn" id="photo" title="Tryb fotograficzny">📷</button><button class="smallbtn" id="pause">Ⅱ</button></div></header>
 <nav class="sidebar">
 <button class="menu-btn" data-page="phone"><span class="ico">📱</span>Telefon</button>
 <button class="menu-btn" data-page="avatar"><span class="ico">👤</span>Postać</button>
@@ -210,6 +276,27 @@ button{font:inherit;cursor:pointer;color:inherit}#world{width:100%;height:100%;d
 <button class="menu-btn" data-page="bag"><span class="ico">🎒</span>Plecak</button>
 <button class="menu-btn" data-page="weather"><span class="ico">🌦</span>Pogoda</button>
 </nav>
+<div class="rp-utilities" aria-label="Szybkie funkcje roleplay">
+ <button class="rp-utility" data-rp-page="cameras" title="Kamery domowe"><span class="rp-small-icon">📹</span>Kamery domowe</button>
+ <button class="rp-utility" data-rp-page="family" title="Rodzina RP"><span class="rp-small-icon">👨‍👩‍👧</span>Rodzina RP</button>
+ <button class="rp-utility" id="rpNewsToggle" title="Aktualizacje"><span class="rp-small-icon">📰</span>Aktualizacje</button>
+</div>
+<div class="rp-tools" id="rpTools" aria-label="Menu roleplay">
+ <button class="rp-tools-toggle" id="rpToolsToggle" aria-expanded="false">✦ RP MENU</button>
+ <button class="rp-launch" data-rp-page="avatar"><b>Edytor postaci</b><span class="rp-arrow">›</span><span class="rp-launch-icon">👤</span></button>
+ <button class="rp-launch" data-rp-page="bag"><b>Narzędzia</b><span class="rp-arrow">›</span><span class="rp-launch-icon">🎒</span></button>
+ <button class="rp-launch" data-rp-page="animations"><b>Animacje</b><span class="rp-arrow">›</span><span class="rp-launch-icon">💃</span></button>
+ <button class="rp-launch" data-rp-page="cars"><b>Pojazdy</b><span class="rp-arrow">›</span><span class="rp-launch-icon">🚘</span></button>
+ <button class="rp-launch" data-rp-page="homes"><b>Domy</b><span class="rp-arrow">›</span><span class="rp-launch-icon">🏠</span></button>
+</div>
+<div class="rp-news" id="rpNews" hidden aria-label="Aktualizacje NEXO LIFE RP">
+ <div class="rp-news-header"><strong>AKTUALIZACJE</strong><button id="rpNewsClose" aria-label="Zamknij aktualizacje">✕</button></div>
+ <div class="rp-news-body"><b>NOWOŚĆ · RP HUB 6.2</b>
+ <p>Odświeżone menu inspirowane otwartymi grami RP. Edytor postaci, narzędzia, animacje, domy i pojazdy na wyciągnięcie ręki.</p>
+ <div class="rp-news-chips"><span>🏠 Kamery domu</span><span>👨‍👩‍👧 Rodzina RP</span><span>🕒 Zegar miasta</span></div></div>
+</div>
+<div class="rp-welcome-flash" id="rpWelcomeFlash" aria-live="polite"><small>WITAJ W</small><strong>NEXO VALLEY</strong></div>
+<div class="rp-camera-overlay" id="rpCameraOverlay"><span id="rpCameraLabel">● KAMERA DOMU</span><button id="rpCameraExit">ZAMKNIJ ✕</button></div>
 <div class="quickbar glass" id="quickbar">
 <button data-quick="phone">📱<span>Telefon</span></button>
 <button data-quick="homes">🏡<span>Domy</span></button>
@@ -226,7 +313,7 @@ button{font:inherit;cursor:pointer;color:inherit}#world{width:100%;height:100%;d
 <div class="status">NEXO STUDIOS · PROCEDURAL 3D · NO IMPORTED MODELS · LOCAL SAVE</div>
 <div class="toast" id="toast"></div>
 </div>
-<button id="photoExit" aria-label="Wyjdź z trybu zdjęcia">✕ Zamknij tryb foto</button><div id="start"><div class="welcome"><div class="sup">NEXO STUDIOS PRESENTS</div><div class="welcome-overline"><span class="pulse"></span> NOWY WYMIAR ROLEPLAY</div><h1>Twoje miasto.<br><em>Twoja historia.</em></h1><p>Wybierz spośród różnych domów i samochodów, zamieszkaj w NEXO VALLEY i stwórz własną historię. Bez narzuconych misji. Cały świat generowany wyłącznie kodem.</p><div class="chips"><b>✧ TWOJE ŻYCIE</b><b>🏠 KATALOG DOMÓW</b><b>🚘 10 POJAZDÓW</b><b>🌦 ŻYWY ŚWIAT</b></div><button id="startBtn" class="primary" disabled aria-busy="true">◌ ŁADOWANIE MIASTA...</button><div id="bootStatus" role="status" style="font-size:12px;color:#c8d6e0;margin-top:12px;min-height:20px">Przygotowuję świat 3D…</div><footer>Wersja Alpha 6.1 · City Edition · Zapis lokalny</footer></div></div>
+<button id="photoExit" aria-label="Wyjdź z trybu zdjęcia">✕ Zamknij tryb foto</button><div id="start"><div class="welcome"><div class="sup">NEXO STUDIOS PRESENTS</div><div class="welcome-overline"><span class="pulse"></span> NOWY WYMIAR ROLEPLAY</div><h1>Twoje miasto.<br><em>Twoja historia.</em></h1><p>Wybierz spośród różnych domów i samochodów, zamieszkaj w NEXO VALLEY i stwórz własną historię. Bez narzuconych misji. Cały świat generowany wyłącznie kodem.</p><div class="chips"><b>✧ TWOJE ŻYCIE</b><b>🏠 KATALOG DOMÓW</b><b>🚘 10 POJAZDÓW</b><b>🌦 ŻYWY ŚWIAT</b></div><button id="startBtn" class="primary" disabled aria-busy="true">◌ ŁADOWANIE MIASTA...</button><div id="bootStatus" role="status" style="font-size:12px;color:#c8d6e0;margin-top:12px;min-height:20px">Przygotowuję świat 3D…</div><footer>Wersja Alpha 6.2 · RP Hub · Zapis lokalny</footer></div></div>
 <script>
 (function(){
  const message=document.getElementById('bootStatus');
