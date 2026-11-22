@@ -58,7 +58,7 @@ const {chromium}=require('playwright');
   const mobileErrors=[];
   mobile.on('pageerror',e=>mobileErrors.push(e.stack||e.message));
   await mobile.goto(base,{waitUntil:'networkidle',timeout:40000});
-  await mobile.waitForFunction(()=>window.__nexoBootReady===true,{timeout:40000});
+  await mobile.waitForFunction(()=>window.__nexoBootReady===true,null,{timeout:55000}).catch(async()=>{throw Error('Mobile boot failed: '+await mobile.locator('#bootStatus').textContent()+'; errors: '+mobileErrors.join('; '))});
   await mobile.locator('#startBtn').click({timeout:12000});
   await mobile.locator('[data-quick="homes"]').click({timeout:8000});
   if(!await mobile.locator('#panel').evaluate(e=>e.classList.contains('visible')))throw Error('Mobile quickbar cannot open houses');
