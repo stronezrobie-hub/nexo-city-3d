@@ -638,7 +638,7 @@ function togglePhoto(){
 el('photo').onclick=togglePhoto;
 el('photoExit').onclick=togglePhoto;
 const key=new Set(),mapped={w:'forward',arrowup:'forward',s:'back',arrowdown:'back',a:'left',arrowleft:'left',d:'right',arrowright:'right',shift:'run'};
-document.addEventListener('keydown',e=>{if(e.target?.matches?.('input, textarea, select, [contenteditable]'))return;const k=e.key.toLowerCase();if(mapped[k]){key.add(mapped[k]);e.preventDefault()}if(e.repeat)return;if(photoMode){if(k==='o'||k==='escape')togglePhoto();return}if(k==='o')togglePhoto();if(k==='e')interact();if(k==='f')togglePanel('phone');if(k==='h')honk();if(k==='l')toggleSiren();if(k==='c'){highView=!highView;showToast(highView?'Kamera z góry':'Kamera zza pleców')}if(k==='p'||k==='escape')togglePause()});
+document.addEventListener('keydown',e=>{if(e.target?.matches?.('input, textarea, select, [contenteditable]'))return;const k=e.key.toLowerCase();if(mapped[k]){key.add(mapped[k]);e.preventDefault()}if(e.repeat)return;if(photoMode){if(k==='o'||k==='escape')togglePhoto();return}if(k==='o')togglePhoto();if(k==='e')interact();if(k==='f')togglePanel('phone');if(k==='h')honk();if(k==='l')toggleSiren();if(k==='c'){highView=!highView;showToast(highView?'Kamera z góry':'Kamera zza pleców')}if(k==='escape'&&homeCamera){setHomeCamera(null);return}if(k==='p'||k==='escape')togglePause()});
 document.addEventListener('keyup',e=>{const k=e.key.toLowerCase();if(mapped[k])key.delete(mapped[k])});W.addEventListener('blur',()=>key.clear());
 document.querySelectorAll('[data-control]').forEach(b=>{const action=b.dataset.control;b.addEventListener('pointerdown',e=>{e.preventDefault();b.setPointerCapture(e.pointerId);key.add(action);b.classList.add('down')});for(const ev of ['pointerup','pointercancel','lostpointercapture'])b.addEventListener(ev,()=>{key.delete(action);b.classList.remove('down')})});
 document.querySelectorAll('[data-shortcut]').forEach(b=>b.addEventListener('click',()=>{const action=b.dataset.shortcut;if(action==='interact')interact();if(action==='phone')togglePanel('phone');if(action==='camera'){highView=!highView;showToast('Zmieniono kamerę')}if(action==='honk')honk()}));
@@ -675,7 +675,21 @@ function updateAudio(){
 el('sound').onclick=()=>{soundEnabled=!soundEnabled;el('sound').textContent=soundEnabled?'🔊':'🔇';if(soundEnabled)initAudio();showToast(soundEnabled?'Dźwięk włączony':'Dźwięk wyłączony')};
 function togglePause(){if(!started)return;paused=!paused;el('pause').textContent=paused?'▶':'Ⅱ';showToast(paused?'Pauza':'Wracamy do miasta!')}
 el('pause').onclick=togglePause;
-el('startBtn').onclick=()=>{started=true;paused=false;initAudio();el('start').classList.add('hidden');showToast('Witaj w NEXO LIFE RP!')}
+const newsStorageKey='nexo-life-rp-hub-62-updates';
+const newsEl=el('rpNews'),flashEl=el('rpWelcomeFlash');
+function setNewsOpen(open){
+ newsEl.hidden=!open;
+ if(!open){try{localStorage.setItem(newsStorageKey,'1')}catch{}}
+}
+el('rpNewsToggle').onclick=()=>setNewsOpen(newsEl.hidden);
+el('rpNewsClose').onclick=()=>setNewsOpen(false);
+el('startBtn').onclick=()=>{
+ started=true;paused=false;initAudio();el('start').classList.add('hidden');
+ flashEl.classList.remove('show');void flashEl.offsetWidth;flashEl.classList.add('show');
+ setTimeout(()=>flashEl.classList.remove('show'),4700);
+ try{if(!localStorage.getItem(newsStorageKey))setNewsOpen(true)}catch{setNewsOpen(true)}
+ showToast('Witaj w NEXO VALLEY! Odkrywaj miasto i wybierz swoją historię.')
+}
 el('day').onclick=()=>{night=!night;applyAtmosphere();el('day').textContent=night?'☾ NOC':'☀ DZIEŃ';showToast(night?'Zapadła noc':'Nastał dzień')};
 function togglePanel(p){if(activePage===p){activePage=null;el('panel').classList.remove('visible')}else{activePage=p;renderPanel()}document.querySelectorAll('[data-page]').forEach(e=>e.classList.toggle('active',e.dataset.page===activePage))}
 const sideMenu=document.querySelector('.sidebar'),menuExpand=el('menuExpand');
@@ -683,6 +697,31 @@ function closeMobileMenu(){sideMenu.classList.remove('expanded');menuExpand.setA
 document.querySelectorAll('[data-page]').forEach(e=>e.onclick=()=>{togglePanel(e.dataset.page);closeMobileMenu()});
 document.querySelectorAll('[data-quick]').forEach(e=>e.onclick=()=>{togglePanel(e.dataset.quick);closeMobileMenu()});
 menuExpand.onclick=()=>{const open=sideMenu.classList.toggle('expanded');menuExpand.setAttribute('aria-expanded',String(open));if(open&&activePage){el('panel').classList.remove('visible');activePage=null;document.querySelectorAll('[data-page]').forEach(e=>e.classList.remove('active'))}};
+const rpToolsEl=el('rpTools'),rpToolsToggle=el('rpToolsToggle');
+rpToolsToggle.onclick=()=>{
+ const expanded=rpToolsEl.classList.toggle('open');
+ rpToolsToggle.setAttribute('aria-expanded',String(expanded));
+ rpToolsToggle.textContent=expanded?'✕ ZAMKNIJ':'✦ RP MENU';
+};
+document.querySelectorAll('[data-rp-page]').forEach(button=>button.addEventListener('click',()=>{
+ if(!started||paused)return;
+ togglePanel(button.dataset.rpPage);closeMobileMenu();
+ rpToolsEl.classList.remove('open');rpToolsToggle.setAttribute('aria-expanded','false');rpToolsToggle.textContent='✦ RP MENU';
+}));
+let homeCamera=null;
+function setHomeCamera(mode){
+ if(mode==='off'||!mode){
+  homeCamera=null;el('rpCameraOverlay').classList.remove('visible');showToast('Wyłączono kamery domowe');return;
+ }
+ const allowed=['front','garden','salon'],home=homes.find(h=>h.id===save.house);
+ if(!home){showToast('Najpierw wybierz własny dom!');return}
+ if(!allowed.includes(mode))return;
+ homeCamera=mode;key.clear();
+ el('rpCameraLabel').textContent=({front:'● CAM 01 — WEJŚCIE',garden:'● CAM 02 — OGRÓD',salon:'● CAM 03 — SALON'})[mode];
+ el('rpCameraOverlay').classList.add('visible');
+ showToast('Włączono monitoring domu — widok sceny 3D');
+}
+el('rpCameraExit').onclick=()=>setHomeCamera(null);
 
 let currentPlace=null;
 function pageText(){
@@ -1095,6 +1134,20 @@ function updateTraffic(dt){
 }
 function progress(dt){if(inside||!save.deliveryActive)return;const t=driving?car.root.position:playerPos;if(Math.hypot(t.x-marker.position.x,t.z-marker.position.z)<5.4){save.cash+=250;save.delivery++;if(save.delivery>=5){save.cash+=650;save.delivery=0;showToast('Ukończono trasę! +$900')}else showToast('Dostawa zakończona! +$250');persist();setMarker();updateHud()}}
 function cameraUpdate(dt){
+ if(homeCamera&&save.house){
+  const h=homes.find(h=>h.id===save.house);
+  if(h){
+   const position=homeCamera==='front'?new T.Vector3(h.x,6,h.z+22):
+    homeCamera==='garden'?new T.Vector3(h.x+20,8,h.z-10):new T.Vector3(0,5,628);
+   const view=homeCamera==='front'?new T.Vector3(h.x,3.1,h.z):
+    homeCamera==='garden'?new T.Vector3(h.x,2.5,h.z-7):new T.Vector3(0,2,620);
+   cam.position.lerp(position,1-Math.exp(-8*dt));
+   cam.lookAt(view);
+   cam.fov+=((homeCamera==='salon'?65:60)-cam.fov)*Math.min(1,dt*5);
+   cam.updateProjectionMatrix();
+   return;
+  }
+ }
  const target=driving?car.root.position:playerPos,rot=(driving?carYaw:0)+orbitYaw;
  const dist=(highView?31:driving?19:11)*cameraDistance,height=(highView?32:driving?11:7)+orbitLift;
  const p=new T.Vector3(target.x+Math.sin(rot)*dist,Math.max(2.5,height),target.z+Math.cos(rot)*dist);
@@ -1129,16 +1182,16 @@ function updateZoneHud(){
  const hh=String(Math.floor(mins/60)%24).padStart(2,'0'),mm=String(mins%60).padStart(2,'0');
  el('clock').textContent=hh+':'+mm+' • '+(night?'NOC':weather==='rain'?'DESZCZ':weather==='fog'?'MGŁA':'SŁONECZNIE');
 }
-function renderHUD(){updateZoneHud();const a=nearObj();el('interact').style.display=a&&!paused?'block':'none';el('interactText').textContent=a?a.label:'';
-el('mode').textContent=inside?'🏠 W DOMU':driving?'🚘 PROWADZENIE AUTA':'🚶 SPACER PO MIEŚCIE';el('speed').style.display=driving?'block':'none';
+function renderHUD(){updateZoneHud();const a=nearObj();el('interact').style.display=a&&!paused&&!homeCamera?'block':'none';el('interactText').textContent=a?a.label:'';
+el('mode').textContent=homeCamera?'📹 KAMERY DOMOWE':inside?'🏠 W DOMU':driving?'🚘 PROWADZENIE AUTA':'🚶 SPACER PO MIEŚCIE';el('speed').style.display=driving?'block':'none';
 el('speed').firstChild.textContent=String(Math.round(Math.abs(carSpeed)*3.2))+' ';
 minimap()}
 W.addEventListener('resize',()=>{cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
 cam.position.set(8,8,35);cam.lookAt(8,1,19);
-function loop(){requestAnimationFrame(loop);let dt=Math.min(.045,clock.getDelta());if(!paused&&!photoMode){if(driving)moveCar(dt);else moveCharacter(dt);animateRoleplay(dt);animateWeather(dt);updateTraffic(dt);progress(dt);payTick+=dt;if(payTick>60){payTick-=60;if(save.job!=='Mieszkaniec'){save.cash+=500;persist();updateHud();showToast('Wypłata za pracę: +$500')}}marker.rotation.y+=dt*.65;torus.rotation.z+=dt*.7;
+function loop(){requestAnimationFrame(loop);let dt=Math.min(.045,clock.getDelta());if(!paused&&!photoMode){if(!homeCamera){if(driving)moveCar(dt);else moveCharacter(dt)}animateRoleplay(dt);animateWeather(dt);updateTraffic(dt);progress(dt);payTick+=dt;if(payTick>60){payTick-=60;if(save.job!=='Mieszkaniec'){save.cash+=500;persist();updateHud();showToast('Wypłata za pracę: +$500')}}marker.rotation.y+=dt*.65;torus.rotation.z+=dt*.7;
 for(const n of npc){const tt=clock.elapsedTime*.45+n.seed;n.g.position.set(n.x+Math.cos(tt)*3,0,n.z+Math.sin(tt)*3);n.g.rotation.y=-tt;n.l.rotation.x=Math.sin(tt*6)*.27;n.r.rotation.x=-Math.sin(tt*6)*.27}
 }
-updateSiren();cameraUpdate(dt);skyDome.position.copy(driving?car.root.position:playerPos);skyDome.visible=!inside;updateStreetLights();updateAudio();renderer.render(scene,cam);uiTick+=dt;if(uiTick>.17){renderHUD();uiTick=0}}
+updateSiren();cameraUpdate(dt);skyDome.position.copy(driving?car.root.position:playerPos);skyDome.visible=homeCamera?homeCamera!=='salon':!inside;updateStreetLights();updateAudio();renderer.render(scene,cam);uiTick+=dt;if(uiTick>.17){renderHUD();uiTick=0}}
 window.__nexoBootReady=true;
 const bootButton=el('startBtn');bootButton.disabled=false;bootButton.removeAttribute('aria-busy');bootButton.textContent='▶ WEJDŹ DO MIASTA';
 el('bootStatus').textContent='✓ Miasto załadowane. Możesz rozpocząć grę.';
