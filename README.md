@@ -1,86 +1,63 @@
-# NEXO LIFE RP 5.0 — City Stories
+# NEXO LIFE RP 6.0 — My World
 
-Autorska, proceduralna gra 3D w przeglądarce. Mechaniki swobodnego roleplay inspirowane gatunkiem gier miejskich RP. **Wszystkie modele, obiekty, elementy świata i efekty są generowane kodem** — bez Blendera i pobierania gotowych assetów 3D.
+**Autorska, jednoosobowa gra 3D w przeglądarce. Cały świat powstaje z kodu, bez gotowych modeli 3D.** To niezależna produkcja, która rozwija mechaniki gatunku life RP; nie jest powiązana z Brookhaven ani Roblox.
 
-Gra jest **niezależnym projektem**. Nie jest częścią Brookhaven ani Roblox i nie kopiuje ich map, postaci ani modeli.
+**Zagraj:** https://nexo-life-rp.vercel.app
 
-**GRA ONLINE:** https://nexo-life-rp.vercel.app
+**GitHub:** https://github.com/stronezrobie-hub/nexo-city-3d
 
-**KOD:** https://github.com/stronezrobie-hub/nexo-city-3d
+## Nowości w 6.0
 
-## Wersja 5.0 — co działa
+- Chodzenie postacią w stylu trzecioosobowym, **WASD względem kamery** i płynne przesuwanie się wzdłuż przeszkód.
+- **Szybki start jazdy:** z garażu możesz bezpośrednio wsiąść do wybranego samochodu.
+- **Własne dekoracje domu:** roślina, lampa, regał, telewizor, fotel i biurko — maksymalnie 6 mebli jednocześnie.
+- Dekoracje są generowane jako modele 3D w kodzie, zapisują się do `localStorage` i można je usuwać.
+- Interakcje z dekoracjami w domu przyciskiem **E**: włączanie TV i lampy, odpoczynek w fotelu, czytanie i inne działania RP.
+- **Szybkie wejście do własnego domu** bez chodzenia przez całe miasto.
+- Nowe **mobilne menu skrótów**: Telefon, Domy, Pojazdy, RP oraz przycisk Więcej.
 
-### Domy i osiedla
-- Wybieranie parceli z katalogu lub podejście do domu w mieście.
-- Cztery autorskie domy generowane kodem: klasyczny, nowoczesny, willa rodzinna, loft.
-- Trzy style wnętrz: przytulny, luksusowy i gaming/neon.
-- Zmiana kolorów elewacji i umowne zamykanie drzwi (tylko RP).
-- Wchodzenie i wychodzenie z umeblowanego wnętrza.
+## Wcześniejsze funkcje
 
-### Garaż i samochody
-- Dziesięć pojazdów: City Cruiser, Family SUV, Street Sport, Police Unit, City Taxi, Ambulance, Fire Rescue, Offroad Explorer, Delivery Van i Executive Sedan.
-- Przywoływanie samochodu, jazda, wsiadanie i wysiadanie, lakier.
-- Syreny świetlne pojazdów służb (L). Klakson (H), generowane dźwięki silnika.
-
-### Miasto i odgrywanie ról
-- **Swobodne RP bez obowiązkowych dostaw**; zadania kurierskie można włączyć w zakładce Praca.
-- Przewodnik po mieście z możliwością szybkiego dotarcia do wybranego miejsca.
-- Aktywności budynków: lekarz i badanie, komisariat, kawa w kawiarni, zakupy, lekcja, bank z wpłatami/wypłatami, stacja paliw, straż pożarna.
-- Role i prace, profil RP z imieniem i biografią, gesty i animacje.
-- Postać: zmiana skóry, włosów i stroju; przedmioty i zwierzęta.
-- NPC, ulice, sygnalizacja, parki, deszcz, mgła, słońce, dzień i noc.
-
-### Wygląd
-- Interfejs, minimapa, kamera obracana myszą/dotykiem, zoom, tryb fotograficzny.
-- Trzy profile jakości: Wydajność, Auto, Ultra.
-- Niebo, materiały, modele i elementy dekoracyjne generowane programistycznie.
+- Katalog 4 modeli domów, 3 style wnętrz i zmiana kolorów elewacji.
+- 10 rodzajów pojazdów, pojazdy służb, światła syren, klakson.
+- Role i zawody, zadania kurierskie opcjonalne, bank, kawiarnia, szpital, komisariat i inne aktywności miejskie.
+- Postać, zwierzaki, przedmioty, animacje, profil RP.
+- Miasto 3D, pogoda, NPC, ruch uliczny, minimapa i swobodna kamera.
+- Zapisywanie postępów lokalnie w przeglądarce.
 
 ## Sterowanie
 
-| Klawisz | Działanie |
+| Klawisz | Funkcja |
 | --- | --- |
-| WASD / strzałki | Spacer lub jazda |
+| WASD / strzałki | Chodzenie lub jazda |
 | Shift | Sprint |
-| E | Interakcja / wsiadanie / domy / budynki |
+| E | Interakcja / wejście do auta / budynku / obsługa mebli |
 | F | Telefon |
 | C | Zmiana kamery |
 | H | Klakson |
-| L | Syrena pojazdu służb |
+| L | Syrena pojazdów służb |
 | P / Esc | Pauza |
 | O | Tryb fotograficzny |
-| Mysz lub palec | Obracanie kamery |
-| Kółko myszy | Przybliżanie/oddalanie |
 
-Na telefonach dostępne są ekranowe przyciski ruchu i interakcji.
+Mysz / dotyk na obszarze świata obraca kamerę, kółko myszy zmienia zoom.
 
-## Uruchomienie lokalne
-
-Wymagany Node.js:
+## Uruchomienie
 
 ```bash
 npm install
 npm run dev
 ```
 
-Wersja produkcyjna:
+Test wydania:
 
 ```bash
 npm run build
-npm run preview
 ```
 
-Gra korzysta z Three.js i Vite. Zewnętrzne assety graficzne nie są pobierane; Three.js jest dołączony do produkcyjnego bundla.
+Automatyczny test Chromium (Playwright) w `tests/browser-smoke.cjs` sprawdza uruchomienie gry, wybór domu, dekorowanie, jazdę, dostawy i menu mobilne. CI jest w `.github/workflows/browser-smoke.yml`.
 
-## Testy
+## Ważne ograniczenia
 
-`npm run build` sprawdza możliwość zbudowania gry. Test `tests/browser-smoke.cjs` używa Chromium/Playwright i obejmuje uruchomienie gry, wybór parceli i domu, ustawienie wnętrza, garaż, swobodne RP, dostawy oraz interakcje miejskie.
-
-## Aktualne ograniczenia
-
-- To **wersja jednoosobowa**. Nie ma kont użytkowników, serwera multiplayer, wspólnego czatu, znajomych ani synchronizacji graczy.
-- Dane (dom, pojazd, profil, środki, zawód itd.) są zapisywane **tylko lokalnie w przeglądarce** w `localStorage`.
-- Symulacja zamykania domu jest tylko mechaniczną konwencją RP, nie kontrolą dostępu innego gracza.
-- Bank korzysta wyłącznie z lokalnej, wirtualnej waluty gry. Tankowanie i niektóre scenki są symulacjami RP.
-- Świat ma autorską oprawę proceduralną i nie jest fotorealistycznym odpowiednikiem gier AAA.
+**Nie ma jeszcze multiplayera, czatu sieciowego ani kont użytkowników.** Zapis odbywa się przez `localStorage` na konkretnym urządzeniu. Zamki drzwi i niektóre aktywności to symulacje RP, a nie mechanizmy sieciowe. Ta gra ma stylizowaną, generowaną kodem grafikę, a nie fotorealistyczne zasoby AAA.
 
 © NEXO Studios.
