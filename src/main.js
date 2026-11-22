@@ -839,6 +839,7 @@ el('day').onclick=()=>{
  showToast('Pora dnia: '+timeLabels[timePreset]);
 };
 function togglePanel(p){if(activePage===p){activePage=null;el('panel').classList.remove('visible')}else{activePage=p;renderPanel()}document.querySelectorAll('[data-page]').forEach(e=>e.classList.toggle('active',e.dataset.page===activePage))}
+el('gfxButton').onclick=()=>togglePanel('settings');
 const sideMenu=document.querySelector('.sidebar'),menuExpand=el('menuExpand');
 function closeMobileMenu(){sideMenu.classList.remove('expanded');menuExpand.setAttribute('aria-expanded','false')}
 document.querySelectorAll('[data-page]').forEach(e=>e.onclick=()=>{togglePanel(e.dataset.page);closeMobileMenu()});
