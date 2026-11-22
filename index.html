@@ -52,7 +52,7 @@ button{font:inherit;cursor:pointer;color:inherit}#world{width:100%;height:100%;d
 <body>
 <canvas id="world"></canvas><div id="shade"></div>
 <div class="hud">
-<header class="head"><div class="logo"><i>N</i><div><b>NEXO LIFE RP</b><small>YOUR CITY • YOUR STORY</small></div></div><div class="header-right"><div class="cash glass"><small>TWOJE PIENIĄDZE</small><span id="cash">$ 2 500</span></div><button class="smallbtn" id="day">☀ DZIEŃ</button><button class="smallbtn" id="pause">Ⅱ</button></div></header>
+<header class="head"><div class="logo"><i>N</i><div><b>NEXO LIFE RP</b><small>YOUR CITY • YOUR STORY</small></div></div><div class="header-right"><div class="cash glass"><small>TWOJE PIENIĄDZE</small><span id="cash">$ 2 500</span></div><button class="smallbtn" id="day">☀ DZIEŃ</button><button class="smallbtn" id="sound" title="Wycisz dźwięki">🔊</button><button class="smallbtn" id="pause">Ⅱ</button></div></header>
 <nav class="sidebar">
 <button class="menu-btn" data-page="phone"><span class="ico">📱</span>Telefon</button>
 <button class="menu-btn" data-page="avatar"><span class="ico">👤</span>Postać</button>
@@ -65,10 +65,10 @@ button{font:inherit;cursor:pointer;color:inherit}#world{width:100%;height:100%;d
 </nav>
 <section class="task glass"><span class="eyebrow">● TWOJA PRZYGODA</span><h3 id="taskTitle">Kurier miejski</h3><p id="taskDesc">Odwiedzaj świecące punkty na mapie, by zarabiać pieniądze.</p><div class="progress"><i id="taskProgress"></i></div><div class="taskfoot"><span id="role">Mieszkaniec</span><span id="mission">0/5</span></div></section>
 <section id="panel" class="glass" aria-label="Panel gry"></section>
-<div class="bottom"><div class="minihud glass"><div id="mode">🚶 SPACER</div><div id="speed" class="speed" style="display:none">0 <span style="font-size:10px">KM/H</span></div><div class="mini-hint"><strong>WASD</strong> ruch · <strong>E</strong> interakcja<br><strong>F</strong> telefon · <strong>C</strong> kamera · <strong>SHIFT</strong> sprint</div></div></div>
+<div class="bottom"><div class="minihud glass"><div id="mode">🚶 SPACER</div><div id="speed" class="speed" style="display:none">0 <span style="font-size:10px">KM/H</span></div><div class="mini-hint"><strong>WASD</strong> ruch · <strong>E</strong> interakcja<br><strong>F</strong> telefon · <strong>H</strong> klakson · <strong>SHIFT</strong> sprint</div></div></div>
 <button class="interact" id="interact" style="display:none"><kbd>E</kbd><span id="interactText"></span></button>
 <div class="map-box glass"><div class="map-title"><span>◉ MIASTO</span><span>LIVE</span></div><canvas id="map" width="316" height="316"></canvas></div>
-<div class="touch"><div class="dpad"><button class="touch-btn" data-control="left">◀</button><button class="touch-btn" data-control="forward">▲</button><button class="touch-btn" data-control="back">▼</button><button class="touch-btn" data-control="right">▶</button></div><div class="actionpad"><button class="touch-btn" data-control="run"><small>SPRINT</small>⚡</button><button class="touch-btn" data-shortcut="interact"><small>AKCJA</small>✦</button><button class="touch-btn" data-shortcut="phone"><small>MENU</small>📱</button><button class="touch-btn" data-shortcut="camera"><small>WIDOK</small>📷</button></div></div>
+<div class="touch"><div class="dpad"><button class="touch-btn" data-control="left">◀</button><button class="touch-btn" data-control="forward">▲</button><button class="touch-btn" data-control="back">▼</button><button class="touch-btn" data-control="right">▶</button></div><div class="actionpad"><button class="touch-btn" data-control="run"><small>SPRINT</small>⚡</button><button class="touch-btn" data-shortcut="interact"><small>AKCJA</small>✦</button><button class="touch-btn" data-shortcut="phone"><small>MENU</small>📱</button><button class="touch-btn" data-shortcut="camera"><small>WIDOK</small>📷</button><button class="touch-btn" data-shortcut="honk"><small>KLAKSON</small>📣</button></div></div>
 <div class="status">NEXO STUDIOS · PROCEDURAL 3D · NO IMPORTED MODELS · LOCAL SAVE</div>
 <div class="toast" id="toast"></div>
 </div>
@@ -78,7 +78,7 @@ import * as T from 'https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.modul
 const el=id=>document.getElementById(id),W=window;
 const scene=new T.Scene();scene.background=new T.Color('#93ccf5');scene.fog=new T.Fog('#93ccf5',125,380);
 const renderer=new T.WebGLRenderer({canvas:el('world'),antialias:true,powerPreference:'high-performance'});
-renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.5));renderer.setSize(innerWidth,innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio||1,matchMedia('(pointer:coarse)').matches?1:1.5));renderer.setSize(innerWidth,innerHeight);
 renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;
 renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1.3;
 const cam=new T.PerspectiveCamera(65,innerWidth/innerHeight,.1,800),clock=new T.Clock();
@@ -274,7 +274,16 @@ function replaceVehicle(type){
 replaceVehicle(save.vehicle);
 for(let i=0;i<15;i++){const model=carModel([0xeecc70,0xec998a,0xb3d2d6,0xbca5f0,0xa5d7a9][Math.floor(rr(0,5))]);model.root.scale.setScalar(.78);scene.add(model.root);traffic.push({model,vertical:random()>.5,lane:Math.floor(rr(-3,4))*60+(random()>.5?3.2:-3.2),t:rr(-185,185),dir:random()>.5?1:-1,speed:rr(7,14)})}
 const npc=[];
-for(let i=0;i<13;i++){const g=new T.Group();cube(g,0,1.45,0,.85,1.3,.7,mat(clothes[i%clothes.length]),false);cube(g,0,2.36,0,.74,.8,.72,skin,false);cube(g,0,.45,0,.7,.75,.5,pants,false);scene.add(g);const px=[-30,90,30,-90][i%4],pz=[-30,30,-90,90][Math.floor(i/4)%4];npc.push({g,x:px,z:pz,seed:rr(0,20)})}
+for(let i=0;i<13;i++){
+ const g=new T.Group(),shirt=mat(clothes[i%clothes.length]),face=mat(skinColors[Math.floor(rr(0,skinColors.length))]);
+ cube(g,0,1.62,0,.87,1.3,.68,shirt,false);
+ const h=new T.Mesh(new T.SphereGeometry(.44,11,9),face);h.position.set(0,2.63,-.03);g.add(h);
+ cube(g,0,3,-.03,.86,.22,.8,mat(hairColors[Math.floor(rr(0,hairColors.length))]),false);
+ cube(g,-.59,1.58,0,.3,1.18,.33,shirt,false);cube(g,.59,1.58,0,.3,1.18,.33,shirt,false);
+ const l=cube(g,-.24,.45,0,.31,.88,.4,pants,false),r=cube(g,.24,.45,0,.31,.88,.4,pants,false);
+ scene.add(g);const px=[-30,90,30,-90][i%4],pz=[-30,30,-90,90][Math.floor(i/4)%4];
+ npc.push({g,x:px,z:pz,seed:rr(0,20),l,r})
+}
 let playerPos=new T.Vector3(8,0,19),charYaw=0,carYaw=0,carSpeed=0,driving=false,inside=false,night=false,started=false,paused=true,highView=false,activePage=null,exitPosition=null,payTick=0,stepTime=0,uiTick=0;
 const esc=text=>String(text).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 let emote='none',emoteClock=0,weather=save.weather;
@@ -349,13 +358,44 @@ function animateWeather(dt){
 }
 function showToast(txt){const e=el('toast');e.textContent=txt;e.classList.add('on');clearTimeout(showToast.id);showToast.id=setTimeout(()=>e.classList.remove('on'),2400)}
 const key=new Set(),mapped={w:'forward',arrowup:'forward',s:'back',arrowdown:'back',a:'left',arrowleft:'left',d:'right',arrowright:'right',shift:'run'};
-document.addEventListener('keydown',e=>{const k=e.key.toLowerCase();if(mapped[k]){key.add(mapped[k]);e.preventDefault()}if(e.repeat)return;if(k==='e')interact();if(k==='f')togglePanel('phone');if(k==='c'){highView=!highView;showToast(highView?'Kamera z góry':'Kamera zza pleców')}if(k==='p'||k==='escape')togglePause()});
+document.addEventListener('keydown',e=>{const k=e.key.toLowerCase();if(mapped[k]){key.add(mapped[k]);e.preventDefault()}if(e.repeat)return;if(k==='e')interact();if(k==='f')togglePanel('phone');if(k==='h')honk();if(k==='c'){highView=!highView;showToast(highView?'Kamera z góry':'Kamera zza pleców')}if(k==='p'||k==='escape')togglePause()});
 document.addEventListener('keyup',e=>{const k=e.key.toLowerCase();if(mapped[k])key.delete(mapped[k])});W.addEventListener('blur',()=>key.clear());
 document.querySelectorAll('[data-control]').forEach(b=>{const action=b.dataset.control;b.addEventListener('pointerdown',e=>{e.preventDefault();b.setPointerCapture(e.pointerId);key.add(action);b.classList.add('down')});for(const ev of ['pointerup','pointercancel','lostpointercapture'])b.addEventListener(ev,()=>{key.delete(action);b.classList.remove('down')})});
-document.querySelectorAll('[data-shortcut]').forEach(b=>b.addEventListener('click',()=>{const action=b.dataset.shortcut;if(action==='interact')interact();if(action==='phone')togglePanel('phone');if(action==='camera'){highView=!highView;showToast('Zmieniono kamerę')}}));
+document.querySelectorAll('[data-shortcut]').forEach(b=>b.addEventListener('click',()=>{const action=b.dataset.shortcut;if(action==='interact')interact();if(action==='phone')togglePanel('phone');if(action==='camera'){highView=!highView;showToast('Zmieniono kamerę')}if(action==='honk')honk()}));
+let soundEnabled=true,audioCtx=null,engineOsc=null,engineGain=null;
+function initAudio(){
+ if(!soundEnabled)return;
+ if(!audioCtx){
+  const Audio=W.AudioContext||W.webkitAudioContext;if(!Audio)return;
+  audioCtx=new Audio();
+  engineOsc=audioCtx.createOscillator();engineGain=audioCtx.createGain();
+  engineOsc.type='sawtooth';engineOsc.frequency.value=45;engineGain.gain.value=0;
+  const filter=audioCtx.createBiquadFilter();filter.type='lowpass';filter.frequency.value=180;
+  engineOsc.connect(filter);filter.connect(engineGain);engineGain.connect(audioCtx.destination);engineOsc.start();
+ }
+ if(audioCtx.state==='suspended')audioCtx.resume().catch(()=>{});
+}
+function honk(){
+ if(!started||paused||!driving||!soundEnabled)return;
+ initAudio();if(!audioCtx)return;
+ const t=audioCtx.currentTime;
+ for(const pitch of [325,405]){
+  const osc=audioCtx.createOscillator(),gain=audioCtx.createGain();
+  osc.type='square';osc.frequency.value=pitch;
+  gain.gain.setValueAtTime(.0001,t);gain.gain.exponentialRampToValueAtTime(.032,t+.03);gain.gain.exponentialRampToValueAtTime(.0001,t+.32);
+  osc.connect(gain);gain.connect(audioCtx.destination);osc.start(t);osc.stop(t+.34);
+ }
+}
+function updateAudio(){
+ if(!audioCtx||!engineOsc||!engineGain)return;
+ const time=audioCtx.currentTime;
+ engineOsc.frequency.setTargetAtTime(44+Math.abs(carSpeed)*3.7,time,.09);
+ engineGain.gain.setTargetAtTime(soundEnabled&&started&&!paused&&driving?.024+Math.abs(carSpeed)*.0005:0,time,.08);
+}
+el('sound').onclick=()=>{soundEnabled=!soundEnabled;el('sound').textContent=soundEnabled?'🔊':'🔇';if(soundEnabled)initAudio();showToast(soundEnabled?'Dźwięk włączony':'Dźwięk wyłączony')};
 function togglePause(){if(!started)return;paused=!paused;el('pause').textContent=paused?'▶':'Ⅱ';showToast(paused?'Pauza':'Wracamy do miasta!')}
 el('pause').onclick=togglePause;
-el('startBtn').onclick=()=>{started=true;paused=false;el('start').classList.add('hidden');showToast('Witaj w NEXO LIFE RP!')}
+el('startBtn').onclick=()=>{started=true;paused=false;initAudio();el('start').classList.add('hidden');showToast('Witaj w NEXO LIFE RP!')}
 el('day').onclick=()=>{night=!night;applyAtmosphere();el('day').textContent=night?'☾ NOC':'☀ DZIEŃ';showToast(night?'Zapadła noc':'Nastał dzień')};
 function togglePanel(p){if(activePage===p){activePage=null;el('panel').classList.remove('visible')}else{activePage=p;renderPanel()}document.querySelectorAll('[data-page]').forEach(e=>e.classList.toggle('active',e.dataset.page===activePage))}
 document.querySelectorAll('[data-page]').forEach(e=>e.onclick=()=>togglePanel(e.dataset.page));
@@ -489,9 +529,9 @@ minimap()}
 W.addEventListener('resize',()=>{cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
 cam.position.set(8,8,35);cam.lookAt(8,1,19);
 function loop(){requestAnimationFrame(loop);let dt=Math.min(.045,clock.getDelta());if(!paused){if(driving)moveCar(dt);else moveCharacter(dt);animateRoleplay(dt);animateWeather(dt);updateTraffic(dt);progress(dt);payTick+=dt;if(payTick>60){payTick-=60;if(save.job!=='Mieszkaniec'){save.cash+=500;persist();updateHud();showToast('Wypłata za pracę: +$500')}}marker.rotation.y+=dt*.65;torus.rotation.z+=dt*.7;
-for(const n of npc){n.g.position.set(n.x+Math.cos(clock.elapsedTime*.45+n.seed)*3,0,n.z+Math.sin(clock.elapsedTime*.45+n.seed)*3)}
+for(const n of npc){const tt=clock.elapsedTime*.45+n.seed;n.g.position.set(n.x+Math.cos(tt)*3,0,n.z+Math.sin(tt)*3);n.g.rotation.y=-tt;n.l.rotation.x=Math.sin(tt*6)*.27;n.r.rotation.x=-Math.sin(tt*6)*.27}
 }
-cameraUpdate(dt);renderer.render(scene,cam);uiTick+=dt;if(uiTick>.17){renderHUD();uiTick=0}}
+cameraUpdate(dt);updateAudio();renderer.render(scene,cam);uiTick+=dt;if(uiTick>.17){renderHUD();uiTick=0}}
 loop();
 </script>
 </body></html>
