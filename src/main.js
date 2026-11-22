@@ -579,7 +579,7 @@ if(activePage==='avatar')return{title:'👤 KREATOR POSTACI',lead:'Personalizuj 
  '<div class="panel-caption">KOLOR WŁOSÓW</div><div class="swatches">'+hairColors.map((c,i)=>'<button class="swatch '+(save.hair===i?'selected':'')+'" style="background:#'+c.toString(16).padStart(6,'0')+'" data-hair="'+i+'" aria-label="Włosy '+i+'"></button>').join('')+'</div>'};
 if(activePage==='cars')return{title:'🚘 GARAŻ MIESZKAŃCA',lead:'Wszystkie pojazdy są dostępne za darmo. Wybierz model i przywołaj go na ulicę.',body:
  vehicleModels.map((v,i)=>'<div class="option"><div><b>'+v.icon+' '+v.name+'</b><small>'+Math.round(v.speed*3.2)+' km/h'+(v.emergency?' · pojazd służb':'')+'</small></div><button data-spawn="'+i+'">'+(save.vehicle===i?'PRZYWOŁAJ':'WYBIERZ')+'</button></div>').join('')+
- '<div class="option"><div><b>🎨 Lakier</b><small>Zmień kolor pojazdu</small></div><button data-paint="1">ZMIANA</button></div>'+
+ '<div class="option"><div><b>⚡ Szybki start</b><small>Wybierz pojazd i od razu jedź</small></div><button data-drive="'+save.vehicle+'">JEDŹ TERAZ</button></div>'+ '<div class="option"><div><b>🎨 Lakier</b><small>Zmień kolor pojazdu</small></div><button data-paint="1">ZMIANA</button></div>'+
  (vehicleModels[save.vehicle]?.emergency?'<div class="option"><div><b>🚨 Syrena pojazdu</b><small>Możesz również użyć klawisza L</small></div><button data-siren="1">'+(sirenOn?'WYŁĄCZ':'WŁĄCZ')+'</button></div>':'')};
 if(activePage==='homes')return{title:'🏠 DOMY I PARCELE',lead:'Wybierz działkę, następnie dom z katalogu. Możesz w każdej chwili zmienić wygląd domu i umeblowanie.',body:
  '<div class="option"><div><b>🏡 Moja parcela</b><small>'+(save.house?'Numer '+save.house:'Jeszcze nie wybrano')+'</small></div><button data-home="1" '+(save.house?'':'disabled')+'>IDŹ DO DOMU</button></div>'+
@@ -669,11 +669,26 @@ if(b.dataset.photo){togglePanel(activePage);togglePhoto()}
 if(b.dataset.lock){save.locked=!save.locked;persist();renderPanel();showToast(save.locked?'Zamknięto drzwi (RP)':'Otwarto drzwi')}
 if(b.dataset.homecolor){save.homeColor=(save.homeColor+1)%5;repaintHome();persist();renderPanel();showToast('Nowy kolor domu')}
 if(b.dataset.saveprofile){save.rpName=(el('rpName')?.value||'Gracz').trim().slice(0,24)||'Gracz';save.bio=(el('rpBio')?.value||'').trim().slice(0,80);persist();updateHud();renderPanel();showToast('Zapisano profil RP')}
-if(b.dataset.spawn!==undefined){if(inside){showToast('Wyjdź z domu, żeby przywołać auto');return}replaceVehicle(Number(b.dataset.spawn));
-const roadX=Math.round(playerPos.x/60)*60,roadZ=Math.round(playerPos.z/60)*60;
-if(Math.abs(roadX-playerPos.x)<Math.abs(roadZ-playerPos.z)){car.root.position.set(roadX+4,0,playerPos.z+6);carYaw=0}
-else{car.root.position.set(playerPos.x+6,0,roadZ+4);carYaw=Math.PI/2}
-driving=false;carSpeed=0;car.root.rotation.y=carYaw;avatar.visible=true;showToast('Auto jest na najbliższej ulicy!')}
+if(b.dataset.spawn!==undefined){
+ if(inside){showToast('Wyjdź z domu, żeby przywołać auto');return}
+ replaceVehicle(Number(b.dataset.spawn));
+ const roadX=Math.round(playerPos.x/60)*60,roadZ=Math.round(playerPos.z/60)*60;
+ if(Math.abs(roadX-playerPos.x)<Math.abs(roadZ-playerPos.z)){car.root.position.set(roadX+4,0,playerPos.z+6);carYaw=0}
+ else{car.root.position.set(playerPos.x+6,0,roadZ+4);carYaw=Math.PI/2}
+ driving=false;carSpeed=0;car.root.rotation.y=carYaw;avatar.visible=true;
+ showToast('Auto czeka przy najbliższej ulicy')}
+if(b.dataset.drive!==undefined){
+ if(inside){showToast('Najpierw wyjdź z domu');return}
+ replaceVehicle(Number(b.dataset.drive));
+ const roadX=Math.round(playerPos.x/60)*60,roadZ=Math.round(playerPos.z/60)*60;
+ if(Math.abs(roadX-playerPos.x)<Math.abs(roadZ-playerPos.z)){car.root.position.set(roadX+4,0,playerPos.z+6);carYaw=0}
+ else{car.root.position.set(playerPos.x+6,0,roadZ+4);carYaw=Math.PI/2}
+ carSpeed=0;car.root.rotation.y=carYaw;
+ driving=true;avatar.visible=false;charYaw=carYaw;
+ playerPos.set(car.root.position.x,0,car.root.position.z);
+ showToast('Jesteś za kierownicą! W/S — gaz i hamulec, A/D — skręt');
+ togglePanel(activePage);
+}
 if(b.dataset.home){if(!save.house)return;const h=homes.find(h=>h.id===save.house);if(h){if(driving){driving=false;avatar.visible=true;playerPos.set(car.root.position.x+4,0,car.root.position.z+4)}if(inside){inside=false}playerPos.copy(h.entry);showToast('Jesteś przy swoim domu!');togglePanel(activePage)}}
 });
 const housePaints=[0xf9d28f,0xa7d4d9,0xe9b5b5,0xd8c6eb,0xc4d6a3].map(c=>mat(c));
@@ -772,13 +787,30 @@ if(obj.kind==='business'){
 }
 el('interact').onclick=interact;
 function blocked(x,z){if(Math.abs(x)>198||Math.abs(z)>198)return true;for(const b of colliders)if(x>b.x1-1.1&&x<b.x2+1.1&&z>b.z1-1.1&&z<b.z2+1.1)return true;return false}
-function moveCharacter(dt){const f=(key.has('forward')?1:0)-(key.has('back')?1:0),turn=(key.has('left')?1:0)-(key.has('right')?1:0);charYaw+=turn*dt*2.2;let speed=(key.has('run')?12:7)*f;
-const nx=playerPos.x-Math.sin(charYaw)*speed*dt,nz=playerPos.z-Math.cos(charYaw)*speed*dt;
-if(inside){if(Math.abs(nx)<11&&Math.abs(nz-620)<11){playerPos.x=nx;playerPos.z=nz}}
-else if(!blocked(nx,nz)){playerPos.x=nx;playerPos.z=nz}
-avatar.position.copy(playerPos);avatar.rotation.y=charYaw;
-if(Math.abs(speed)>0){stepTime+=dt*10;leftArm.rotation.x=Math.sin(stepTime)*.25;rightArm.rotation.x=-Math.sin(stepTime)*.25;for(let i=0;i<legs.length;i++)legs[i].rotation.x=Math.sin(stepTime+i*Math.PI)*.11}
-else{leftArm.rotation.x*=.8;rightArm.rotation.x*=.8;for(const l of legs)l.rotation.x*=.8}
+function moveCharacter(dt){
+ // Camera-relative third-person movement: WASD also allows strafing.
+ // Sprint applies a multiplier while retaining diagonal speed normalization.
+ const forward=(key.has('forward')?1:0)-(key.has('back')?1:0);
+ const sideways=(key.has('right')?1:0)-(key.has('left')?1:0);
+ const magnitude=Math.hypot(forward,sideways);
+ if(magnitude<.01){avatar.position.copy(playerPos);avatar.rotation.y=charYaw;leftArm.rotation.x*=.78;rightArm.rotation.x*=.78;for(const l of legs)l.rotation.x*=.78;return}
+ const f=forward/magnitude,r=sideways/magnitude,speed=key.has('run')?11.5:6.2;
+ const dirX=-Math.sin(orbitYaw)*f+Math.cos(orbitYaw)*r;
+ const dirZ=-Math.cos(orbitYaw)*f-Math.sin(orbitYaw)*r;
+ const nx=playerPos.x+dirX*speed*dt,nz=playerPos.z+dirZ*speed*dt;
+ if(inside){if(Math.abs(nx)<11&&Math.abs(nz-620)<11){playerPos.x=nx;playerPos.z=nz}}
+ else{
+  // Slide along walls instead of stopping abruptly when one axis is blocked.
+  if(!blocked(nx,playerPos.z))playerPos.x=nx;
+  if(!blocked(playerPos.x,nz))playerPos.z=nz;
+ }
+ const desiredYaw=Math.atan2(-dirX,-dirZ);
+ const delta=Math.atan2(Math.sin(desiredYaw-charYaw),Math.cos(desiredYaw-charYaw));
+ charYaw+=delta*Math.min(1,dt*12);
+ avatar.position.copy(playerPos);avatar.rotation.y=charYaw;
+ stepTime+=dt*(key.has('run')?13:9);
+ leftArm.rotation.x=Math.sin(stepTime)*.36;rightArm.rotation.x=-Math.sin(stepTime)*.36;
+ for(let a=0;a<legs.length;a++)legs[a].rotation.x=Math.sin(stepTime+a*Math.PI)*.17;
 }
 function moveCar(dt){let gas=(key.has('forward')?1:0),reverse=key.has('back')?1:0;
 if(gas)carSpeed+=24*dt;else if(reverse)carSpeed-=30*dt;else carSpeed*=Math.exp(-1.6*dt);
@@ -796,7 +828,7 @@ if(driving&&Math.hypot(x-car.root.position.x,z-car.root.position.z)<4){carSpeed*
 }}
 function progress(dt){if(inside||!save.deliveryActive)return;const t=driving?car.root.position:playerPos;if(Math.hypot(t.x-marker.position.x,t.z-marker.position.z)<5.4){save.cash+=250;save.delivery++;if(save.delivery>=5){save.cash+=650;save.delivery=0;showToast('Ukończono trasę! +$900')}else showToast('Dostawa zakończona! +$250');persist();setMarker();updateHud()}}
 function cameraUpdate(dt){
- const target=driving?car.root.position:playerPos,rot=(driving?carYaw:charYaw)+orbitYaw;
+ const target=driving?car.root.position:playerPos,rot=(driving?carYaw:0)+orbitYaw;
  const dist=(highView?31:driving?19:11)*cameraDistance,height=(highView?32:driving?11:7)+orbitLift;
  const p=new T.Vector3(target.x+Math.sin(rot)*dist,Math.max(2.5,height),target.z+Math.cos(rot)*dist);
  if(inside){p.x=target.x+Math.sin(rot)*Math.min(9,dist);p.y=Math.min(7,Math.max(2.7,5+orbitLift*.1));p.z=target.z+Math.cos(rot)*Math.min(9,dist)}
