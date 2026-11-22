@@ -13,6 +13,18 @@ const skyShader=new T.ShaderMaterial({
  fragmentShader:'varying vec3 vDir; uniform float uNight; uniform float uSunset; void main(){ vec3 d=normalize(vDir); float h=smoothstep(-0.14,0.96,d.y); vec3 low=vec3(.91,.83,.71),high=vec3(.27,.60,.87); vec3 day=mix(low,high,pow(h,.67)); float sunset=exp(-pow((d.y-.07)*6.,2.))*.14; day+=vec3(.95,.44,.24)*sunset*(1.+uSunset*4.);day=mix(day,vec3(.91,.43,.24)+vec3(.03,.17,.36)*h,uSunset*.54); float sunlight=pow(max(0.,dot(d,normalize(vec3(-.54,.62,-.41)))),520.); day+=vec3(1.,.91,.72)*sunlight*2.1; vec3 night=mix(vec3(.06,.10,.19),vec3(.015,.035,.10),h); float moon=pow(max(0.,dot(d,normalize(vec3(.36,.48,.63)))),680.); night+=vec3(.6,.71,.93)*moon*.65; gl_FragColor=vec4(mix(day,night,uNight),1.); }'
 });
 const skyDome=new T.Mesh(new T.SphereGeometry(480,34,18),skyShader);skyDome.renderOrder=-999;scene.add(skyDome);
+// Code-generated starfield: purely geometric points, visible only at night.
+const starPositions=new Float32Array(520*3);
+let starSeed=17342;
+for(let i=0;i<520;i++){
+ starSeed=(starSeed*1664525+1013904223)>>>0;const a=starSeed/4294967296*6.283;
+ starSeed=(starSeed*1664525+1013904223)>>>0;const h=.13+(starSeed/4294967296)*.84;
+ const r=420*Math.sqrt(1-h*h);
+ starPositions[i*3]=Math.cos(a)*r;starPositions[i*3+1]=420*h;starPositions[i*3+2]=Math.sin(a)*r;
+}
+const starGeo=new T.BufferGeometry();starGeo.setAttribute('position',new T.BufferAttribute(starPositions,3));
+const starfield=new T.Points(starGeo,new T.PointsMaterial({color:0xe4f4ff,size:2.1,sizeAttenuation:false,transparent:true,opacity:.8,depthWrite:false,fog:false}));
+skyDome.add(starfield);starfield.visible=false;
 const renderer=new T.WebGLRenderer({canvas:el('world'),antialias:true,powerPreference:'high-performance'});
 renderer.setPixelRatio(Math.min(devicePixelRatio||1,matchMedia('(pointer:coarse)').matches?1:1.5));renderer.setSize(innerWidth,innerHeight);
 renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;renderer.outputColorSpace=T.SRGBColorSpace;
@@ -407,6 +419,47 @@ function makeBusShelter(x,z){
  labelSign('PRZYSTANEK',x,3.13,z-1.87,6.8,.72,'#234550','#e7f7ff');
 }
 makeBusShelter(18,18);makeBusShelter(-102,18);
+// Architecture pack: skylights, rooftop ventilation, night-lit offices and balconies.
+const premiumGeometry=new T.Group();scene.add(premiumGeometry);
+const roofVentMat=mat(0x6e878b,.44),roofTrim=mat(0xd8dad7),solarCell=new T.MeshPhysicalMaterial({color:0x203b52,metalness:.48,roughness:.19,clearcoat:.9});
+const litWindowMat=new T.MeshStandardMaterial({color:0xf9e9c7,emissive:0xffb36b,emissiveIntensity:.05,metalness:0,roughness:.7});
+const litWindows=[];
+for(const b of businesses){
+ const height=b.kind==='hospital'?27:b.kind==='school'?20:16;
+ for(const dx of [-10,10]){
+  cube(premiumGeometry,b.x+dx,height+1,b.z-11,3.4,1.5,3,roofVentMat,false);
+  cube(premiumGeometry,b.x+dx,height+1.85,b.z-11,3.65,.25,3.2,roofTrim,false);
+ }
+ for(const dx of [-12,-9,-6,6,9,12]){
+  for(let y=7;y<height-1;y+=4.5){
+   const mesh=cube(premiumGeometry,b.x+dx,y,b.z+5.24,.55,.84,.10,litWindowMat,false);
+   litWindows.push(mesh);
+  }
+ }
+ if(b.kind==='school'||b.kind==='hospital'){
+  for(let k=0;k<4;k++){
+   const panel=cube(premiumGeometry,b.x-12+k*7,height+.82,b.z-8,5,.14,3,solarCell,false);
+   panel.rotation.x=-.15;
+  }
+ }
+}
+for(const h of homes){
+ for(const dx of [-6,6]){
+  cube(premiumGeometry,h.x+dx,7.4,h.z+3.19,3.2,.20,.43,roofTrim,false);
+  cube(premiumGeometry,h.x+dx,3.27,h.z+3.19,3.2,.20,.43,roofTrim,false);
+ }
+}
+// Animated concentric highlights on the water surface.
+const waterRippleMaterial=new T.MeshBasicMaterial({color:0xc7fcff,transparent:true,opacity:.3,depthWrite:false,side:T.DoubleSide});
+const waterRipples=[];
+for(const [ix,iz] of [[2,2],[3,3]]){
+ const x=-150+ix*60,z=-150+iz*60;
+ for(let i=0;i<3;i++){
+  const ring=new T.Mesh(new T.RingGeometry(1,1.08,48),waterRippleMaterial);
+  ring.rotation.x=-Math.PI/2;ring.position.set(x,1.065,z);
+  ring.userData.phase=i/3;scene.add(ring);waterRipples.push(ring);
+ }
+}
 
 const indoor=new T.Group();scene.add(indoor);indoor.position.set(0,0,620);
 const floor=mat(0xbab5aa),walls=mat(0xf0e7d8),couch=mat(0x5c8a9d),rug=mat(0x9cbbc0);
@@ -416,6 +469,17 @@ cube(indoor,0,.08,-2,12,.11,9,rug,false);cube(indoor,0,1.1,-6,9,1.4,3.6,couch);
 cube(indoor,0,1.7,-7.4,9,1.5,.55,couch);cube(indoor,0,.6,1,4.3,1.1,2.4,m.wood);
 cube(indoor,-8,2,-8,3,4,3,m.wood);cube(indoor,9,2.2,-9,3,4.2,3,m.trim);
 cube(indoor,0,3,12.6,3,6,.28,m.wood,false);
+// Premium interior: ceiling beams, floor joints, hanging lights and framed artwork.
+const floorLineMaterial=mat(0xa7a496,.78);
+for(let i=-12;i<=12;i+=2.4)cube(indoor,i,.029,0,.026,.015,25.7,floorLineMaterial,false);
+cube(indoor,0,10.25,0,25.7,.4,25.7,walls,false);
+for(const z of [-8,0,8]){
+ cube(indoor,0,9.88,z,24,.15,.2,m.wood,false);
+ cube(indoor,0,9.55,z,2.5,.32,1.1,mat(0xdfdfd4),false);
+}
+const wallArt=new T.MeshBasicMaterial({color:0x4e8692});
+cube(indoor,0,5.15,-12.68,5.8,3.1,.14,wallArt,false);
+cube(indoor,0,5.16,-12.52,5.1,2.45,.12,mat(0xc2a67c),false);
 // Furnished bedroom, kitchen and dining area – procedural meshes only
 cube(indoor,-7,.55,5,6,1.1,8,m.wood,false);
 cube(indoor,-7,1.17,5,5.5,.5,7.2,mat(0xe6ebe7),false);
@@ -552,6 +616,7 @@ function setQuality(value){
  scene.environmentIntensity=profile.env;
  graphics.streetLightLimit=profile.lights;
  graphics.visibility=profile.fog;
+ premiumGeometry.visible=save.quality!=='low';
  persist();
  refreshGraphicsHud();
 }
@@ -737,7 +802,7 @@ function applyAtmosphere(){
  const bg=night?(foggy?0x263546:0x172a45):foggy?0x8e9da6:raining?0x829fb8:0x93ccf5;
  scene.background.setHex(bg);scene.fog.color.setHex(bg);scene.fog.near=foggy?40:raining?85:Math.max(125,graphics.visibility*.28);scene.fog.far=foggy?215:raining?315:(graphics.visibility||380);
  amb.intensity=night?1.1:raining?1.6:timePreset==='sunset'?1.9:2.35;sun.intensity=night?.62:raining?1.5:timePreset==='sunset'?2.4:2.8;renderer.toneMappingExposure=night?1.27:timePreset==='sunset'?1.25:1.37;scene.environmentIntensity=(qualityPresets[save.quality]?.env||.5)*(night?.4:1);
- rainCloud.visible=raining;m.road.roughness=raining?.31:.8;m.road.needsUpdate=true;skyShader.uniforms.uNight.value=night?1:0;skyShader.uniforms.uSunset.value=timePreset==='sunset'?1:timePreset==='dawn'?.55:0;
+ rainCloud.visible=raining;m.road.roughness=raining?.31:.8;m.road.needsUpdate=true;skyShader.uniforms.uNight.value=night?1:0;starfield.visible=night;litWindowMat.emissiveIntensity=night?2.4:.03;skyShader.uniforms.uSunset.value=timePreset==='sunset'?1:timePreset==='dawn'?.55:0;
  sun.color.setHex(timePreset==='sunset'?0xffad7e:timePreset==='dawn'?0xffd0a1:0xffe9c9);
 }
 applyAtmosphere();
@@ -748,6 +813,7 @@ function animateWeather(dt){
   rainGeo.attributes.position.needsUpdate=true;
  }
  for(const c of clouds){c.position.x+=dt*.45;if(c.position.x>205)c.position.x=-205}
+for(const ripple of waterRipples){const t=(clock.elapsedTime*.3+ripple.userData.phase)%1;ripple.scale.setScalar(.7+t*3.5);ripple.material.opacity=.3}
  for(const o of signals){const phase=(Math.floor(clock.elapsedTime/7+o.offset*.3)%3+3)%3;o.bulb.material.color.setHex(phase===o.i?[0xff6864,0xffd166,0x79ff88][o.i]:[0x4c2729,0x5c4f2b,0x24492f][o.i])}
 }
 function showToast(txt){const e=el('toast');e.textContent=txt;e.classList.add('on');clearTimeout(showToast.id);showToast.id=setTimeout(()=>e.classList.remove('on'),2400)}
