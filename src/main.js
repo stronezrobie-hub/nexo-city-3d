@@ -8,9 +8,9 @@ const el=id=>document.getElementById(id),W=window;
 const scene=new T.Scene();scene.background=new T.Color('#93ccf5');scene.fog=new T.Fog('#93ccf5',125,380);
 const skyShader=new T.ShaderMaterial({
  side:T.BackSide,depthWrite:false,fog:false,
- uniforms:{uNight:{value:0}},
+ uniforms:{uNight:{value:0},uSunset:{value:0}},
  vertexShader:'varying vec3 vDir; void main(){vDir=position;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',
- fragmentShader:'varying vec3 vDir; uniform float uNight; void main(){ vec3 d=normalize(vDir); float h=smoothstep(-0.14,0.96,d.y); vec3 low=vec3(.91,.83,.71),high=vec3(.27,.60,.87); vec3 day=mix(low,high,pow(h,.67)); float sunset=exp(-pow((d.y-.07)*6.,2.))*.14; day+=vec3(.95,.57,.30)*sunset; float sunlight=pow(max(0.,dot(d,normalize(vec3(-.54,.62,-.41)))),520.); day+=vec3(1.,.91,.72)*sunlight*2.1; vec3 night=mix(vec3(.06,.10,.19),vec3(.015,.035,.10),h); float moon=pow(max(0.,dot(d,normalize(vec3(.36,.48,.63)))),680.); night+=vec3(.6,.71,.93)*moon*.65; gl_FragColor=vec4(mix(day,night,uNight),1.); }'
+ fragmentShader:'varying vec3 vDir; uniform float uNight; uniform float uSunset; void main(){ vec3 d=normalize(vDir); float h=smoothstep(-0.14,0.96,d.y); vec3 low=vec3(.91,.83,.71),high=vec3(.27,.60,.87); vec3 day=mix(low,high,pow(h,.67)); float sunset=exp(-pow((d.y-.07)*6.,2.))*.14; day+=vec3(.95,.44,.24)*sunset*(1.+uSunset*4.);day=mix(day,vec3(.91,.43,.24)+vec3(.03,.17,.36)*h,uSunset*.54); float sunlight=pow(max(0.,dot(d,normalize(vec3(-.54,.62,-.41)))),520.); day+=vec3(1.,.91,.72)*sunlight*2.1; vec3 night=mix(vec3(.06,.10,.19),vec3(.015,.035,.10),h); float moon=pow(max(0.,dot(d,normalize(vec3(.36,.48,.63)))),680.); night+=vec3(.6,.71,.93)*moon*.65; gl_FragColor=vec4(mix(day,night,uNight),1.); }'
 });
 const skyDome=new T.Mesh(new T.SphereGeometry(480,34,18),skyShader);skyDome.renderOrder=-999;scene.add(skyDome);
 const renderer=new T.WebGLRenderer({canvas:el('world'),antialias:true,powerPreference:'high-performance'});
@@ -478,6 +478,10 @@ try{const data=JSON.parse(localStorage.getItem('nexo-life-rp-alpha2')||'{}');if(
 const skinColors=[0xf0c39b,0xf9d8bc,0xb98462,0x80543e,0xc7a68c],hairColors=[0x342a29,0xe5bd76,0x644734,0x1a2430,0xb5543d];
 torso.color.setHex(clothes[save.color]);skin.color.setHex(skinColors[save.skin]);hair.color.setHex(hairColors[save.hair]);
 function persist(){try{localStorage.setItem('nexo-life-rp-alpha2',JSON.stringify(save))}catch{}}
+function refreshGraphicsHud(){
+ const badge=el('gfxValue');if(badge)badge.textContent=(qualityPresets[save.quality]?.label||'BALANCED');
+ const fps=el('qualityFps');if(fps)fps.textContent=String(graphics.fps||0);
+}
 const qualityPresets={
  low:{label:'LOW',dpr:.75,shadow:0,bloom:false,ao:false,fog:260,env:.3,lights:2},
  balanced:{label:'BALANCED',dpr:1,shadow:1024,bloom:false,ao:false,fog:380,env:.5,lights:3},
@@ -520,7 +524,7 @@ function setQuality(value){
  graphics.streetLightLimit=profile.lights;
  graphics.visibility=profile.fog;
  persist();
- if(typeof refreshGraphicsHud==='function')refreshGraphicsHud();
+ refreshGraphicsHud();
 }
 setQuality(save.quality);
 let car=carModel(0xa6e7fc);car.root.position.set(6,0,-12);scene.add(car.root);
@@ -619,7 +623,7 @@ for(const [i,b] of businesses.filter(b=>['bank','cafe','shop','police','hospital
  model.root.traverse(obj=>{if(obj.isMesh){obj.castShadow=false;obj.receiveShadow=true}});
  scene.add(model.root);
 }
-let playerPos=new T.Vector3(8,0,19),charYaw=0,carYaw=0,carSpeed=0,driving=false,inside=false,night=false,started=false,paused=true,highView=false,activePage=null,exitPosition=null,payTick=0,stepTime=0,uiTick=0;
+let playerPos=new T.Vector3(8,0,19),charYaw=0,carYaw=0,carSpeed=0,driving=false,inside=false,night=false,timePreset='day',started=false,paused=true,highView=false,activePage=null,exitPosition=null,payTick=0,stepTime=0,uiTick=0;
 const esc=text=>String(text).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 let emote='none',emoteClock=0,weather=save.weather;
 const propHolder=new T.Group();propHolder.position.set(0,-.75,-.15);rightArm.add(propHolder);
@@ -680,8 +684,9 @@ function applyAtmosphere(){
  const foggy=weather==='fog',raining=weather==='rain';
  const bg=night?(foggy?0x263546:0x172a45):foggy?0x8e9da6:raining?0x829fb8:0x93ccf5;
  scene.background.setHex(bg);scene.fog.color.setHex(bg);scene.fog.near=foggy?40:raining?85:Math.max(125,graphics.visibility*.28);scene.fog.far=foggy?215:raining?315:(graphics.visibility||380);
- amb.intensity=night?1.1:raining?1.6:2.35;sun.intensity=night?.62:raining?1.5:2.8;renderer.toneMappingExposure=night?1.27:1.37;
- rainCloud.visible=raining;m.road.roughness=raining?.31:.8;m.road.needsUpdate=true;skyShader.uniforms.uNight.value=night?1:0;
+ amb.intensity=night?1.1:raining?1.6:timePreset==='sunset'?1.9:2.35;sun.intensity=night?.62:raining?1.5:timePreset==='sunset'?2.4:2.8;renderer.toneMappingExposure=night?1.27:timePreset==='sunset'?1.25:1.37;scene.environmentIntensity=(qualityPresets[save.quality]?.env||.5)*(night?.4:1);
+ rainCloud.visible=raining;m.road.roughness=raining?.31:.8;m.road.needsUpdate=true;skyShader.uniforms.uNight.value=night?1:0;skyShader.uniforms.uSunset.value=timePreset==='sunset'?1:timePreset==='dawn'?.55:0;
+ sun.color.setHex(timePreset==='sunset'?0xffad7e:timePreset==='dawn'?0xffd0a1:0xffe9c9);
 }
 applyAtmosphere();
 function animateWeather(dt){
@@ -772,7 +777,15 @@ el('startBtn').onclick=()=>{
  try{if(!localStorage.getItem(newsStorageKey))setNewsOpen(true)}catch{setNewsOpen(true)}
  showToast('Witaj w NEXO VALLEY! Odkrywaj miasto i wybierz swoją historię.')
 }
-el('day').onclick=()=>{night=!night;applyAtmosphere();el('day').textContent=night?'☾ NOC':'☀ DZIEŃ';showToast(night?'Zapadła noc':'Nastał dzień')};
+const timePresets=['dawn','day','sunset','night'];
+const timeLabels={dawn:'🌅 ŚWIT',day:'☀ DZIEŃ',sunset:'🌇 ZACHÓD',night:'☾ NOC'};
+el('day').onclick=()=>{
+ timePreset=timePresets[(timePresets.indexOf(timePreset)+1)%timePresets.length];
+ night=timePreset==='night';
+ applyAtmosphere();
+ el('day').textContent=timeLabels[timePreset];
+ showToast('Pora dnia: '+timeLabels[timePreset]);
+};
 function togglePanel(p){if(activePage===p){activePage=null;el('panel').classList.remove('visible')}else{activePage=p;renderPanel()}document.querySelectorAll('[data-page]').forEach(e=>e.classList.toggle('active',e.dataset.page===activePage))}
 const sideMenu=document.querySelector('.sidebar'),menuExpand=el('menuExpand');
 function closeMobileMenu(){sideMenu.classList.remove('expanded');menuExpand.setAttribute('aria-expanded','false')}
@@ -888,10 +901,14 @@ if(activePage==='bag')return{title:'🎒 PLECAK I PUPIL',lead:'Wybierz przedmiot
  [['none','✋ Puste ręce'],['phone','📱 Telefon'],['flashlight','🔦 Latarka'],['coffee','☕ Kawa'],['umbrella','☂️ Parasol'],['balloon','🎈 Balon']].map(x=>'<div class="option"><b>'+x[1]+'</b><button data-prop="'+x[0]+'" '+(save.prop===x[0]?'disabled':'')+'>'+(save.prop===x[0]?'WYBRANO':'WEŹ')+'</button></div>').join('')+
  '<div class="panel-caption">ZWIERZĘTA</div>'+
  [['none','Bez zwierzaka'],['dog','🐶 Pies'],['cat','🐱 Kot']].map(x=>'<div class="option"><b>'+x[1]+'</b><button data-pet="'+x[0]+'" '+(save.pet===x[0]?'disabled':'')+'>'+(save.pet===x[0]?'WYBRANO':'WYBIERZ')+'</button></div>').join('')};
-if(activePage==='settings')return{title:'⚙️ GRAFIKA I KAMERA',lead:'Dostosuj jakość obrazu do swojego sprzętu. Ustawienia zapisują się automatycznie.',body:
- '<div class="panel-caption">JAKOŚĆ GRAFIKI</div>'+
- [['fast','⚡ Wydajność','Mniej efektów dla słabszych telefonów'],['auto','✨ Zrównoważona','Dostosowana do urządzenia'],['ultra','💎 Ultra','Ostrzejsza grafika i cienie']].map(x=>'<div class="option"><div><b>'+x[1]+'</b><small>'+x[2]+'</small></div><button data-quality="'+x[0]+'" '+(save.quality===x[0]?'disabled':'')+'>'+(save.quality===x[0]?'AKTYWNA':'USTAW')+'</button></div>').join('')+
- '<div class="option"><div><b>📷 Tryb fotograficzny</b><small>Ukryj HUD i zrób zdjęcie świata</small></div><button data-photo="1">WŁĄCZ</button></div>'+ '<p class="panel-lead">Przeciągnij palcem lub myszą po świecie, aby obracać kamerę. Kółkiem myszy zmieniaj przybliżenie. Klawisz O uruchamia tryb fotograficzny.</p>'};
+if(activePage==='settings')return{title:'💎 GRAPHICS 7.0',lead:'Prawdziwe profile renderowania. Low jest oszczędny, a Ultra+ uruchamia najwyższą jakość, poświatę i cieniowanie kontaktowe na komputerach.',body:
+ '<div class="panel-caption">JAKOŚĆ OBRAZU</div>'+
+ [['low','⚡ LOW','Płynność · bez dynamicznych cieni'],['balanced','🌿 BALANCED','Dobra równowaga jakości i wydajności'],['high','✨ HIGH','Dokładniejsze cienie i materiały'],['ultra','💎 ULTRA','Duże mapy cieni, bloom i szkło'],['ultraPlus','🔥 ULTRA+','Maksymalne cienie · bloom · SSAO (na PC)']]
+ .map(x=>'<div class="option"><div><b>'+x[1]+'</b><small>'+x[2]+'</small></div><button data-quality="'+x[0]+'" '+(save.quality===x[0]?'disabled':'')+'>'+(save.quality===x[0]?'AKTYWNY':'USTAW')+'</button></div>').join('')+
+ '<div class="option"><div><b>🎮 Tryb aktywny</b><small id="qualityDescription">'+qualityPresets[save.quality].label+' · FPS: <span id="qualityFps">'+graphics.fps+'</span> · rozdzielczość '+Math.round(graphics.dpr*100)+'%</small></div></div>'+
+ '<p class="panel-lead">Ultra i Ultra+ bardziej obciążają kartę graficzną. Na urządzeniach dotykowych efekty bloom/SSAO są ograniczone dla płynności. W razie spadków FPS wybierz HIGH lub BALANCED.</p>'+
+ '<div class="option"><div><b>📷 Tryb fotograficzny</b><small>Ukryj HUD i zrób zdjęcie świata</small></div><button data-photo="1">WŁĄCZ</button></div>'+
+ '<p class="panel-lead">Obracaj kamerę przeciągnięciem, a kółkiem myszy zmieniaj zoom. Klawisz O uruchamia tryb foto.</p>'};
 if(activePage==='weather')return{title:'🌦 POGODA I ATMOSFERA',lead:'Zmiana pogody wpływa na widoczność i wygląd miasta.',body:
  [['clear','☀️ Słonecznie','Jasne niebo i dobra widoczność'],['rain','🌧️ Deszcz','Opady i mokra nawierzchnia'],['fog','🌫️ Mgła','Ograniczona widoczność']].map(x=>'<div class="option"><div><b>'+x[1]+'</b><small>'+x[2]+'</small></div><button data-weather="'+x[0]+'" '+(weather===x[0]?'disabled':'')+'>'+(weather===x[0]?'WYBRANO':'USTAW')+'</button></div>').join('')};
 return{title:'NEXO LIFE RP',lead:'',body:''}
@@ -952,7 +969,7 @@ if(b.dataset.prop!==undefined){equipProp(b.dataset.prop);renderPanel();showToast
 if(b.dataset.pet!==undefined){save.pet=b.dataset.pet;buildPet(save.pet);persist();renderPanel();showToast(save.pet==='none'?'Zwierzak odwołany':'Masz nowego pupila!')}
 if(b.dataset.emote!==undefined){emote=b.dataset.emote;emoteClock=0;showToast('Emotka: '+emote)}
 if(b.dataset.weather){weather=b.dataset.weather;save.weather=weather;persist();applyAtmosphere();renderPanel();showToast('Zmieniono pogodę')}
-if(b.dataset.quality){setQuality(b.dataset.quality);renderPanel();showToast('Zmieniono jakość grafiki')}
+if(b.dataset.quality){setQuality(b.dataset.quality);renderPanel();showToast('Grafika: '+qualityPresets[save.quality].label)}
 if(b.dataset.photo){togglePanel(activePage);togglePhoto()}
 if(b.dataset.lock){save.locked=!save.locked;persist();renderPanel();showToast(save.locked?'Zamknięto drzwi (RP)':'Otwarto drzwi')}
 if(b.dataset.homecolor){save.homeColor=(save.homeColor+1)%5;repaintHome();persist();renderPanel();showToast('Nowy kolor domu')}
@@ -1239,7 +1256,7 @@ function cameraUpdate(dt){
  const fieldOfView=driving?65+Math.min(8,Math.abs(carSpeed)*.15):61;
  cam.fov+=(fieldOfView-cam.fov)*Math.min(1,dt*4);
  cam.updateProjectionMatrix();
- sun.position.set(target.x-75,140,target.z+90);sun.target.position.set(target.x,0,target.z);sun.target.updateMatrixWorld()
+ const sunOffset=timePreset==='sunset'?[95,57,-80]:timePreset==='dawn'?[-65,72,120]:[-75,140,90];sun.position.set(target.x+sunOffset[0],sunOffset[1],target.z+sunOffset[2]);sun.target.position.set(target.x,0,target.z);sun.target.updateMatrixWorld()
 }
 const mc=el('map'),ctx=mc.getContext('2d');
 function minimap(){
@@ -1260,7 +1277,7 @@ function updateZoneHud(){
   currentZone=nearest.d<1100?nearest.b.name.toUpperCase():Math.abs(playerPos.x)<65&&Math.abs(playerPos.z)<65?'CENTRUM MIASTA':playerPos.x>65?'WSCHODNIA DZIELNICA':playerPos.x< -65?'ZACHODNIA DZIELNICA':'OSIEDLE PARKOWE';
  }
  el('zone').textContent=currentZone;
- const mins=(night?22*60+10:10*60+45)+Math.floor(clock.elapsedTime/4);
+ const mins=({dawn:6*60+15,day:10*60+45,sunset:18*60+35,night:22*60+10}[timePreset]||645)+Math.floor(clock.elapsedTime/4);
  const hh=String(Math.floor(mins/60)%24).padStart(2,'0'),mm=String(mins%60).padStart(2,'0');
  el('clock').textContent=hh+':'+mm+' • '+(night?'NOC':weather==='rain'?'DESZCZ':weather==='fog'?'MGŁA':'SŁONECZNIE');
 }
@@ -1270,7 +1287,8 @@ el('speed').firstChild.textContent=String(Math.round(Math.abs(carSpeed)*3.2))+' 
 minimap()}
 W.addEventListener('resize',()=>{cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);graphics.composer?.setSize(innerWidth,innerHeight)});
 cam.position.set(8,8,35);cam.lookAt(8,1,19);
-function loop(){requestAnimationFrame(loop);let dt=Math.min(.045,clock.getDelta());if(!paused&&!photoMode){if(!homeCamera){if(driving)moveCar(dt);else moveCharacter(dt)}animateRoleplay(dt);animateWeather(dt);updateTraffic(dt);progress(dt);payTick+=dt;if(payTick>60){payTick-=60;if(save.job!=='Mieszkaniec'){save.cash+=500;persist();updateHud();showToast('Wypłata za pracę: +$500')}}marker.rotation.y+=dt*.65;torus.rotation.z+=dt*.7;
+let fpsInterval=0,fpsFrames=0;
+function loop(){requestAnimationFrame(loop);const frameDt=clock.getDelta();let dt=Math.min(.045,frameDt);fpsInterval+=frameDt;fpsFrames++;if(fpsInterval>=1){graphics.fps=Math.round(fpsFrames/fpsInterval);fpsInterval=0;fpsFrames=0;refreshGraphicsHud();}if(!paused&&!photoMode){if(!homeCamera){if(driving)moveCar(dt);else moveCharacter(dt)}animateRoleplay(dt);animateWeather(dt);updateTraffic(dt);progress(dt);payTick+=dt;if(payTick>60){payTick-=60;if(save.job!=='Mieszkaniec'){save.cash+=500;persist();updateHud();showToast('Wypłata za pracę: +$500')}}marker.rotation.y+=dt*.65;torus.rotation.z+=dt*.7;
 for(const n of npc){const tt=clock.elapsedTime*.45+n.seed;n.g.position.set(n.x+Math.cos(tt)*3,0,n.z+Math.sin(tt)*3);n.g.rotation.y=-tt;n.l.rotation.x=Math.sin(tt*6)*.27;n.r.rotation.x=-Math.sin(tt*6)*.27}
 }
 updateSiren();cameraUpdate(dt);skyDome.position.copy(driving?car.root.position:playerPos);skyDome.visible=homeCamera?homeCamera!=='salon':!inside;updateStreetLights();updateAudio();renderGraphics(dt);uiTick+=dt;if(uiTick>.17){renderHUD();uiTick=0}}
