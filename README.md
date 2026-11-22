@@ -6,6 +6,18 @@
 
 **GitHub:** https://github.com/stronezrobie-hub/nexo-city-3d
 
+## City Edition 6.1 — wygląd i obsługa
+
+- **Nowe menu:** duży panel zakładek jest ukryty domyślnie, zastąpił go kompaktowy pasek dolny. Przycisk „Więcej” otwiera pełne menu dopiero na żądanie. Uspójniono również rozmieszczenie elementów na małych ekranach.
+- **Drogi:** wyniesione krawężniki, malowane linie brzegowe i miejsca parkingowe.
+- **Miasto:** fasady budynków mają dodatkowe szyby, ościeżnice, wejścia, ganki, schody, roślinność i przystanki.
+- **Postać:** sylwetka 3D o bardziej naturalnych proporcjach, zaokrąglona głowa i ruchome kończyny, nadal generowane wyłącznie kodem.
+- **Ulice:** zaparkowane samochody i prosty system reagowania ruchu NPC na fazy świateł.
+- **Pogoda i noc:** poprawiona jasność i czytelność świata w trybie nocnym.
+- **Testy mobilne:** kontrola, że główne menu nie zakrywa gry na małym ekranie.
+
+To **stylizowany proceduralny realizm**, nie fotorealizm ani kopia Brookhaven/Roblox.
+
 ## Nowości w 6.0
 
 - Chodzenie postacią w stylu trzecioosobowym, **WASD względem kamery** i płynne przesuwanie się wzdłuż przeszkód.
