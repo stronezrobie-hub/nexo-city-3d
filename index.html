@@ -668,7 +668,7 @@ if(activePage==='bag')return{title:'🎒 PLECAK I PUPIL',lead:'Wybierz przedmiot
 if(activePage==='settings')return{title:'⚙️ GRAFIKA I KAMERA',lead:'Dostosuj jakość obrazu do swojego sprzętu. Ustawienia zapisują się automatycznie.',body:
  '<div class="panel-caption">JAKOŚĆ GRAFIKI</div>'+
  [['fast','⚡ Wydajność','Mniej efektów dla słabszych telefonów'],['auto','✨ Zrównoważona','Dostosowana do urządzenia'],['ultra','💎 Ultra','Ostrzejsza grafika i cienie']].map(x=>'<div class="option"><div><b>'+x[1]+'</b><small>'+x[2]+'</small></div><button data-quality="'+x[0]+'" '+(save.quality===x[0]?'disabled':'')+'>'+(save.quality===x[0]?'AKTYWNA':'USTAW')+'</button></div>').join('')+
- '<p class="panel-lead">Przeciągnij palcem lub myszą po świecie, aby obracać kamerę. Kółkiem myszy zmieniaj przybliżenie. Klawisz O uruchamia tryb fotograficzny.</p>'};
+ '<div class="option"><div><b>📷 Tryb fotograficzny</b><small>Ukryj HUD i zrób zdjęcie świata</small></div><button data-photo="1">WŁĄCZ</button></div>'+ '<p class="panel-lead">Przeciągnij palcem lub myszą po świecie, aby obracać kamerę. Kółkiem myszy zmieniaj przybliżenie. Klawisz O uruchamia tryb fotograficzny.</p>'};
 if(activePage==='weather')return{title:'🌦 POGODA I ATMOSFERA',lead:'Zmiana pogody wpływa na widoczność i wygląd miasta.',body:
  [['clear','☀️ Słonecznie','Jasne niebo i dobra widoczność'],['rain','🌧️ Deszcz','Opady i mokra nawierzchnia'],['fog','🌫️ Mgła','Ograniczona widoczność']].map(x=>'<div class="option"><div><b>'+x[1]+'</b><small>'+x[2]+'</small></div><button data-weather="'+x[0]+'" '+(weather===x[0]?'disabled':'')+'>'+(weather===x[0]?'WYBRANO':'USTAW')+'</button></div>').join('')};
 return{title:'NEXO LIFE RP',lead:'',body:''}
@@ -687,6 +687,7 @@ if(b.dataset.pet!==undefined){save.pet=b.dataset.pet;buildPet(save.pet);persist(
 if(b.dataset.emote!==undefined){emote=b.dataset.emote;emoteClock=0;showToast('Emotka: '+emote)}
 if(b.dataset.weather){weather=b.dataset.weather;save.weather=weather;persist();applyAtmosphere();renderPanel();showToast('Zmieniono pogodę')}
 if(b.dataset.quality){setQuality(b.dataset.quality);renderPanel();showToast('Zmieniono jakość grafiki')}
+if(b.dataset.photo){togglePanel(activePage);togglePhoto()}
 if(b.dataset.lock){save.locked=!save.locked;persist();renderPanel();showToast(save.locked?'Zamknięto drzwi (RP)':'Otwarto drzwi')}
 if(b.dataset.homecolor){save.homeColor=(save.homeColor+1)%5;repaintHome();persist();renderPanel();showToast('Nowy kolor domu')}
 if(b.dataset.saveprofile){save.rpName=(el('rpName')?.value||'Gracz').trim().slice(0,24)||'Gracz';save.bio=(el('rpBio')?.value||'').trim().slice(0,80);persist();updateHud();renderPanel();showToast('Zapisano profil RP')}
