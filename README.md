@@ -1,53 +1,64 @@
-# NEXO LIFE RP — Alpha 2.0
+# NEXO LIFE RP 3.0 — Realistic City Update
 
-Autorska gra WEB 3D typu life roleplay, inspirowana koncepcją swobodnego życia w mieście. Cały świat, postacie, samochody, drzewa i budynki są generowane z brył przez kod JavaScript i Three.js — bez modelowania i gotowych assetów graficznych.
+Autorska gra internetowa 3D typu **life roleplay**, rozwijana w 100% kodem, bez Blendera, ręcznego modelowania i gotowych assetów 3D. Mechaniki inspirowane otwartym RP, ale **to nie jest kopia Brookhaven ani gra Roblox**.
 
-## 🎮 Gra online
+**Gra:** https://nexo-life-rp.vercel.app
 
-https://nexo-life-rp.vercel.app
+**Repozytorium:** https://github.com/stronezrobie-hub/nexo-city-3d
 
-Kod źródłowy: https://github.com/stronezrobie-hub/nexo-city-3d
+**Wdrożenia:** GitHub `main` → Vercel, automatycznie.
 
-Zmiany w gałęzi `main` uruchamiają automatyczne wdrożenia do Vercel (projekt: `nexo-life-rp`).
+## Aktualna wersja Alpha 3.0
 
-## Co działa
+### Świat i realizm
+- Proceduralna mapa low-poly 3D, ulice, przejścia dla pieszych, chodniki, sygnalizacja świetlna.
+- Domy, garaże, szyldy generowane w runtime, ławki, drzewa, chmury.
+- Szkoła, szpital, komisariat, straż pożarna, bank, kawiarnia, sklep, salon aut, stacja paliw.
+- Deszcz, mgła, słońce, ręczne przełączanie dnia i nocy.
+- Postacie NPC, uproszczone poruszanie się innych samochodów.
 
-- Otwarta mapa miasta low-poly 3D, budynki i parki generowane proceduralnie.
-- Własna postać, spacer, bieg i personalizacja stroju.
-- Wsiadanie do samochodu, wysiadanie i prowadzenie auta.
-- Ruch uliczny i postacie NPC.
-- Domy: wybór, zajęcie, wejście do wnętrza i wyjście.
-- Budynki miejskie: sklep, szpital, szkoła, komisariat, kawiarnia, salon samochodowy.
-- Zawody, wypłata co 60 sekund aktywnej gry (poza mieszkańcem).
-- Dostawy, gotówka, minimapa, dzień/noc i kamera z góry.
-- Telefon z zakładkami: postać, pojazdy, praca, domy.
-- Przyciski dotykowe i lokalny zapis pieniędzy, stroju, zawodu oraz posiadanego domu.
+### Roleplay
+- Postać z kolorem ubrań, skóry i włosów, imieniem i biografią RP.
+- Emotki: machanie, taniec, siadanie.
+- Plecak: telefon, latarka, kawa, parasol, balon.
+- Pupile podążające za postacią: pies i kot.
+- Cztery rodzaje samochodów: miejski, SUV, sportowy i policyjny.
+- Jazda, wysiadanie i wsiadanie, klakson i syntetyczny dźwięk silnika.
+- Własny dom, wejście do umeblowanego wnętrza, zmiana koloru elewacji i flaga zamka RP.
+- Prace, wypłaty i misje dostawcze, lokalny zapis postępu.
 
-## Sterowanie
+### Sterowanie
+- WASD / strzałki — ruch i jazda
+- E — interakcje / wsiadanie / wysiadanie / domy
+- F — telefon
+- C — kamera
+- Shift — sprint
+- H — klakson (w pojeździe)
+- P / Esc — pauza
 
-| Klawisz | Funkcja |
-|---|---|
-| WASD / strzałki | Chodzenie lub jazda |
-| Shift | Sprint postaci |
-| E | Interakcja / wsiadanie / wysiadanie / domy |
-| F | Telefon |
-| C | Zmiana kamery |
-| P / Escape | Pauza |
+Telefon: ekranowe przyciski do jazdy/chodzenia, interakcji, kamery i klaksonu.
 
-Na telefonie działają przyciski ekranowe.
+## Technologie
 
-## Uruchomienie lokalne
+HTML, CSS, JavaScript i Three.js (ładowany z CDN). Geometria, kolory, szyldy (CanvasTexture), efekty i dźwięki (Web Audio API) są tworzone kodem. `index.html` stanowi komplet aktualnej aplikacji.
 
-Gra jest pojedynczym plikiem `index.html`, bez kompilowania. Otwórz katalog projektu w terminalu i uruchom:
+## Uruchamianie lokalne
 
 ```bash
 python -m http.server 8080
 ```
 
-Następnie przejdź do `http://localhost:8080`. Biblioteka Three.js jest wczytywana z CDN, więc potrzebne jest połączenie z internetem.
+Otwórz `http://localhost:8080`. Ładowanie Three.js wymaga internetu.
 
-## Ograniczenia wersji Alpha
+## Co jest jeszcze do zrobienia
 
-To jest wersja **single-player**, bez multiplayera, czatu sieciowego i serwerowego zapisu kont. Dane zapisują się wyłącznie w `localStorage` aktualnej przeglądarki. Jazda używa uproszczonej fizyki, a wnętrza domów są współdzielonym proceduralnym szablonem. Niezależna gra; nie jest produktem Roblox ani Brookhaven.
+Ta wersja **nie jest pełną odpowiedniczką Brookhaven**. Obecnie brak:
+- prawdziwego multiplayera, serwera, wspólnego czatu i zapraszania znajomych,
+- kont użytkowników i serwerowego zapisu postępów,
+- zaawansowanej fizyki pojazdów i ruchu drogowego AI,
+- pełnych wnętrz wszystkich budynków, edytora mebli, prywatnych parceli dla wielu graczy,
+- animacji motion-capture, fotorealistycznych tekstur i pełnego świata AAA.
 
-© NEXO Studios.
+Niektóre mechaniki (jak blokowanie domu) służą **odgrywaniu ról w trybie jednoosobowym**, nie stanowią realnych zabezpieczeń przed innymi graczami. Gra zapisuje ustawienia przez `localStorage` w danej przeglądarce. Bez infrastruktury backendowej nie da się zrealizować wiarygodnego multiplayera.
+
+© NEXO STUDIOS. Projekt niezależny od Roblox/Brookhaven.
