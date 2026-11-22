@@ -1,12 +1,13 @@
-name: Browser smoke test
+name: NEXO LIFE RP - TypeScript prototype
 on:
   push:
-    branches: [main]
+    branches:
+      - rebuild/phase-1-typescript
   workflow_dispatch:
 permissions:
   contents: read
 jobs:
-  smoke:
+  browser-test:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -14,14 +15,18 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: npm install --no-save playwright@1.56.1
-      - run: npm run build
-      - run: npx playwright install --with-deps chromium
-      - name: Serve game
+      - name: Install and build
+        run: |
+          npm install
+          npm run typecheck
+          npm run build
+      - name: Install Chromium test environment
+        run: |
+          npm install --no-save playwright@1.65.1
+          npx playwright install --with-deps chromium
+      - name: Serve compiled game
         run: |
           python3 -m http.server 4173 --directory dist --bind 127.0.0.1 > /tmp/nexo-server.log 2>&1 &
           sleep 2
-      - name: Verify rendering and entering game
-        run: node tests/browser-smoke.cjs
-      - name: Verify graphics presets, time of day and weather
-        run: node tests/graphics-smoke.cjs
+      - name: Test movement, home interaction and responsive controls
+        run: node tests/prototype-smoke.cjs
