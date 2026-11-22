@@ -242,6 +242,96 @@ for(let i=0;i<13;i++){
  for(let k=0;k<4;k++){const mesh=new T.Mesh(puffGeom,cloudMaterial);mesh.position.set((k-1.5)*7,rr(-2,2),rr(-4,4));mesh.scale.set(rr(9,14),rr(3,5),rr(5,8));g.add(mesh)}
  clouds.push(g);
 }
+
+/* City Edition: sidewalks, lane shoulders and procedural architectural detailing.
+   Every object below is a Three.js mesh; nothing is downloaded or modeled by hand. */
+const detailMaterials={
+  pale:mat(0xd5d6d0),whiteLine:new T.MeshBasicMaterial({color:0xe6e9e5}),
+  curbstone:mat(0xa4aeb0),step:mat(0xc3c4be),slate:mat(0x465866),
+  door:mat(0x705b4b,.55),frame:mat(0x3e5b66,.42),
+  window:new T.MeshPhysicalMaterial({color:0x9ac6d5,roughness:.2,metalness:.14,transparent:true,opacity:.72}),
+  signMetal:mat(0x42555e),markings:new T.MeshBasicMaterial({color:0xf9f8ed}),
+  foliage:mat(0x58835c),yellow:new T.MeshBasicMaterial({color:0xffd37b})
+};
+// Road and pavement have clearly separated raised kerbs and painted shoulder lines.
+for(let road=-3;road<=3;road++)for(let seg=-3;seg<3;seg++){
+  const middle=seg*60+30;
+  for(const sign of [-1,1]){
+    cube(scene,road*60+sign*7.9,.23,middle,.52,.42,43,detailMaterials.curbstone,false);
+    cube(scene,middle,.23,road*60+sign*7.9,43,.42,.52,detailMaterials.curbstone,false);
+    cube(scene,road*60+sign*6.15,.105,middle,.14,.016,43,detailMaterials.whiteLine,false);
+    cube(scene,middle,.106,road*60+sign*6.15,43,.016,.14,detailMaterials.whiteLine,false);
+  }
+}
+// Houses gain dimensional windows, roof edges, porches and architectural trim.
+for(const h of homes){
+ const house=h.facade,wallTop=house.position.y+house.geometry.parameters.height/2;
+ const front=h.z+3.12;
+ for(const dx of [-6,6]){
+   const x=h.x+dx,frame=detailMaterials.frame;
+   const trimTop=cube(scene,x,6.75,front,3.25,.22,.3,detailMaterials.pale,false);
+   const trimBottom=cube(scene,x,3.25,front,3.55,.25,.35,detailMaterials.pale,false);
+   const mullion=cube(scene,x,5.05,front+.03,.10,3.0,.18,frame,false);
+   h.visuals.push(trimTop,trimBottom,mullion);
+ }
+ for(const dx of [-1.8,1.8]){
+   h.visuals.push(cube(scene,h.x+dx,1.75,front,.25,3.4,.3,detailMaterials.pale,false));
+ }
+ h.visuals.push(cube(scene,h.x,3.5,front,4.05,.28,.48,detailMaterials.pale,false));
+ h.visuals.push(cube(scene,h.x,1.6,front+.12,3.15,3.0,.23,detailMaterials.door,false));
+ // Three porch steps create a physically plausible entrance.
+ for(let n=0;n<3;n++){
+   const step=cube(scene,h.x,.21+n*.14,h.z+9.7-n*.45,4.6,.18,1.22,detailMaterials.step,false);
+   h.visuals.push(step);
+ }
+ // A small roof overhang and structural gutter frame.
+ const l=cube(scene,h.x,wallTop+.2,h.z-7.0,22.4,.24,21.8,detailMaterials.slate,false);
+ h.visuals.push(l);
+ // Low vegetation at the entrance, without obscuring the door.
+ for(const dx of [-10,10]){
+   for(const oz of [5.5,9.7]){
+     const shrub=new T.Mesh(new T.IcosahedronGeometry(1.2,1),detailMaterials.foliage);
+     shrub.position.set(h.x+dx,.92,h.z+oz);shrub.scale.set(1.05,.66,.80);shrub.receiveShadow=true;scene.add(shrub);
+   }
+ }
+}
+// Town buildings get window surrounds, additional glass and distinct ground floors.
+for(const b of businesses){
+ const kind=b.kind;
+ const height=kind==='hospital'?27:kind==='school'?20:16;
+ const facadeZ=b.z+4.96,cols=[-13,-8,0,8,13];
+ for(let y=7;y<height-1;y+=4.5)for(const dx of cols){
+   const xpos=b.x+dx;
+   cube(scene,xpos,y,facadeZ+.08,2.75,2.5,.12,detailMaterials.window,false);
+   cube(scene,xpos,y+1.32,facadeZ+.2,3.05,.13,.28,detailMaterials.frame,false);
+   cube(scene,xpos,y-1.35,facadeZ+.2,3.05,.17,.28,detailMaterials.pale,false);
+   cube(scene,xpos,y,facadeZ+.19,.10,2.45,.22,detailMaterials.frame,false);
+ }
+ for(const dx of [-17.4,17.4]){
+   cube(scene,b.x+dx,height/2,b.z+5.08,.34,height,.3,detailMaterials.pale,false);
+ }
+ cube(scene,b.x,5.7,b.z+5.02,37,.35,.6,detailMaterials.slate,false);
+ for(const dx of [-4.8,4.8])cube(scene,b.x+dx,2.5,b.z+5.1,.32,4.7,.38,detailMaterials.frame,false);
+ cube(scene,b.x,5.03,b.z+5.12,11,.34,.45,detailMaterials.pale,false);
+}
+// Structured parking markings around businesses and a couple of community bus shelters.
+for(const b of businesses){
+ for(const dx of [-12,-4,4,12]){
+  cube(scene,b.x+dx,.245,b.z+20,.13,.023,5.1,detailMaterials.markings,false);
+ }
+ cube(scene,b.x,.245,b.z+22.35,24,.02,.14,detailMaterials.markings,false);
+}
+function makeBusShelter(x,z){
+ const roof=detailMaterials.slate,glass=detailMaterials.window;
+ cube(scene,x,3.35,z,8,.33,3.6,roof,false);
+ cube(scene,x,1.75,z+1.6,8,3.2,.2,glass,false);
+ for(const dx of [-3.8,3.8])cube(scene,x+dx,1.75,z,.2,3.3,3.3,detailMaterials.signMetal,false);
+ cube(scene,x,1.45,z-.3,5,.18,1.2,detailMaterials.pale,false);
+ cube(scene,x,1.02,z-.3,4.8,.75,.35,detailMaterials.door,false);
+ labelSign('PRZYSTANEK',x,3.13,z-1.87,6.8,.72,'#234550','#e7f7ff');
+}
+makeBusShelter(18,18);makeBusShelter(-102,18);
+
 const indoor=new T.Group();scene.add(indoor);indoor.position.set(0,0,620);
 const floor=mat(0xbab5aa),walls=mat(0xf0e7d8),couch=mat(0x5c8a9d),rug=mat(0x9cbbc0);
 cube(indoor,0,-.1,0,26,.25,26,floor);
@@ -469,7 +559,7 @@ function applyAtmosphere(){
  const foggy=weather==='fog',raining=weather==='rain';
  const bg=night?(foggy?0x263546:0x172a45):foggy?0x8e9da6:raining?0x829fb8:0x93ccf5;
  scene.background.setHex(bg);scene.fog.color.setHex(bg);scene.fog.near=foggy?40:raining?85:125;scene.fog.far=foggy?215:raining?315:380;
- amb.intensity=night?.7:raining?1.4:2.1;sun.intensity=night?.4:raining?1.3:2.65;renderer.toneMappingExposure=night?1.04:1.3;
+ amb.intensity=night?1.1:raining?1.6:2.35;sun.intensity=night?.62:raining?1.5:2.8;renderer.toneMappingExposure=night?1.27:1.37;
  rainCloud.visible=raining;m.road.roughness=raining?.31:.8;m.road.needsUpdate=true;skyShader.uniforms.uNight.value=night?1:0;
 }
 applyAtmosphere();
