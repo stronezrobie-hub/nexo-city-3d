@@ -696,7 +696,7 @@ if(b.dataset.spawn!==undefined){
  if(Math.abs(roadX-playerPos.x)<Math.abs(roadZ-playerPos.z)){car.root.position.set(roadX+4,0,playerPos.z+6);carYaw=0}
  else{car.root.position.set(playerPos.x+6,0,roadZ+4);carYaw=Math.PI/2}
  driving=false;carSpeed=0;car.root.rotation.y=carYaw;avatar.visible=true;
- showToast('Auto czeka przy najbliższej ulicy')}
+ showToast('Auto czeka przy najbliższej ulicy');renderPanel()}
 if(b.dataset.drive!==undefined){
  if(inside){showToast('Najpierw wyjdź z domu');return}
  replaceVehicle(Number(b.dataset.drive));
