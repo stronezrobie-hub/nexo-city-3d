@@ -309,8 +309,8 @@ function carModel(color){
  cube(grp,0,.3,-2.8,2.1,.24,.5,black,false);
  return{root:grp,coat};
 }
-let save={cash:2500,job:'Mieszkaniec',color:0,house:0,delivery:0,rpName:'Gracz',bio:'Nowy mieszkaniec NEXO CITY',skin:0,hair:0,vehicle:0,prop:'none',pet:'none',locked:false,homeColor:0,houseStyle:'classic',furnitureStyle:'cozy',weather:'clear',quality:'auto'};
-try{const data=JSON.parse(localStorage.getItem('nexo-life-rp-alpha2')||'{}');if(data&&typeof data==='object')Object.assign(save,{cash:Number(data.cash)||2500,job:typeof data.job==='string'?data.job:'Mieszkaniec',color:Math.max(0,Number(data.color)||0)%clothes.length,house:Number(data.house)||0,delivery:Math.min(4,Math.max(0,Number(data.delivery)||0)),rpName:typeof data.rpName==='string'?data.rpName.slice(0,24):'Gracz',bio:typeof data.bio==='string'?data.bio.slice(0,80):'Nowy mieszkaniec NEXO CITY',skin:Math.max(0,Number(data.skin)||0)%5,hair:Math.max(0,Number(data.hair)||0)%5,vehicle:Math.max(0,Number(data.vehicle)||0)%10,prop:typeof data.prop==='string'?data.prop:'none',pet:typeof data.pet==='string'?data.pet:'none',locked:!!data.locked,homeColor:Math.max(0,Number(data.homeColor)||0)%5,houseStyle:['classic','modern','villa','loft'].includes(data.houseStyle)?data.houseStyle:'classic',furnitureStyle:['cozy','luxury','neon'].includes(data.furnitureStyle)?data.furnitureStyle:'cozy',weather:['clear','rain','fog'].includes(data.weather)?data.weather:'clear',quality:['auto','fast','ultra'].includes(data.quality)?data.quality:'auto'})}catch{}
+let save={cash:2500,job:'Mieszkaniec',color:0,house:0,delivery:0,deliveryActive:false,rpName:'Gracz',bio:'Nowy mieszkaniec NEXO CITY',skin:0,hair:0,vehicle:0,prop:'none',pet:'none',locked:false,homeColor:0,houseStyle:'classic',furnitureStyle:'cozy',weather:'clear',quality:'auto'};
+try{const data=JSON.parse(localStorage.getItem('nexo-life-rp-alpha2')||'{}');if(data&&typeof data==='object')Object.assign(save,{cash:Number(data.cash)||2500,job:typeof data.job==='string'?data.job:'Mieszkaniec',color:Math.max(0,Number(data.color)||0)%clothes.length,house:Number(data.house)||0,delivery:Math.min(4,Math.max(0,Number(data.delivery)||0)),deliveryActive:!!data.deliveryActive,rpName:typeof data.rpName==='string'?data.rpName.slice(0,24):'Gracz',bio:typeof data.bio==='string'?data.bio.slice(0,80):'Nowy mieszkaniec NEXO CITY',skin:Math.max(0,Number(data.skin)||0)%5,hair:Math.max(0,Number(data.hair)||0)%5,vehicle:Math.max(0,Number(data.vehicle)||0)%10,prop:typeof data.prop==='string'?data.prop:'none',pet:typeof data.pet==='string'?data.pet:'none',locked:!!data.locked,homeColor:Math.max(0,Number(data.homeColor)||0)%5,houseStyle:['classic','modern','villa','loft'].includes(data.houseStyle)?data.houseStyle:'classic',furnitureStyle:['cozy','luxury','neon'].includes(data.furnitureStyle)?data.furnitureStyle:'cozy',weather:['clear','rain','fog'].includes(data.weather)?data.weather:'clear',quality:['auto','fast','ultra'].includes(data.quality)?data.quality:'auto'})}catch{}
 const skinColors=[0xf0c39b,0xf9d8bc,0xb98462,0x80543e,0xc7a68c],hairColors=[0x342a29,0xe5bd76,0x644734,0x1a2430,0xb5543d];
 torso.color.setHex(clothes[save.color]);skin.color.setHex(skinColors[save.skin]);hair.color.setHex(hairColors[save.hair]);
 function persist(){try{localStorage.setItem('nexo-life-rp-alpha2',JSON.stringify(save))}catch{}}
@@ -549,21 +549,35 @@ el('day').onclick=()=>{night=!night;applyAtmosphere();el('day').textContent=nigh
 function togglePanel(p){if(activePage===p){activePage=null;el('panel').classList.remove('visible')}else{activePage=p;renderPanel()}document.querySelectorAll('[data-page]').forEach(e=>e.classList.toggle('active',e.dataset.page===activePage))}
 document.querySelectorAll('[data-page]').forEach(e=>e.onclick=()=>togglePanel(e.dataset.page));
 function pageText(){if(activePage==='phone')return {title:'📱 NEXO PHONE',lead:'Twoje miasto w kieszeni. Wybierz, co chcesz robić.',body:[
- ['avatar','👤 Postać','Wygląd i styl'],['cars','🚘 Garaż','Cztery modele samochodów'],
- ['homes','🏠 Dom','Twój dom i jego ustawienia'],['jobs','💼 Praca','Wybierz swój zawód'],
+ ['avatar','👤 Postać','Wygląd i styl'],['cars','🚘 Garaż','10 rodzajów pojazdów'],
+ ['homes','🏠 Dom','Parcele, katalog domów i wnętrza'],['jobs','💼 Praca','Zawody i opcjonalne dostawy'],['places','🗺️ Miasto','Wszystkie miejsca i teleport'],
  ['rp','🎭 Roleplay','Imię, biografia i emotki'],['bag','🎒 Plecak','Przedmioty i zwierzęta'],['weather','🌦 Pogoda','Słońce, deszcz lub mgła'],['settings','⚙️ Ustawienia','Jakość grafiki i kamera']
  ].map(x=>'<div class="option"><div><b>'+x[1]+'</b><small>'+x[2]+'</small></div><button data-open="'+x[0]+'">OTWÓRZ</button></div>').join('')};
 if(activePage==='avatar')return{title:'👤 KREATOR POSTACI',lead:'Personalizuj swój wygląd. Wszystkie elementy postaci powstają z kodu.',body:
  '<div class="panel-caption">STRÓJ</div><div class="swatches">'+clothes.map((c,i)=>'<button class="swatch '+(save.color===i?'selected':'')+'" style="background:#'+c.toString(16).padStart(6,'0')+'" data-color="'+i+'" aria-label="Strój '+i+'"></button>').join('')+'</div>'+
  '<div class="panel-caption">KOLOR SKÓRY</div><div class="swatches">'+skinColors.map((c,i)=>'<button class="swatch '+(save.skin===i?'selected':'')+'" style="background:#'+c.toString(16).padStart(6,'0')+'" data-skin="'+i+'" aria-label="Skóra '+i+'"></button>').join('')+'</div>'+
  '<div class="panel-caption">KOLOR WŁOSÓW</div><div class="swatches">'+hairColors.map((c,i)=>'<button class="swatch '+(save.hair===i?'selected':'')+'" style="background:#'+c.toString(16).padStart(6,'0')+'" data-hair="'+i+'" aria-label="Włosy '+i+'"></button>').join('')+'</div>'};
-if(activePage==='cars')return{title:'🚘 TWÓJ GARAŻ',lead:'Wybierz pojazd, przywołaj go na najbliższą ulicę i wsiądź klawiszem E.',body:vehicleModels.map((v,i)=>'<div class="option"><div><b>'+['🚙','🚘','🏎️','🚓'][i]+' '+v.name+'</b><small>Maks. prędkość: '+Math.round(v.speed*3.2)+' km/h</small></div><button data-spawn="'+i+'">'+(save.vehicle===i?'PRZYWOŁAJ':'WYBIERZ')+'</button></div>').join('')+
- '<div class="option"><div><b>🎨 Kolor karoserii</b><small>Losowy nowy lakier</small></div><button data-paint="1">ZMIANA</button></div>'};
-if(activePage==='homes')return{title:'🏠 TWOJA NIERUCHOMOŚĆ',lead:'Podejdź do domu z numerem i wciśnij E, żeby go zająć. Każdy dom ma wnętrze.',body:
- '<div class="option"><div><b>🏡 Mój dom</b><small>'+(save.house?'Numer '+save.house:'Nie zajęto domu')+'</small></div><button data-home="1" '+(save.house?'':'disabled')+'>IDŹ DO DOMU</button></div>'+
- '<div class="option"><div><b>'+(save.locked?'🔒 Drzwi zamknięte':'🔓 Drzwi otwarte')+'</b><small>Ustawienie RP (tryb jednoosobowy)</small></div><button data-lock="1" '+(!save.house?'disabled':'')+'>'+(save.locked?'OTWÓRZ':'ZAMKNIJ')+'</button></div>'+
- '<div class="option"><div><b>🎨 Elewacja domu</b><small>Wybierz następny kolor domu</small></div><button data-homecolor="1" '+(!save.house?'disabled':'')+'>ZMIEŃ</button></div>'};
-if(activePage==='jobs')return{title:'💼 ZNAJDŹ PRACĘ',lead:'Wybierz zawód i zarabiaj podczas gry. Dostawy to dodatkowe wynagrodzenie.',body:['Mieszkaniec','Kurier','Policjant','Lekarz','Strażak','Sprzedawca','Nauczyciel','Mechanik','Kierowca','Reporter'].map(name=>'<div class="option"><div><b>'+name+'</b><small>'+(name==='Mieszkaniec'?'Swobodna rozgrywka':name==='Kurier'?'Zarabiaj dodatkowo na dostawach':'Wypłata co 60 sekund')+'</small></div><button data-job="'+name+'" '+(save.job===name?'disabled':'')+'>'+(save.job===name?'WYBRANO':'WYBIERZ')+'</button></div>').join('')};
+if(activePage==='cars')return{title:'🚘 GARAŻ MIESZKAŃCA',lead:'Wszystkie pojazdy są dostępne za darmo. Wybierz model i przywołaj go na ulicę.',body:
+ vehicleModels.map((v,i)=>'<div class="option"><div><b>'+v.icon+' '+v.name+'</b><small>'+Math.round(v.speed*3.2)+' km/h'+(v.emergency?' · pojazd służb':'')+'</small></div><button data-spawn="'+i+'">'+(save.vehicle===i?'PRZYWOŁAJ':'WYBIERZ')+'</button></div>').join('')+
+ '<div class="option"><div><b>🎨 Lakier</b><small>Zmień kolor pojazdu</small></div><button data-paint="1">ZMIANA</button></div>'+
+ (vehicleModels[save.vehicle]?.emergency?'<div class="option"><div><b>🚨 Syrena pojazdu</b><small>Możesz również użyć klawisza L</small></div><button data-siren="1">'+(sirenOn?'WYŁĄCZ':'WŁĄCZ')+'</button></div>':'')};
+if(activePage==='homes')return{title:'🏠 DOMY I PARCELE',lead:'Wybierz działkę, następnie dom z katalogu. Możesz w każdej chwili zmienić wygląd domu i umeblowanie.',body:
+ '<div class="option"><div><b>🏡 Moja parcela</b><small>'+(save.house?'Numer '+save.house:'Jeszcze nie wybrano')+'</small></div><button data-home="1" '+(save.house?'':'disabled')+'>IDŹ DO DOMU</button></div>'+
+ '<div class="panel-caption">WYBIERZ PARCELĘ</div>'+
+ homes.slice(0,12).map(h=>'<div class="option"><div><b>🏡 Dom nr '+String(h.id).padStart(2,'0')+'</b><small>Osiedle NEXO Valley'+(save.house===h.id?' · Twój dom':'')+'</small></div><button data-claim="'+h.id+'" '+(save.house===h.id?'disabled':'')+'>'+(save.house===h.id?'WYBRANO':'ZAJMIJ')+'</button></div>').join('')+
+ '<div class="panel-caption">KATALOG DOMÓW</div>'+
+ houseStyles.map(h=>'<div class="option"><div><b>'+h.icon+' '+h.name+'</b><small>'+h.description+'</small></div><button data-house-style="'+h.id+'" '+(!save.house||save.houseStyle===h.id?'disabled':'')+'>'+(save.houseStyle===h.id?'AKTYWNY':'WYBIERZ')+'</button></div>').join('')+
+ '<div class="panel-caption">STYL WNĘTRZA</div>'+
+ furnitureStyles.map(t=>'<div class="option"><div><b>'+t.icon+' '+t.name+'</b></div><button data-interior="'+t.id+'" '+(!save.house||save.furnitureStyle===t.id?'disabled':'')+'>'+(save.furnitureStyle===t.id?'AKTYWNY':'USTAW')+'</button></div>').join('')+
+ '<div class="panel-caption">USTAWIENIA DOMU</div>'+
+ '<div class="option"><div><b>'+(save.locked?'🔒 Drzwi zamknięte':'🔓 Drzwi otwarte')+'</b><small>Symulacja RP — tryb jednoosobowy</small></div><button data-lock="1" '+(!save.house?'disabled':'')+'>'+(save.locked?'OTWÓRZ':'ZAMKNIJ')+'</button></div>'+
+ '<div class="option"><div><b>🎨 Kolor elewacji</b><small>Pięć wariantów kolorystycznych</small></div><button data-homecolor="1" '+(!save.house?'disabled':'')+'>ZMIEŃ</button></div>'};
+if(activePage==='jobs')return{title:'💼 PRACA I AKTYWNOŚCI RP',lead:'Odgrywaj dowolną rolę. Dostawy są opcjonalne — nie musisz wykonywać misji, aby zwiedzać miasto.',body:
+ '<div class="option"><div><b>📦 Dostawy kurierskie</b><small>'+(save.deliveryActive?'Trasa aktywna · '+save.delivery+'/5':'Swobodne RP bez obowiązkowych misji')+'</small></div><button data-delivery="1">'+(save.deliveryActive?'ZAKOŃCZ':'ROZPOCZNIJ')+'</button></div>'+
+ '<div class="panel-caption">ROLE W MIEŚCIE</div>'+
+ ['Mieszkaniec','Kurier','Policjant','Lekarz','Strażak','Sprzedawca','Nauczyciel','Mechanik','Kierowca','Reporter'].map(name=>'<div class="option"><div><b>'+name+'</b><small>'+(name==='Mieszkaniec'?'Swobodna rozgrywka':name==='Kurier'?'Możesz realizować dostawy':'Wypłata za aktywną grę')+'</small></div><button data-job="'+name+'" '+(save.job===name?'disabled':'')+'>'+(save.job===name?'WYBRANO':'WYBIERZ')+'</button></div>').join('')};
+if(activePage==='places')return{title:'🗺️ PRZEWODNIK PO MIEŚCIE',lead:'Odwiedzaj miejsca pracy i spotkań w NEXO Valley. Naciśnij „IDŹ”, aby szybko przenieść się przed wejście.',body:
+ businesses.map((b,i)=>'<div class="option"><div><b>'+({'school':'🎓','police':'🚓','hospital':'🏥','cafe':'☕','shop':'🛍️','garage':'🚘','bank':'🏦','fire':'🚒','gas':'⛽'}[b.kind]||'🏙️')+' '+b.name+'</b><small>'+('Wspólne miejsce RP · '+(i+1))+'</small></div><button data-visit="'+i+'">IDŹ</button></div>').join('')};
 if(activePage==='rp')return{title:'🎭 ROLEPLAY',lead:'Ustaw imię postaci, swoją historię i wykonuj emotki.',body:
  '<div class="panel-caption">TWOJE IMIĘ RP</div><input class="rp-field" id="rpName" maxlength="24" value="'+esc(save.rpName)+'" placeholder="Imię postaci">'+
  '<div class="panel-caption">TWOJA HISTORIA</div><input class="rp-field" id="rpBio" maxlength="80" value="'+esc(save.bio)+'" placeholder="Kim jest Twoja postać?">'+
@@ -590,6 +604,18 @@ if(b.dataset.open){activePage=b.dataset.open;renderPanel();document.querySelecto
 if(b.dataset.color!==undefined){save.color=Number(b.dataset.color);torso.color.setHex(clothes[save.color]);persist();renderPanel();showToast('Zmieniono styl postaci!')}
 if(b.dataset.job){save.job=b.dataset.job;persist();renderPanel();updateHud();showToast('Nowa praca: '+save.job)}
 if(b.dataset.paint){car.coat.color.setHex([0xa6e7fc,0xf49aab,0xb4ff91,0xe0c2ff,0xf4db90][Math.floor(rr(0,5))]);showToast('Zmieniono lakier')}
+if(b.dataset.siren){toggleSiren();renderPanel()}
+if(b.dataset.delivery){save.deliveryActive=!save.deliveryActive;persist();setMarker();updateHud();renderPanel();showToast(save.deliveryActive?'Trasa kurierska rozpoczęta':'Swobodne RP — dostawy wyłączone')}
+if(b.dataset['houseStyle']){save.houseStyle=b.dataset['houseStyle'];persist();repaintHome();renderPanel();showToast('Wybrano nowy model domu')}
+if(b.dataset.interior){save.furnitureStyle=b.dataset.interior;persist();applyInteriorTheme();renderPanel();showToast('Zmieniono wnętrze domu')}
+if(b.dataset.claim!==undefined){
+ const h=homes.find(h=>h.id===Number(b.dataset.claim));
+ if(h){save.house=h.id;save.locked=false;persist();repaintHome();inside=false;driving=false;carSpeed=0;avatar.visible=true;playerPos.copy(h.entry);renderPanel();showToast('Dom nr '+h.id+' należy teraz do Ciebie!')}
+}
+if(b.dataset.visit!==undefined){
+ const location=businesses[Number(b.dataset.visit)];
+ if(location){inside=false;driving=false;carSpeed=0;avatar.visible=true;playerPos.copy(location.entry);togglePanel(activePage);showToast('Witaj: '+location.name)}
+}
 if(b.dataset.skin!==undefined){save.skin=Number(b.dataset.skin);skin.color.setHex(skinColors[save.skin]);persist();renderPanel();showToast('Zmieniono wygląd postaci')}
 if(b.dataset.hair!==undefined){save.hair=Number(b.dataset.hair);hair.color.setHex(hairColors[save.hair]);persist();renderPanel();showToast('Zmieniono kolor włosów')}
 if(b.dataset.prop!==undefined){equipProp(b.dataset.prop);renderPanel();showToast('Przedmiot w ekwipunku')}
@@ -668,14 +694,21 @@ function applyInteriorTheme(){
  floor.color.setHex(t.floor);walls.color.setHex(t.walls);couch.color.setHex(t.couch);rug.color.setHex(t.rug);indoorLight.color.setHex(t.light);
 }
 repaintHome();applyInteriorTheme();
-function updateHud(){el('cash').textContent='$ '+save.cash.toLocaleString('pl-PL');el('role').textContent=save.rpName+' · '+save.job;el('mission').textContent=save.delivery+'/5';el('taskProgress').style.width=(save.delivery/5*100)+'%'}
+function updateHud(){
+ el('cash').textContent='$ '+save.cash.toLocaleString('pl-PL');
+ el('role').textContent=save.rpName+' · '+save.job;
+ el('mission').textContent=save.deliveryActive?save.delivery+'/5':'FREE RP';
+ el('taskProgress').style.width=(save.deliveryActive?save.delivery/5*100:0)+'%';
+ el('taskTitle').textContent=save.deliveryActive?'Kurier miejski':'Witaj w NEXO Valley!';
+ el('taskDesc').textContent=save.deliveryActive?'Odwiedzaj świecące znaczniki i zarabiaj pieniądze.':'Wybierz dom, samochód i dowolną rolę. Ciesz się swobodą — bez obowiązkowych misji.';
+}
 updateHud();
 let points=[[0,-60],[120,0],[0,120],[-120,0],[180,120]],destinationIndex=0;
 const marker=new T.Group();scene.add(marker);
 const torus=new T.Mesh(new T.TorusGeometry(2.8,.25,9,36),m.yellow);torus.position.y=3.3;marker.add(torus);
 const beamMat=new T.MeshBasicMaterial({color:0xcaff60,transparent:true,opacity:.18,side:T.DoubleSide,depthWrite:false});
 const beam=new T.Mesh(new T.CylinderGeometry(2.5,2.5,6.5,18,1,true),beamMat);beam.position.y=3.35;marker.add(beam);
-function setMarker(){const p=points[save.delivery%points.length];marker.position.set(p[0],0,p[1])}setMarker();
+function setMarker(){const p=points[save.delivery%points.length];marker.position.set(p[0],0,p[1]);marker.visible=!!save.deliveryActive}setMarker();
 function nearObj(){if(inside){if(playerPos.distanceTo(new T.Vector3(0,0,630))<8)return {kind:'exit',label:'Wyjdź z domu'};return null}
 if(driving)return{kind:'leave',label:'Wysiądź z samochodu'};
 const distance=playerPos.distanceTo(car.root.position);if(distance<7)return{kind:'enter',label:'Wsiądź do samochodu'};
@@ -715,7 +748,7 @@ function updateTraffic(dt){for(const t of traffic){t.t+=dt*t.speed*t.dir;if(t.t>
 const x=t.vertical?t.lane:t.t,z=t.vertical?t.t:t.lane;t.model.root.position.set(x,0,z);t.model.root.rotation.y=t.vertical?(t.dir===1?Math.PI:0):(t.dir===1?-Math.PI/2:Math.PI/2);
 if(driving&&Math.hypot(x-car.root.position.x,z-car.root.position.z)<4){carSpeed*=-.2}
 }}
-function progress(dt){if(inside)return;const t=driving?car.root.position:playerPos;if(Math.hypot(t.x-marker.position.x,t.z-marker.position.z)<5.4){save.cash+=250;save.delivery++;if(save.delivery>=5){save.cash+=650;save.delivery=0;showToast('Ukończono trasę! +$900')}else showToast('Dostawa zakończona! +$250');persist();setMarker();updateHud()}}
+function progress(dt){if(inside||!save.deliveryActive)return;const t=driving?car.root.position:playerPos;if(Math.hypot(t.x-marker.position.x,t.z-marker.position.z)<5.4){save.cash+=250;save.delivery++;if(save.delivery>=5){save.cash+=650;save.delivery=0;showToast('Ukończono trasę! +$900')}else showToast('Dostawa zakończona! +$250');persist();setMarker();updateHud()}}
 function cameraUpdate(dt){
  const target=driving?car.root.position:playerPos,rot=(driving?carYaw:charYaw)+orbitYaw;
  const dist=(highView?31:driving?19:11)*cameraDistance,height=(highView?32:driving?11:7)+orbitLift;
