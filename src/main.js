@@ -1,4 +1,9 @@
 import * as T from 'three';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { SSAOPass } from 'three/addons/postprocessing/SSAOPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 const el=id=>document.getElementById(id),W=window;
 const scene=new T.Scene();scene.background=new T.Color('#93ccf5');scene.fog=new T.Fog('#93ccf5',125,380);
 const skyShader=new T.ShaderMaterial({
@@ -12,6 +17,49 @@ const renderer=new T.WebGLRenderer({canvas:el('world'),antialias:true,powerPrefe
 renderer.setPixelRatio(Math.min(devicePixelRatio||1,matchMedia('(pointer:coarse)').matches?1:1.5));renderer.setSize(innerWidth,innerHeight);
 renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;renderer.outputColorSpace=T.SRGBColorSpace;
 renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1.3;
+/* All reflections use a skyline environment rendered from Canvas; no imported HDRI. */
+function generateCityEnvironment(){
+ const canvas=document.createElement('canvas');canvas.width=768;canvas.height=384;
+ const g=canvas.getContext('2d');
+ const gradient=g.createLinearGradient(0,0,0,384);
+ gradient.addColorStop(0,'#88b9e0');gradient.addColorStop(.45,'#a6cde8');
+ gradient.addColorStop(.53,'#f3dfb7');gradient.addColorStop(1,'#4d776e');
+ g.fillStyle=gradient;g.fillRect(0,0,768,384);
+ let state=15821;const random=()=>{state=(state*1664525+1013904223)>>>0;return state/4294967296};
+ for(let i=0;i<100;i++){
+  const x=random()*768,w=5+random()*25,h=18+random()*105;
+  g.fillStyle=i%3===0?'#6c8994':'#7b9d9f';g.fillRect(x,218-h,w,h);
+  if(i%2===0){g.fillStyle='rgba(242,252,249,.46)';for(let t=0;t<4;t++)g.fillRect(x+2+t*4,223-h+6,2,3)}
+ }
+ const image=new T.CanvasTexture(canvas);image.colorSpace=T.SRGBColorSpace;
+ image.mapping=T.EquirectangularReflectionMapping;
+ return image;
+}
+scene.environment=generateCityEnvironment();
+scene.environmentIntensity=.7;
+const graphics={composer:null,bloom:null,ssao:null,mode:'balanced',fps:0,dpr:1};
+function rebuildGraphicsPipeline(enableBloom,enableAO){
+ if(graphics.composer){graphics.composer.dispose();graphics.composer=null;graphics.bloom=null;graphics.ssao=null}
+ if(!enableBloom&&!enableAO)return;
+ const composer=new EffectComposer(renderer);
+ composer.addPass(new RenderPass(scene,cam));
+ if(enableAO){
+  const ao=new SSAOPass(scene,cam,innerWidth,innerHeight);
+  ao.kernelRadius=7;ao.minDistance=.004;ao.maxDistance=.13;ao.output=SSAOPass.OUTPUT.Default;
+  composer.addPass(ao);graphics.ssao=ao;
+ }
+ if(enableBloom){
+  const bloom=new UnrealBloomPass(new T.Vector2(innerWidth,innerHeight),.18,.36,1.08);
+  composer.addPass(bloom);graphics.bloom=bloom;
+ }
+ composer.addPass(new OutputPass());
+ composer.setPixelRatio(graphics.dpr);composer.setSize(innerWidth,innerHeight);
+ graphics.composer=composer;
+}
+function renderGraphics(dt){
+ if(graphics.composer)graphics.composer.render(dt);
+ else renderer.render(scene,cam);
+}
 const cam=new T.PerspectiveCamera(65,innerWidth/innerHeight,.1,800),clock=new T.Clock();
 const amb=new T.HemisphereLight(0xe2f6ff,0x72906b,2.1);scene.add(amb);
 const sun=new T.DirectionalLight(0xffe9c9,2.65);sun.position.set(-75,140,90);sun.castShadow=true;sun.shadow.mapSize.set(matchMedia('(pointer:coarse)').matches?768:2048,matchMedia('(pointer:coarse)').matches?768:2048);sun.shadow.normalBias=.035;sun.shadow.camera.left=-105;sun.shadow.camera.right=105;sun.shadow.camera.top=105;sun.shadow.camera.bottom=-105;sun.shadow.camera.far=350;scene.add(sun);
@@ -214,13 +262,13 @@ for(const [ix,iz] of [[-3,-3],[-1,-1],[1,1],[2,-1],[-2,1]]){
  for(const dx of [-9,9])bench(x+dx,z+9,Math.PI);
 }
 const lampPool=[];
-for(let i=0;i<5;i++){const l=new T.PointLight(0xffce91,0,31,2);l.castShadow=false;scene.add(l);lampPool.push(l)}
+for(let i=0;i<8;i++){const l=new T.PointLight(0xffce91,0,31,2);l.castShadow=false;scene.add(l);lampPool.push(l)}
 function updateStreetLights(){
  if(!night||inside){for(const l of lampPool)l.intensity=0;lampGlass.emissiveIntensity=.55;return}
  lampGlass.emissiveIntensity=3.5;
  const origin=driving?car.root.position:playerPos;
- const near=streetLightSpots.map(p=>({p,d:(p[0]-origin.x)**2+(p[2]-origin.z)**2})).sort((a,b)=>a.d-b.d).slice(0,lampPool.length);
- for(let i=0;i<lampPool.length;i++){const l=lampPool[i],n=near[i];if(!n||n.d>6500){l.intensity=0;continue}l.position.set(...n.p);l.intensity=55}
+ const near=streetLightSpots.map(p=>({p,d:(p[0]-origin.x)**2+(p[2]-origin.z)**2})).sort((a,b)=>a.d-b.d).slice(0,Math.min(lampPool.length,graphics.streetLightLimit||5));
+ for(let i=0;i<lampPool.length;i++){const l=lampPool[i],n=near[i];if(!n||n.d>6500||i>=(graphics.streetLightLimit||5)){l.intensity=0;continue}l.position.set(...n.p);l.intensity=55}
 }
 const signals=[];
 for(let a=-3;a<=3;a++)for(let b=-3;b<=3;b++)if((a+b)%2===0){
@@ -425,20 +473,54 @@ function carModel(color){
  cube(grp,0,.3,-2.8,2.1,.24,.5,black,false);
  return{root:grp,coat};
 }
-let save={cash:2500,job:'Mieszkaniec',color:0,house:0,delivery:0,deliveryActive:false,bank:0,rpName:'Gracz',bio:'Nowy mieszkaniec NEXO CITY',skin:0,hair:0,vehicle:0,prop:'none',pet:'none',locked:false,homeColor:0,decor:[],houseStyle:'classic',furnitureStyle:'cozy',weather:'clear',quality:'auto',familyActive:false,familyName:'Rodzina NEXO',familyRole:'Opiekun'};
-try{const data=JSON.parse(localStorage.getItem('nexo-life-rp-alpha2')||'{}');if(data&&typeof data==='object')Object.assign(save,{cash:Number(data.cash)||2500,job:typeof data.job==='string'?data.job:'Mieszkaniec',color:Math.max(0,Number(data.color)||0)%clothes.length,house:Number(data.house)||0,delivery:Math.min(4,Math.max(0,Number(data.delivery)||0)),deliveryActive:!!data.deliveryActive,bank:Math.max(0,Number(data.bank)||0),rpName:typeof data.rpName==='string'?data.rpName.slice(0,24):'Gracz',bio:typeof data.bio==='string'?data.bio.slice(0,80):'Nowy mieszkaniec NEXO CITY',skin:Math.max(0,Number(data.skin)||0)%5,hair:Math.max(0,Number(data.hair)||0)%5,vehicle:Math.max(0,Number(data.vehicle)||0)%10,prop:typeof data.prop==='string'?data.prop:'none',pet:typeof data.pet==='string'?data.pet:'none',locked:!!data.locked,homeColor:Math.max(0,Number(data.homeColor)||0)%5,decor:Array.isArray(data.decor)?data.decor.slice(0,6):[],houseStyle:['classic','modern','villa','loft'].includes(data.houseStyle)?data.houseStyle:'classic',furnitureStyle:['cozy','luxury','neon'].includes(data.furnitureStyle)?data.furnitureStyle:'cozy',weather:['clear','rain','fog'].includes(data.weather)?data.weather:'clear',quality:['auto','fast','ultra'].includes(data.quality)?data.quality:'auto',familyActive:!!data.familyActive,familyName:typeof data.familyName==='string'?data.familyName.slice(0,28):'Rodzina NEXO',familyRole:['Opiekun','Dziecko','Rodzeństwo','Gość'].includes(data.familyRole)?data.familyRole:'Opiekun'})}catch{}
+let save={cash:2500,job:'Mieszkaniec',color:0,house:0,delivery:0,deliveryActive:false,bank:0,rpName:'Gracz',bio:'Nowy mieszkaniec NEXO CITY',skin:0,hair:0,vehicle:0,prop:'none',pet:'none',locked:false,homeColor:0,decor:[],houseStyle:'classic',furnitureStyle:'cozy',weather:'clear',quality:'balanced',familyActive:false,familyName:'Rodzina NEXO',familyRole:'Opiekun'};
+try{const data=JSON.parse(localStorage.getItem('nexo-life-rp-alpha2')||'{}');if(data&&typeof data==='object')Object.assign(save,{cash:Number(data.cash)||2500,job:typeof data.job==='string'?data.job:'Mieszkaniec',color:Math.max(0,Number(data.color)||0)%clothes.length,house:Number(data.house)||0,delivery:Math.min(4,Math.max(0,Number(data.delivery)||0)),deliveryActive:!!data.deliveryActive,bank:Math.max(0,Number(data.bank)||0),rpName:typeof data.rpName==='string'?data.rpName.slice(0,24):'Gracz',bio:typeof data.bio==='string'?data.bio.slice(0,80):'Nowy mieszkaniec NEXO CITY',skin:Math.max(0,Number(data.skin)||0)%5,hair:Math.max(0,Number(data.hair)||0)%5,vehicle:Math.max(0,Number(data.vehicle)||0)%10,prop:typeof data.prop==='string'?data.prop:'none',pet:typeof data.pet==='string'?data.pet:'none',locked:!!data.locked,homeColor:Math.max(0,Number(data.homeColor)||0)%5,decor:Array.isArray(data.decor)?data.decor.slice(0,6):[],houseStyle:['classic','modern','villa','loft'].includes(data.houseStyle)?data.houseStyle:'classic',furnitureStyle:['cozy','luxury','neon'].includes(data.furnitureStyle)?data.furnitureStyle:'cozy',weather:['clear','rain','fog'].includes(data.weather)?data.weather:'clear',quality:(['low','balanced','high','ultra','ultraPlus'].includes(data.quality)?data.quality:({auto:'balanced',fast:'low'}[data.quality]||'balanced')),familyActive:!!data.familyActive,familyName:typeof data.familyName==='string'?data.familyName.slice(0,28):'Rodzina NEXO',familyRole:['Opiekun','Dziecko','Rodzeństwo','Gość'].includes(data.familyRole)?data.familyRole:'Opiekun'})}catch{}
 const skinColors=[0xf0c39b,0xf9d8bc,0xb98462,0x80543e,0xc7a68c],hairColors=[0x342a29,0xe5bd76,0x644734,0x1a2430,0xb5543d];
 torso.color.setHex(clothes[save.color]);skin.color.setHex(skinColors[save.skin]);hair.color.setHex(hairColors[save.hair]);
 function persist(){try{localStorage.setItem('nexo-life-rp-alpha2',JSON.stringify(save))}catch{}}
+const qualityPresets={
+ low:{label:'LOW',dpr:.75,shadow:0,bloom:false,ao:false,fog:260,env:.3,lights:2},
+ balanced:{label:'BALANCED',dpr:1,shadow:1024,bloom:false,ao:false,fog:380,env:.5,lights:3},
+ high:{label:'HIGH',dpr:1.3,shadow:1536,bloom:false,ao:false,fog:450,env:.75,lights:5},
+ ultra:{label:'ULTRA',dpr:1.65,shadow:2048,bloom:true,ao:false,fog:510,env:.95,lights:6},
+ ultraPlus:{label:'ULTRA+',dpr:2,shadow:3072,bloom:true,ao:true,fog:570,env:1.12,lights:8}
+};
 function setQuality(value){
- save.quality=value;persist();
+ const profile=qualityPresets[value]||qualityPresets.balanced;
+ save.quality=value in qualityPresets?value:'balanced';
  const mobile=matchMedia('(pointer:coarse)').matches;
- const dpr=value==='fast'?.7:value==='ultra'?Math.min(devicePixelRatio||1,2):Math.min(devicePixelRatio||1,mobile?.85:1.5);
+ const maxDpr=mobile?1.4:2;
+ const dpr=Math.min(profile.dpr,maxDpr,devicePixelRatio||1);
+ graphics.mode=save.quality;graphics.dpr=dpr;
  renderer.setPixelRatio(dpr);renderer.setSize(innerWidth,innerHeight);
- const shadows=value!=='fast'&&(!mobile||value==='ultra');
+ const shadows=profile.shadow>0;
+ renderer.shadowMap.enabled=shadows;renderer.shadowMap.type=T.PCFSoftShadowMap;
  sun.castShadow=shadows;
- renderer.shadowMap.enabled=shadows;
- renderer.shadowMap.needsUpdate=true;
+ if(shadows){
+  const maxTexture=renderer.capabilities.maxTextureSize||2048;
+  const shadowSize=Math.min(profile.shadow,mobile?2048:maxTexture,maxTexture);
+  if(sun.shadow.mapSize.width!==shadowSize){
+   if(sun.shadow.map){sun.shadow.map.dispose();sun.shadow.map=null}
+   sun.shadow.mapSize.set(shadowSize,shadowSize);
+  }
+  sun.shadow.camera.left=save.quality==='ultraPlus'?-75:-95;
+  sun.shadow.camera.right=-sun.shadow.camera.left;
+  sun.shadow.camera.top=-sun.shadow.camera.left;
+  sun.shadow.camera.bottom=sun.shadow.camera.left;
+  sun.shadow.normalBias=.025;
+  sun.shadow.bias=-.00014;
+  sun.shadow.needsUpdate=true;
+ }
+ const enableBloom=profile.bloom&&!mobile;
+ const enableAO=profile.ao&&!mobile;
+ // Stronger effects remain available in Ultra and Ultra+ on desktop;
+ // smartphones get upgraded lighting/shadows without overly expensive full-screen passes.
+ rebuildGraphicsPipeline(enableBloom,enableAO);
+ scene.environmentIntensity=profile.env;
+ graphics.streetLightLimit=profile.lights;
+ graphics.visibility=profile.fog;
+ persist();
+ if(typeof refreshGraphicsHud==='function')refreshGraphicsHud();
 }
 setQuality(save.quality);
 let car=carModel(0xa6e7fc);car.root.position.set(6,0,-12);scene.add(car.root);
@@ -597,7 +679,7 @@ const rainCloud=new T.Points(rainGeo,new T.PointsMaterial({color:0xc5e7ff,size:.
 function applyAtmosphere(){
  const foggy=weather==='fog',raining=weather==='rain';
  const bg=night?(foggy?0x263546:0x172a45):foggy?0x8e9da6:raining?0x829fb8:0x93ccf5;
- scene.background.setHex(bg);scene.fog.color.setHex(bg);scene.fog.near=foggy?40:raining?85:125;scene.fog.far=foggy?215:raining?315:380;
+ scene.background.setHex(bg);scene.fog.color.setHex(bg);scene.fog.near=foggy?40:raining?85:Math.max(125,graphics.visibility*.28);scene.fog.far=foggy?215:raining?315:(graphics.visibility||380);
  amb.intensity=night?1.1:raining?1.6:2.35;sun.intensity=night?.62:raining?1.5:2.8;renderer.toneMappingExposure=night?1.27:1.37;
  rainCloud.visible=raining;m.road.roughness=raining?.31:.8;m.road.needsUpdate=true;skyShader.uniforms.uNight.value=night?1:0;
 }
@@ -1186,12 +1268,12 @@ function renderHUD(){updateZoneHud();const a=nearObj();el('interact').style.disp
 el('mode').textContent=homeCamera?'📹 KAMERY DOMOWE':inside?'🏠 W DOMU':driving?'🚘 PROWADZENIE AUTA':'🚶 SPACER PO MIEŚCIE';el('speed').style.display=driving?'block':'none';
 el('speed').firstChild.textContent=String(Math.round(Math.abs(carSpeed)*3.2))+' ';
 minimap()}
-W.addEventListener('resize',()=>{cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
+W.addEventListener('resize',()=>{cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);graphics.composer?.setSize(innerWidth,innerHeight)});
 cam.position.set(8,8,35);cam.lookAt(8,1,19);
 function loop(){requestAnimationFrame(loop);let dt=Math.min(.045,clock.getDelta());if(!paused&&!photoMode){if(!homeCamera){if(driving)moveCar(dt);else moveCharacter(dt)}animateRoleplay(dt);animateWeather(dt);updateTraffic(dt);progress(dt);payTick+=dt;if(payTick>60){payTick-=60;if(save.job!=='Mieszkaniec'){save.cash+=500;persist();updateHud();showToast('Wypłata za pracę: +$500')}}marker.rotation.y+=dt*.65;torus.rotation.z+=dt*.7;
 for(const n of npc){const tt=clock.elapsedTime*.45+n.seed;n.g.position.set(n.x+Math.cos(tt)*3,0,n.z+Math.sin(tt)*3);n.g.rotation.y=-tt;n.l.rotation.x=Math.sin(tt*6)*.27;n.r.rotation.x=-Math.sin(tt*6)*.27}
 }
-updateSiren();cameraUpdate(dt);skyDome.position.copy(driving?car.root.position:playerPos);skyDome.visible=homeCamera?homeCamera!=='salon':!inside;updateStreetLights();updateAudio();renderer.render(scene,cam);uiTick+=dt;if(uiTick>.17){renderHUD();uiTick=0}}
+updateSiren();cameraUpdate(dt);skyDome.position.copy(driving?car.root.position:playerPos);skyDome.visible=homeCamera?homeCamera!=='salon':!inside;updateStreetLights();updateAudio();renderGraphics(dt);uiTick+=dt;if(uiTick>.17){renderHUD();uiTick=0}}
 window.__nexoBootReady=true;
 const bootButton=el('startBtn');bootButton.disabled=false;bootButton.removeAttribute('aria-busy');bootButton.textContent='▶ WEJDŹ DO MIASTA';
 el('bootStatus').textContent='✓ Miasto załadowane. Możesz rozpocząć grę.';
