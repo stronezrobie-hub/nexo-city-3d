@@ -318,10 +318,11 @@ function persist(){try{localStorage.setItem('nexo-life-rp-alpha2',JSON.stringify
 function setQuality(value){
  save.quality=value;persist();
  const mobile=matchMedia('(pointer:coarse)').matches;
- const dpr=value==='fast'?.75:value==='ultra'?Math.min(devicePixelRatio||1,2):Math.min(devicePixelRatio||1,mobile?1:1.5);
+ const dpr=value==='fast'?.7:value==='ultra'?Math.min(devicePixelRatio||1,2):Math.min(devicePixelRatio||1,mobile?.85:1.5);
  renderer.setPixelRatio(dpr);renderer.setSize(innerWidth,innerHeight);
- sun.castShadow=value!=='fast';
- renderer.shadowMap.enabled=value!=='fast';
+ const shadows=value!=='fast'&&(!mobile||value==='ultra');
+ sun.castShadow=shadows;
+ renderer.shadowMap.enabled=shadows;
  renderer.shadowMap.needsUpdate=true;
 }
 setQuality(save.quality);
