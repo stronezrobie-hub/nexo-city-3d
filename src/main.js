@@ -355,13 +355,38 @@ const indoorLight=new T.PointLight(0xffedcf,100,40);indoorLight.position.set(0,7
 const homeDecorRoot=new T.Group();indoor.add(homeDecorRoot);
 const clothes=[0x8bdeff,0xf9a7af,0xa9ff86,0xdfbbff,0xffcd7b,0xffffff,0x454d6d];
 const skin=mat(0xf0c39b),hair=mat(0x342a29),pants=mat(0x293b52),shoes=mat(0x202b37);
-const avatar=new T.Group(),torso=mat(clothes[0]),head=new T.Group();scene.add(avatar);
-cube(avatar,0,1.75,0,1.45,1.8,.75,torso);cube(avatar,0,.55,-.04,1.25,1.0,.68,pants);
-cube(avatar,-.39,.15,-.04,.46,.55,.57,shoes);cube(avatar,.39,.15,-.04,.46,.55,.57,shoes);
-const leftArm=cube(avatar,-1,1.7,0,.45,1.6,.48,torso);const rightArm=cube(avatar,1,1.7,0,.45,1.6,.48,torso);
-cube(avatar,0,3,.0,1.13,1.1,1.03,skin);cube(avatar,0,3.54,-.08,1.2,.3,1.1,hair);
-for(const x of [-.27,.27])cube(avatar,x,3.13,-.53,.15,.12,.07,m.dark,false);
-const legs=[...avatar.children].filter(a=>a.position.y<.23&&a!==leftArm&&a!==rightArm);
+const avatar=new T.Group(),torso=mat(clothes[0]);scene.add(avatar);
+function characterPart(parent,geom,material,x,y,z){
+ const mesh=new T.Mesh(geom,material);mesh.position.set(x,y,z);mesh.castShadow=true;mesh.receiveShadow=true;parent.add(mesh);return mesh;
+}
+// Anatomical, articulated low-poly human silhouette instead of block avatar.
+characterPart(avatar,new T.CapsuleGeometry(.54,.77,5,14),torso,0,2,0);
+characterPart(avatar,new T.CylinderGeometry(.47,.47,.63,14),pants,0,1.24,.015);
+characterPart(avatar,new T.CylinderGeometry(.16,.17,.23,10),skin,0,2.62,0);
+const face=characterPart(avatar,new T.SphereGeometry(.56,16,12),skin,0,3.04,-.02);
+face.scale.set(.88,1,.81);
+const hairTop=characterPart(avatar,new T.SphereGeometry(.59,16,10,0,Math.PI*2,0,Math.PI*.51),hair,0,3.09,-.01);
+hairTop.scale.set(.89,1.05,.82);
+for(const side of [-1,1]){
+ characterPart(avatar,new T.SphereGeometry(.076,10,8),m.dark,side*.22,3.08,-.47);
+ characterPart(avatar,new T.SphereGeometry(.038,8,6),m.white,side*.24,3.105,-.527);
+ characterPart(avatar,new T.SphereGeometry(.13,8,6),skin,side*.5,2.99,0);
+}
+characterPart(avatar,new T.SphereGeometry(.09,10,8),skin,0,2.93,-.49);
+const leftArm=new T.Group(),rightArm=new T.Group();leftArm.position.set(-.76,2.40,0);rightArm.position.set(.76,2.40,0);
+avatar.add(leftArm,rightArm);
+for(const arm of [leftArm,rightArm]){
+ characterPart(arm,new T.CapsuleGeometry(.215,.5,5,10),torso,0,-.43,0);
+ characterPart(arm,new T.CylinderGeometry(.175,.14,.35,10),skin,0,-.95,0);
+ characterPart(arm,new T.SphereGeometry(.17,9,7),skin,0,-1.15,0);
+}
+const legs=[];
+for(const xx of [-.31,.31]){
+ const leg=new T.Group();leg.position.set(xx,1.12,0);avatar.add(leg);
+ characterPart(leg,new T.CapsuleGeometry(.24,.54,5,10),pants,0,-.48,0);
+ characterPart(leg,new T.SphereGeometry(.27,10,8),shoes,0,-.91,-.15).scale.set(1.12,.56,1.5);
+ legs.push(leg);
+}
 avatar.castShadow=true;
 function carModel(color){
  const grp=new T.Group();
