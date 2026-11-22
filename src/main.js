@@ -548,7 +548,12 @@ el('pause').onclick=togglePause;
 el('startBtn').onclick=()=>{started=true;paused=false;initAudio();el('start').classList.add('hidden');showToast('Witaj w NEXO LIFE RP!')}
 el('day').onclick=()=>{night=!night;applyAtmosphere();el('day').textContent=night?'☾ NOC':'☀ DZIEŃ';showToast(night?'Zapadła noc':'Nastał dzień')};
 function togglePanel(p){if(activePage===p){activePage=null;el('panel').classList.remove('visible')}else{activePage=p;renderPanel()}document.querySelectorAll('[data-page]').forEach(e=>e.classList.toggle('active',e.dataset.page===activePage))}
-document.querySelectorAll('[data-page]').forEach(e=>e.onclick=()=>togglePanel(e.dataset.page));
+const sideMenu=document.querySelector('.sidebar'),menuExpand=el('menuExpand');
+function closeMobileMenu(){sideMenu.classList.remove('expanded');menuExpand.setAttribute('aria-expanded','false')}
+document.querySelectorAll('[data-page]').forEach(e=>e.onclick=()=>{togglePanel(e.dataset.page);closeMobileMenu()});
+document.querySelectorAll('[data-quick]').forEach(e=>e.onclick=()=>{togglePanel(e.dataset.quick);closeMobileMenu()});
+menuExpand.onclick=()=>{const open=sideMenu.classList.toggle('expanded');menuExpand.setAttribute('aria-expanded',String(open));if(open&&activePage){el('panel').classList.remove('visible');activePage=null;document.querySelectorAll('[data-page]').forEach(e=>e.classList.remove('active'))}};
+
 let currentPlace=null;
 function pageText(){
  if(activePage==='place'){
