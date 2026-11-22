@@ -525,6 +525,18 @@ for(let i=0;i<13;i++){
  scene.add(g);const px=[-30,90,30,-90][i%4],pz=[-30,30,-90,90][Math.floor(i/4)%4];
  npc.push({g,x:px,z:pz,seed:rr(0,20),l,r})
 }
+/* Parked city vehicles add street life without requiring additional 3D assets. */
+const parkedPalette=[0xc2ccd0,0x394b60,0xe0b7a0,0xa0af99,0xf7e8d8];
+for(const [i,b] of businesses.filter(b=>['bank','cafe','shop','police','hospital','garage','school'].includes(b.kind)).entries()){
+ if(i>6)break;
+ const model=carModel(parkedPalette[i%parkedPalette.length]);
+ const side=i%2===0?-1:1;
+ model.root.scale.setScalar(.68);
+ model.root.position.set(b.x+side*11,0,b.z+20.7);
+ model.root.rotation.y=Math.PI/2;
+ model.root.traverse(obj=>{if(obj.isMesh){obj.castShadow=false;obj.receiveShadow=true}});
+ scene.add(model.root);
+}
 let playerPos=new T.Vector3(8,0,19),charYaw=0,carYaw=0,carSpeed=0,driving=false,inside=false,night=false,started=false,paused=true,highView=false,activePage=null,exitPosition=null,payTick=0,stepTime=0,uiTick=0;
 const esc=text=>String(text).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 let emote='none',emoteClock=0,weather=save.weather;
@@ -1038,10 +1050,26 @@ if(blocked(nx,nz)){carSpeed*=-.18}else{car.root.position.x=nx;car.root.position.
 car.root.rotation.y=carYaw;
 playerPos.set(car.root.position.x,0,car.root.position.z);charYaw=carYaw;
 }
-function updateTraffic(dt){for(const t of traffic){t.t+=dt*t.speed*t.dir;if(t.t>192)t.t=-192;if(t.t< -192)t.t=192;
-const x=t.vertical?t.lane:t.t,z=t.vertical?t.t:t.lane;t.model.root.position.set(x,0,z);t.model.root.rotation.y=t.vertical?(t.dir===1?Math.PI:0):(t.dir===1?-Math.PI/2:Math.PI/2);
-if(driving&&Math.hypot(x-car.root.position.x,z-car.root.position.z)<4){carSpeed*=-.2}
-}}
+function updateTraffic(dt){
+ // Basic intersection-aware traffic: approach lights, slow down, then resume.
+ const cycle=Math.floor(clock.elapsedTime/8)%2;
+ for(const t of traffic){
+  const nextIntersection=t.dir>0?Math.ceil((t.t+.2)/60)*60:Math.floor((t.t-.2)/60)*60;
+  const approach=(nextIntersection-t.t)*t.dir;
+  const red=t.vertical?cycle===0:cycle===1;
+  const stop=red&&approach>0&&approach<12;
+  const desired=stop?Math.max(0,(approach-2)*1.8):t.speed;
+  t.currentSpeed=(t.currentSpeed??t.speed)+(desired-(t.currentSpeed??t.speed))*Math.min(1,dt*(stop?4:1.5));
+  const old=t.t;
+  t.t+=dt*t.currentSpeed*t.dir;
+  if(stop&&approach<=2.2)t.t=old;
+  if(t.t>192)t.t=-192;if(t.t< -192)t.t=192;
+  const x=t.vertical?t.lane:t.t,z=t.vertical?t.t:t.lane;
+  t.model.root.position.set(x,0,z);
+  t.model.root.rotation.y=t.vertical?(t.dir===1?Math.PI:0):(t.dir===1?-Math.PI/2:Math.PI/2);
+  if(driving&&Math.hypot(x-car.root.position.x,z-car.root.position.z)<4)carSpeed*=-.2;
+ }
+}
 function progress(dt){if(inside||!save.deliveryActive)return;const t=driving?car.root.position:playerPos;if(Math.hypot(t.x-marker.position.x,t.z-marker.position.z)<5.4){save.cash+=250;save.delivery++;if(save.delivery>=5){save.cash+=650;save.delivery=0;showToast('Ukończono trasę! +$900')}else showToast('Dostawa zakończona! +$250');persist();setMarker();updateHud()}}
 function cameraUpdate(dt){
  const target=driving?car.root.position:playerPos,rot=(driving?carYaw:0)+orbitYaw;
