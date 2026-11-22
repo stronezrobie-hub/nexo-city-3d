@@ -66,17 +66,18 @@ function streetLight(x,z){
 }
 function windows(x,y,z,ww,levels,front=1){for(let a=0;a<levels;a++)for(let b=0;b<3;b++)cube(scene,x+(b-1)*(ww/3.6),y+3+a*3.7,z+front*.16,1.65,1.65,.18,m.glass,false)}
 function home(x,z,id){
- const color=palettes[Math.floor(random()*palettes.length)],height=rr(8,11);
+ const color=palettes[Math.floor(random()*palettes.length)],height=rr(8,11),visuals=[];
  cube(scene,x,.15,z+2,48,.27,45,m.side,false);
- const facade=cube(scene,x,height/2+.3,z-7,20,height,20,color);addCollider(x,z-7,20,20);
- cube(scene,x,height+.4,z-7,22,.3,22,m.roof);
- prism(scene,x,height+4.1,z-7,15.6,7.4,m.roof,4).rotation.y=Math.PI/4;
- cube(scene,x,.95,z+3,3.6,1.9,.2,m.wood,false);
- for(const dx of [-6,6])for(const zz of [-1,-13])cube(scene,x+dx,5,z+zz,3.1,3.1,.2,m.glass,false);
+ const facade=cube(scene,x,height/2+.3,z-7,20,height,20,color);visuals.push(facade);addCollider(x,z-7,20,20);
+ visuals.push(cube(scene,x,height+.4,z-7,22,.3,22,m.roof));
+ const pitch=prism(scene,x,height+4.1,z-7,15.6,7.4,m.roof,4);pitch.rotation.y=Math.PI/4;visuals.push(pitch);
+ visuals.push(cube(scene,x,.95,z+3,3.6,1.9,.2,m.wood,false));
+ for(const dx of [-6,6])for(const zz of [-1,-13])visuals.push(cube(scene,x+dx,5,z+zz,3.1,3.1,.2,m.glass,false));
  for(let t=0;t<2;t++)plant(x+(t?18:-18),z+rr(4,13),rr(.55,.85));
- const pos=new T.Vector3(x,0,z+11),sign=cube(scene,x-9,1.4,z+11,.3,2.5,.3,m.dark,false);
+ const pos=new T.Vector3(x,0,z+11);
+ cube(scene,x-9,1.4,z+11,.3,2.5,.3,m.dark,false);
  cube(scene,x-9,2.65,z+11,3,.9,.26,m.yellow,false);
- homes.push({id,x,z,entry:pos,facade});
+ homes.push({id,x,z,entry:pos,facade,visuals,custom:null});
 }
 function business(x,z,name,kind,color){
  cube(scene,x,.13,z+2,49,.22,46,m.side,false);
@@ -308,8 +309,8 @@ function carModel(color){
  cube(grp,0,.3,-2.8,2.1,.24,.5,black,false);
  return{root:grp,coat};
 }
-let save={cash:2500,job:'Mieszkaniec',color:0,house:0,delivery:0,rpName:'Gracz',bio:'Nowy mieszkaniec NEXO CITY',skin:0,hair:0,vehicle:0,prop:'none',pet:'none',locked:false,homeColor:0,weather:'clear',quality:'auto'};
-try{const data=JSON.parse(localStorage.getItem('nexo-life-rp-alpha2')||'{}');if(data&&typeof data==='object')Object.assign(save,{cash:Number(data.cash)||2500,job:typeof data.job==='string'?data.job:'Mieszkaniec',color:Math.max(0,Number(data.color)||0)%clothes.length,house:Number(data.house)||0,delivery:Math.min(4,Math.max(0,Number(data.delivery)||0)),rpName:typeof data.rpName==='string'?data.rpName.slice(0,24):'Gracz',bio:typeof data.bio==='string'?data.bio.slice(0,80):'Nowy mieszkaniec NEXO CITY',skin:Math.max(0,Number(data.skin)||0)%5,hair:Math.max(0,Number(data.hair)||0)%5,vehicle:Math.max(0,Number(data.vehicle)||0)%4,prop:typeof data.prop==='string'?data.prop:'none',pet:typeof data.pet==='string'?data.pet:'none',locked:!!data.locked,homeColor:Math.max(0,Number(data.homeColor)||0)%5,weather:['clear','rain','fog'].includes(data.weather)?data.weather:'clear',quality:['auto','fast','ultra'].includes(data.quality)?data.quality:'auto'})}catch{}
+let save={cash:2500,job:'Mieszkaniec',color:0,house:0,delivery:0,rpName:'Gracz',bio:'Nowy mieszkaniec NEXO CITY',skin:0,hair:0,vehicle:0,prop:'none',pet:'none',locked:false,homeColor:0,houseStyle:'classic',furnitureStyle:'cozy',weather:'clear',quality:'auto'};
+try{const data=JSON.parse(localStorage.getItem('nexo-life-rp-alpha2')||'{}');if(data&&typeof data==='object')Object.assign(save,{cash:Number(data.cash)||2500,job:typeof data.job==='string'?data.job:'Mieszkaniec',color:Math.max(0,Number(data.color)||0)%clothes.length,house:Number(data.house)||0,delivery:Math.min(4,Math.max(0,Number(data.delivery)||0)),rpName:typeof data.rpName==='string'?data.rpName.slice(0,24):'Gracz',bio:typeof data.bio==='string'?data.bio.slice(0,80):'Nowy mieszkaniec NEXO CITY',skin:Math.max(0,Number(data.skin)||0)%5,hair:Math.max(0,Number(data.hair)||0)%5,vehicle:Math.max(0,Number(data.vehicle)||0)%4,prop:typeof data.prop==='string'?data.prop:'none',pet:typeof data.pet==='string'?data.pet:'none',locked:!!data.locked,homeColor:Math.max(0,Number(data.homeColor)||0)%5,houseStyle:['classic','modern','villa','loft'].includes(data.houseStyle)?data.houseStyle:'classic',furnitureStyle:['cozy','luxury','neon'].includes(data.furnitureStyle)?data.furnitureStyle:'cozy',weather:['clear','rain','fog'].includes(data.weather)?data.weather:'clear',quality:['auto','fast','ultra'].includes(data.quality)?data.quality:'auto'})}catch{}
 const skinColors=[0xf0c39b,0xf9d8bc,0xb98462,0x80543e,0xc7a68c],hairColors=[0x342a29,0xe5bd76,0x644734,0x1a2430,0xb5543d];
 torso.color.setHex(clothes[save.color]);skin.color.setHex(skinColors[save.skin]);hair.color.setHex(hairColors[save.hair]);
 function persist(){try{localStorage.setItem('nexo-life-rp-alpha2',JSON.stringify(save))}catch{}}
@@ -548,8 +549,65 @@ driving=false;carSpeed=0;car.root.rotation.y=carYaw;avatar.visible=true;showToas
 if(b.dataset.home){if(!save.house)return;const h=homes.find(h=>h.id===save.house);if(h){if(driving){driving=false;avatar.visible=true;playerPos.set(car.root.position.x+4,0,car.root.position.z+4)}if(inside){inside=false}playerPos.copy(h.entry);showToast('Jesteś przy swoim domu!');togglePanel(activePage)}}
 });
 const housePaints=[0xf9d28f,0xa7d4d9,0xe9b5b5,0xd8c6eb,0xc4d6a3].map(c=>mat(c));
-function repaintHome(){const home=homes.find(h=>h.id===save.house);if(home)home.facade.material=housePaints[save.homeColor]}
-repaintHome();
+const houseStyles=[
+ {id:'classic',name:'Dom klasyczny',icon:'🏡',description:'Przytulny dom z dwuspadowym dachem'},
+ {id:'modern',name:'Nowoczesna willa',icon:'🏙️',description:'Panoramiczne okna i płaski dach'},
+ {id:'villa',name:'Willa rodzinna',icon:'🏘️',description:'Taras, balkon i ozdobne kolumny'},
+ {id:'loft',name:'Dom loftowy',icon:'🏠',description:'Cegła, stal i duże przeszklenia'}
+];
+const furnitureStyles=[
+ {id:'cozy',name:'Przytulny',icon:'🛋️'},
+ {id:'luxury',name:'Luksusowy',icon:'💎'},
+ {id:'neon',name:'Gaming / Neon',icon:'🎮'}
+];
+const darkFrame=mat(0x23343f,.28),balcony=mat(0xe9e6dd),brick=mat(0x875d50),glassFront=new T.MeshPhysicalMaterial({color:0x9dcbd8,transparent:true,opacity:.72,roughness:.12,metalness:.1});
+function rebuildOwnedHome(){
+ for(const h of homes){if(h.custom){scene.remove(h.custom);h.custom.traverse(o=>{if(o.isMesh)o.geometry.dispose()});h.custom=null}h.visuals.forEach(o=>o.visible=true)}
+ const h=homes.find(h=>h.id===save.house);
+ if(!h)return;
+ h.facade.material=housePaints[save.homeColor];
+ if(save.houseStyle==='classic')return;
+ h.visuals.forEach(o=>o.visible=false);
+ const g=new T.Group();g.position.set(h.x,0,h.z-7);scene.add(g);h.custom=g;
+ const paint=housePaints[save.homeColor],accent=balcony;
+ if(save.houseStyle==='modern'){
+  cube(g,0,4.2,0,20,8.4,20,paint);
+  cube(g,0,8.75,0,22,.7,22,darkFrame);
+  cube(g,0,4.25,10.15,15,6.5,.19,glassFront,false);
+  cube(g,-6,4.2,10.4,.27,6.8,.45,darkFrame,false);cube(g,6,4.2,10.4,.27,6.8,.45,darkFrame,false);
+  for(const x of [-3,0,3])cube(g,x,4.2,10.31,.14,6.4,.28,darkFrame,false);
+  cube(g,4,9.05,3,10,.3,12,accent,false);
+  cube(g,5,1.75,10.5,3.5,3.6,.2,m.wood,false);
+ }else if(save.houseStyle==='villa'){
+  cube(g,0,5,0,20,10,20,paint);
+  cube(g,0,10.4,0,22,.6,22,accent);
+  cube(g,0,11.4,0,21,1.6,19,m.roof);
+  cube(g,0,2.5,11.4,17,5,4,accent);
+  for(const x of [-7.5,7.5])cube(g,x,2.6,13.5,.75,5.2,.75,accent);
+  cube(g,0,5.1,10.35,8,5,.2,glassFront,false);
+  cube(g,0,7.9,13.25,17,.24,.28,darkFrame);
+  for(const x of [-7,-3,3,7])cube(g,x,8.75,13.3,.2,1.8,.25,darkFrame);
+ }else{
+  cube(g,0,5.6,0,20,11.2,20,brick);
+  cube(g,0,11.6,0,21.5,.55,21.5,darkFrame);
+  cube(g,0,5.6,10.25,15,8.7,.2,glassFront,false);
+  for(const x of [-6,-3,0,3,6])cube(g,x,5.7,10.4,.22,9,.22,darkFrame,false);
+  cube(g,0,5.6,10.41,15,.18,.25,darkFrame,false);
+  cube(g,0,11.45,9.7,20,1.2,1.0,darkFrame);
+ }
+ // Common door, accessible from the existing plot entrance
+ cube(g,0,1.65,10.56,2.45,3.3,.19,m.wood,false);
+ cube(g,0,1.67,10.7,1.7,2.55,.08,darkFrame,false);
+ cube(g,.85,1.6,10.85,.1,.12,.12,accent,false);
+}
+function repaintHome(){rebuildOwnedHome()}
+function applyInteriorTheme(){
+ const mode=save.furnitureStyle||'cozy';
+ const themes={cozy:{floor:0xbab5aa,walls:0xf0e7d8,couch:0x5c8a9d,rug:0x9cbbc0,light:0xffedcf},luxury:{floor:0x464c53,walls:0xd6d6d4,couch:0x202934,rug:0xb5a37c,light:0xffddaa},neon:{floor:0x1b243c,walls:0x202b49,couch:0x6946a5,rug:0x247f9e,light:0x85baff}};
+ const t=themes[mode]||themes.cozy;
+ floor.color.setHex(t.floor);walls.color.setHex(t.walls);couch.color.setHex(t.couch);rug.color.setHex(t.rug);indoorLight.color.setHex(t.light);
+}
+repaintHome();applyInteriorTheme();
 function updateHud(){el('cash').textContent='$ '+save.cash.toLocaleString('pl-PL');el('role').textContent=save.rpName+' · '+save.job;el('mission').textContent=save.delivery+'/5';el('taskProgress').style.width=(save.delivery/5*100)+'%'}
 updateHud();
 let points=[[0,-60],[120,0],[0,120],[-120,0],[180,120]],destinationIndex=0;
