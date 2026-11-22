@@ -181,10 +181,10 @@ for(let k=-3;k<=3;k++){
  cube(scene,k*60,.092,v,.17,.016,3.3,m.stripe,false);cube(scene,v,.093,k*60,3.3,.016,.17,m.stripe,false)}
 }
 const palettes=[0xf9d28f,0xcbeaf0,0xe7b7aa,0xc5d4b9,0xcdbfe4,0xe9e9d5,0xc5cfdd].map(mat);
+const treeFoliagePalette=[m.tree,m.leaf2,mat(0x518f56),mat(0x8cb574)];
 function plant(x,z,s=1){
  cube(scene,x,1.8*s,z,.52*s,3.6*s,.52*s,m.wood);
- const shades=[m.tree,m.leaf2,mat(0x518f56),mat(0x8cb574)];
- const variant=Math.floor(random()*shades.length),foliage=shades[variant];
+ const variant=Math.floor(random()*treeFoliagePalette.length),foliage=treeFoliagePalette[variant];
  for(let layer=0;layer<3;layer++){
    const crown=new T.Mesh(new T.IcosahedronGeometry((2.1+layer*.27)*s,1),foliage);
    crown.position.set(x+(layer===1?.38:-.23)*s,(4.6+layer*.77)*s,z+(layer===1?-.22:.16)*s);
@@ -239,6 +239,58 @@ for(let iz=0;iz<6;iz++)for(let ix=0;ix<6;ix++){
  if(type==='home')home(x,z,++homeId);
  else if(type==='park'){cube(scene,x,.13,z,47,.22,47,mat(0x8bb97b),false);for(let q=0;q<9;q++){const a=q/9*Math.PI*2;plant(x+Math.cos(a)*16,z+Math.sin(a)*16,rr(.65,1))}cube(scene,x,.48,z,7,.7,7,mat(0xcbd8d4),false)}
  else{const data=shopInfo[type];business(x,z,...data)}
+}
+
+/* Public spaces: fountains, low-maintenance greenery, benches, plaza accents. */
+const waterMaterial=new T.MeshPhysicalMaterial({color:0x59b7ca,metalness:.15,roughness:.18,transparent:true,opacity:.84,clearcoat:1});
+const stone=mat(0xd7d2c1),stoneDark=mat(0x9aabb2),flowers=[mat(0xf0ad80),mat(0xe4c1e8),mat(0xffdb79),mat(0xf4edef)];
+function cylinder(x,y,z,top,bottom,height,material,segments=20,parent=scene){
+ const o=new T.Mesh(new T.CylinderGeometry(top,bottom,height,segments),material);o.position.set(x,y,z);o.receiveShadow=true;parent.add(o);return o;
+}
+function parkFountain(x,z){
+ cylinder(x,.5,z,5.65,5.85,.8,stone,30);
+ cylinder(x,.95,z,5.15,5.2,.16,waterMaterial,32);
+ cylinder(x,1.7,z,1.1,1.45,2.2,stone,16);
+ cylinder(x,2.65,z,2.2,2.5,.35,stone,26);
+ cylinder(x,2.88,z,1.85,1.85,.14,waterMaterial,30);
+ cylinder(x,3.6,z,.25,.36,1.5,waterMaterial,12);
+ addCollider(x,z,8,8);
+ for(let d=0;d<4;d++){const a=d*Math.PI/2;bench(x+Math.sin(a)*10,z+Math.cos(a)*10,a+Math.PI)}
+}
+for(const [ix,iz] of [[2,2],[3,3]])parkFountain(-150+ix*60,-150+iz*60);
+const flowerPositions=[];
+for(let i=0;i<6;i++)for(let j=0;j<6;j++)if(plots[j][i]==='park'){
+ const px=-150+i*60,pz=-150+j*60;
+ for(let n=0;n<85;n++){
+  const angle=random()*Math.PI*2,r=rr(8.5,22.5),x=px+Math.cos(angle)*r,z=pz+Math.sin(angle)*r;
+  flowerPositions.push({x,z,scale:rr(.14,.36),type:Math.floor(rr(0,4))});
+ }
+}
+const flowerMesh=new T.InstancedMesh(new T.IcosahedronGeometry(1,0),flowers[0],flowerPositions.length);
+flowerMesh.instanceMatrix.setUsage(T.StaticDrawUsage);
+const flowerDummy=new T.Object3D(),flowerColors=[0xf7bf8f,0xf1d3ec,0xffe381,0xffffff];
+for(let i=0;i<flowerPositions.length;i++){
+ const p=flowerPositions[i];
+ flowerDummy.position.set(p.x,.35,p.z);flowerDummy.scale.setScalar(p.scale);flowerDummy.rotation.set(0,i*2.3,0);flowerDummy.updateMatrix();
+ flowerMesh.setMatrixAt(i,flowerDummy.matrix);flowerMesh.setColorAt(i,new T.Color(flowerColors[p.type]));
+}
+flowerMesh.instanceMatrix.needsUpdate=true;scene.add(flowerMesh);
+const decorativePlants=[];
+for(const b of businesses){
+ if(b.kind==='cafe'||b.kind==='shop'||b.kind==='bank'){
+  for(const dx of [-14,14]){
+   cylinder(b.x+dx,.57,b.z+9,1.1,.88,1.1,stoneDark,10);
+   const shrub=new T.Mesh(new T.DodecahedronGeometry(1.5),m.tree);shrub.position.set(b.x+dx,1.9,b.z+9);shrub.castShadow=false;scene.add(shrub);
+  }
+ }
+ if(b.kind==='cafe'){
+  const awnMat=[mat(0xffeee1),mat(0xd07f64)];
+  for(let v=0;v<10;v++)cube(scene,b.x-8+v*1.8,5.1,b.z+7,1.8,.24,4,awnMat[v%2],false);
+  for(const dx of [-9,9])bench(b.x+dx,b.z+13,Math.PI/2);
+ }
+ if(b.kind==='garage'){
+   for(let v=0;v<4;v++)cube(scene,b.x-13+v*8,2.3,b.z+5.22,6.6,3.8,.17,m.glass,false);
+ }
 }
 for(let k=-3;k<=3;k++)for(let j=-3;j<=3;j++)if((k+j)%2===0)streetLight(k*60+10,j*60+10);
 
