@@ -1,10 +1,24 @@
-# NEXO LIFE RP 6.0 — My World
+# NEXO LIFE RP 6.2 — RP Hub
 
 **Autorska, jednoosobowa gra 3D w przeglądarce. Cały świat powstaje z kodu, bez gotowych modeli 3D.** To niezależna produkcja, która rozwija mechaniki gatunku life RP; nie jest powiązana z Brookhaven ani Roblox.
 
 **Zagraj:** https://nexo-life-rp.vercel.app
 
 **GitHub:** https://github.com/stronezrobie-hub/nexo-city-3d
+
+## RP Hub 6.2 — system inspirowany zrzutami ekranu
+
+- **Witaj w NEXO VALLEY:** animowane, oryginalne powitanie uruchamiane po rozpoczęciu gry.
+- **Aktualizacje:** czytelny panel nowości. Możesz go zamknąć i otworzyć ponownie przez przycisk aktualizacji.
+- **Szybki panel RP po prawej:** edytor postaci, narzędzia, animacje, pojazdy i domy. Skróty otwierają istniejące funkcje gry, a nie puste makiety.
+- **Animacje:** machanie, taniec, siadanie, salutowanie, radość oraz powrót do normalnej pozycji.
+- **Rodzina RP:** własna nazwa rodziny i wybór roli (opiekun, dziecko, rodzeństwo, gość) z lokalnym zapisem. **Bez zapraszania innych graczy** — multiplayer nie jest jeszcze zaimplementowany.
+- **Kamery domowe:** trzy przełączane widoki w świecie 3D (wejście, ogród, salon) dostępne po zajęciu domu. Są to symulowane kamery w grze, nie podgląd prawdziwych urządzeń.
+- **Telefon:** nowości RP dostępne również jako pozycje menu wirtualnego telefonu.
+- **Smartfony:** prawy panel skrótów można rozwinąć i zwinąć, by nie zasłaniał gry.
+- Testy Chromium sprawdzają powitanie, aktualizacje, skróty RP, rodzinę, kamery, dotychczasowe mechaniki domów i pojazdów oraz układ mobilny.
+
+Grafika nawiązuje funkcjonalnie do gatunku gier typu city roleplay, ale **nie używa logotypów, chronionych modeli ani materiałów z Brookhaven czy Roblox**.
 
 ## City Edition 6.1 — wygląd i obsługa
 
