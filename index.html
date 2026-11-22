@@ -339,6 +339,7 @@ function applyAtmosphere(){
 }
 applyAtmosphere();
 function animateWeather(dt){
+ rainCloud.visible=weather==='rain'&&!inside;
  if(rainCloud.visible){rainCloud.position.set(playerPos.x,0,playerPos.z);
   for(let i=0;i<330;i++){const a=i*3;weatherPositions[a+1]-=dt*32;if(weatherPositions[a+1]<0){weatherPositions[a+1]=44;weatherPositions[a]=(Math.random()-.5)*100;weatherPositions[a+2]=(Math.random()-.5)*100}}
   rainGeo.attributes.position.needsUpdate=true;
@@ -358,11 +359,35 @@ el('startBtn').onclick=()=>{started=true;paused=false;el('start').classList.add(
 el('day').onclick=()=>{night=!night;applyAtmosphere();el('day').textContent=night?'☾ NOC':'☀ DZIEŃ';showToast(night?'Zapadła noc':'Nastał dzień')};
 function togglePanel(p){if(activePage===p){activePage=null;el('panel').classList.remove('visible')}else{activePage=p;renderPanel()}document.querySelectorAll('[data-page]').forEach(e=>e.classList.toggle('active',e.dataset.page===activePage))}
 document.querySelectorAll('[data-page]').forEach(e=>e.onclick=()=>togglePanel(e.dataset.page));
-function pageText(){if(activePage==='phone')return {title:'📱 NEXO PHONE',lead:'Twoje miasto w kieszeni. Wybierz, co chcesz robić.',body:'<div class="option"><div><b>👤 Mój profil</b><small>Wybierz wygląd postaci</small></div><button data-open="avatar">OTWÓRZ</button></div><div class="option"><div><b>🚘 Garaż</b><small>Przywołaj samochód</small></div><button data-open="cars">OTWÓRZ</button></div><div class="option"><div><b>🏠 Nieruchomości</b><small>Zajmij dom i wejdź do środka</small></div><button data-open="homes">OTWÓRZ</button></div><div class="option"><div><b>💼 Mój zawód</b><small>Zmień pracę i otrzymuj wypłaty</small></div><button data-open="jobs">OTWÓRZ</button></div>'};
-if(activePage==='avatar')return{title:'👤 TWOJA POSTAĆ',lead:'Zmieniaj kolory ubrań. Wszystko rysuje się automatycznie za pomocą kodu.',body:'<div class="eyebrow">KOLOR STROJU</div><div class="swatches">'+clothes.map((c,i)=>'<button class="swatch '+(save.color===i?'selected':'')+'" style="background:#'+c.toString(16).padStart(6,'0')+'" data-color="'+i+'" aria-label="Kolor '+(i+1)+'"></button>').join('')+'</div><p class="panel-lead">Zmiana zapisuje się automatycznie w tej przeglądarce.</p>'};
-if(activePage==='cars')return{title:'🚘 GARAŻ',lead:'Przywołaj samochód na pobliską ulicę. Wciśnij E obok auta, żeby do niego wsiąść.',body:'<div class="option"><div><b>🚙 City Cruiser</b><small>Samochód miejski · darmowy</small></div><button data-spawn="0">PRZYWOŁAJ</button></div><div class="option"><div><b>🎨 Lakier samochodu</b><small>Wybierz kolejny dostępny kolor</small></div><button data-paint="1">ZMIANA</button></div>'};
-if(activePage==='homes')return{title:'🏠 DOMY I MIESZKANIA',lead:'Podejdź do dowolnego domu oznaczonego żółtą tabliczką i naciśnij E, aby go zająć.',body:'<div class="option"><div><b>🏡 Twój dom</b><small>'+(save.house?'Dom numer '+save.house:'Nie wybrano domu')+'</small></div><button data-home="1" '+(save.house?'':'disabled')+'>NAWIGUJ</button></div><p class="panel-lead">Możesz zmienić dom w dowolnym momencie. W środku jest salon z meblami generowanymi kodem.</p>'};
-if(activePage==='jobs')return{title:'💼 ZNAJDŹ PRACĘ',lead:'Wybierz zawód i zarabiaj regularnie podczas rozgrywki. Dostawy dają dodatkowe premie.',body:['Mieszkaniec','Kurier','Policjant','Lekarz','Strażak','Sprzedawca'].map(name=>'<div class="option"><div><b>'+name+'</b><small>'+(name==='Mieszkaniec'?'Odkrywaj miasto':name==='Kurier'?'Dostawy + 250 $ za punkt':'Wypłata co 60 sekund')+'</small></div><button data-job="'+name+'" '+(save.job===name?'disabled':'')+'>'+(save.job===name?'WYBRANO':'WYBIERZ')+'</button></div>').join('')};
+function pageText(){if(activePage==='phone')return {title:'📱 NEXO PHONE',lead:'Twoje miasto w kieszeni. Wybierz, co chcesz robić.',body:[
+ ['avatar','👤 Postać','Wygląd i styl'],['cars','🚘 Garaż','Cztery modele samochodów'],
+ ['homes','🏠 Dom','Twój dom i jego ustawienia'],['jobs','💼 Praca','Wybierz swój zawód'],
+ ['rp','🎭 Roleplay','Imię, biografia i emotki'],['bag','🎒 Plecak','Przedmioty i zwierzęta'],['weather','🌦 Pogoda','Słońce, deszcz lub mgła']
+ ].map(x=>'<div class="option"><div><b>'+x[1]+'</b><small>'+x[2]+'</small></div><button data-open="'+x[0]+'">OTWÓRZ</button></div>').join('')};
+if(activePage==='avatar')return{title:'👤 KREATOR POSTACI',lead:'Personalizuj swój wygląd. Wszystkie elementy postaci powstają z kodu.',body:
+ '<div class="panel-caption">STRÓJ</div><div class="swatches">'+clothes.map((c,i)=>'<button class="swatch '+(save.color===i?'selected':'')+'" style="background:#'+c.toString(16).padStart(6,'0')+'" data-color="'+i+'" aria-label="Strój '+i+'"></button>').join('')+'</div>'+
+ '<div class="panel-caption">KOLOR SKÓRY</div><div class="swatches">'+skinColors.map((c,i)=>'<button class="swatch '+(save.skin===i?'selected':'')+'" style="background:#'+c.toString(16).padStart(6,'0')+'" data-skin="'+i+'" aria-label="Skóra '+i+'"></button>').join('')+'</div>'+
+ '<div class="panel-caption">KOLOR WŁOSÓW</div><div class="swatches">'+hairColors.map((c,i)=>'<button class="swatch '+(save.hair===i?'selected':'')+'" style="background:#'+c.toString(16).padStart(6,'0')+'" data-hair="'+i+'" aria-label="Włosy '+i+'"></button>').join('')+'</div>'};
+if(activePage==='cars')return{title:'🚘 TWÓJ GARAŻ',lead:'Wybierz pojazd, przywołaj go na najbliższą ulicę i wsiądź klawiszem E.',body:vehicleModels.map((v,i)=>'<div class="option"><div><b>'+['🚙','🚘','🏎️','🚓'][i]+' '+v.name+'</b><small>Maks. prędkość: '+Math.round(v.speed*3.2)+' km/h</small></div><button data-spawn="'+i+'">'+(save.vehicle===i?'PRZYWOŁAJ':'WYBIERZ')+'</button></div>').join('')+
+ '<div class="option"><div><b>🎨 Kolor karoserii</b><small>Losowy nowy lakier</small></div><button data-paint="1">ZMIANA</button></div>'};
+if(activePage==='homes')return{title:'🏠 TWOJA NIERUCHOMOŚĆ',lead:'Podejdź do domu z numerem i wciśnij E, żeby go zająć. Każdy dom ma wnętrze.',body:
+ '<div class="option"><div><b>🏡 Mój dom</b><small>'+(save.house?'Numer '+save.house:'Nie zajęto domu')+'</small></div><button data-home="1" '+(save.house?'':'disabled')+'>IDŹ DO DOMU</button></div>'+
+ '<div class="option"><div><b>'+(save.locked?'🔒 Drzwi zamknięte':'🔓 Drzwi otwarte')+'</b><small>Ustawienie RP (tryb jednoosobowy)</small></div><button data-lock="1" '+(!save.house?'disabled':'')+'>'+(save.locked?'OTWÓRZ':'ZAMKNIJ')+'</button></div>'+
+ '<div class="option"><div><b>🎨 Elewacja domu</b><small>Wybierz następny kolor domu</small></div><button data-homecolor="1" '+(!save.house?'disabled':'')+'>ZMIEŃ</button></div>'};
+if(activePage==='jobs')return{title:'💼 ZNAJDŹ PRACĘ',lead:'Wybierz zawód i zarabiaj podczas gry. Dostawy to dodatkowe wynagrodzenie.',body:['Mieszkaniec','Kurier','Policjant','Lekarz','Strażak','Sprzedawca','Nauczyciel','Mechanik','Kierowca','Reporter'].map(name=>'<div class="option"><div><b>'+name+'</b><small>'+(name==='Mieszkaniec'?'Swobodna rozgrywka':name==='Kurier'?'Zarabiaj dodatkowo na dostawach':'Wypłata co 60 sekund')+'</small></div><button data-job="'+name+'" '+(save.job===name?'disabled':'')+'>'+(save.job===name?'WYBRANO':'WYBIERZ')+'</button></div>').join('')};
+if(activePage==='rp')return{title:'🎭 ROLEPLAY',lead:'Ustaw imię postaci, swoją historię i wykonuj emotki.',body:
+ '<div class="panel-caption">TWOJE IMIĘ RP</div><input class="rp-field" id="rpName" maxlength="24" value="'+esc(save.rpName)+'" placeholder="Imię postaci">'+
+ '<div class="panel-caption">TWOJA HISTORIA</div><input class="rp-field" id="rpBio" maxlength="80" value="'+esc(save.bio)+'" placeholder="Kim jest Twoja postać?">'+
+ '<button class="fullbtn" data-saveprofile="1">ZAPISZ PROFIL</button>'+
+ '<div class="panel-caption">EMOTKI I GESTY</div>'+
+ [['wave','👋 Pomachaj'],['dance','💃 Zatańcz'],['sit','🪑 Usiądź'],['none','🧍 Wstań']].map(x=>'<div class="option"><b>'+x[1]+'</b><button data-emote="'+x[0]+'">WYKONAJ</button></div>').join('')};
+if(activePage==='bag')return{title:'🎒 PLECAK I PUPIL',lead:'Wybierz przedmiot do ręki albo zwierzaka, który będzie za Tobą chodził.',body:
+ '<div class="panel-caption">PRZEDMIOTY</div>'+
+ [['none','✋ Puste ręce'],['phone','📱 Telefon'],['flashlight','🔦 Latarka'],['coffee','☕ Kawa'],['umbrella','☂️ Parasol'],['balloon','🎈 Balon']].map(x=>'<div class="option"><b>'+x[1]+'</b><button data-prop="'+x[0]+'" '+(save.prop===x[0]?'disabled':'')+'>'+(save.prop===x[0]?'WYBRANO':'WEŹ')+'</button></div>').join('')+
+ '<div class="panel-caption">ZWIERZĘTA</div>'+
+ [['none','Bez zwierzaka'],['dog','🐶 Pies'],['cat','🐱 Kot']].map(x=>'<div class="option"><b>'+x[1]+'</b><button data-pet="'+x[0]+'" '+(save.pet===x[0]?'disabled':'')+'>'+(save.pet===x[0]?'WYBRANO':'WYBIERZ')+'</button></div>').join('')};
+if(activePage==='weather')return{title:'🌦 POGODA I ATMOSFERA',lead:'Zmiana pogody wpływa na widoczność i wygląd miasta.',body:
+ [['clear','☀️ Słonecznie','Jasne niebo i dobra widoczność'],['rain','🌧️ Deszcz','Opady i mokra nawierzchnia'],['fog','🌫️ Mgła','Ograniczona widoczność']].map(x=>'<div class="option"><div><b>'+x[1]+'</b><small>'+x[2]+'</small></div><button data-weather="'+x[0]+'" '+(weather===x[0]?'disabled':'')+'>'+(weather===x[0]?'WYBRANO':'USTAW')+'</button></div>').join('')};
 return{title:'NEXO LIFE RP',lead:'',body:''}
 }
 function renderPanel(){const data=pageText(),p=el('panel');p.innerHTML='<div class="panel-head"><h2>'+data.title+'</h2><button data-close="1">✕</button></div><p class="panel-lead">'+data.lead+'</p>'+data.body;p.classList.add('visible')}
@@ -372,14 +397,26 @@ if(b.dataset.open){activePage=b.dataset.open;renderPanel();document.querySelecto
 if(b.dataset.color!==undefined){save.color=Number(b.dataset.color);torso.color.setHex(clothes[save.color]);persist();renderPanel();showToast('Zmieniono styl postaci!')}
 if(b.dataset.job){save.job=b.dataset.job;persist();renderPanel();updateHud();showToast('Nowa praca: '+save.job)}
 if(b.dataset.paint){car.coat.color.setHex([0xa6e7fc,0xf49aab,0xb4ff91,0xe0c2ff,0xf4db90][Math.floor(rr(0,5))]);showToast('Zmieniono lakier')}
-if(b.dataset.spawn){if(inside){showToast('Wyjdź z domu, żeby przywołać auto');return}
+if(b.dataset.skin!==undefined){save.skin=Number(b.dataset.skin);skin.color.setHex(skinColors[save.skin]);persist();renderPanel();showToast('Zmieniono wygląd postaci')}
+if(b.dataset.hair!==undefined){save.hair=Number(b.dataset.hair);hair.color.setHex(hairColors[save.hair]);persist();renderPanel();showToast('Zmieniono kolor włosów')}
+if(b.dataset.prop!==undefined){equipProp(b.dataset.prop);renderPanel();showToast('Przedmiot w ekwipunku')}
+if(b.dataset.pet!==undefined){save.pet=b.dataset.pet;buildPet(save.pet);persist();renderPanel();showToast(save.pet==='none'?'Zwierzak odwołany':'Masz nowego pupila!')}
+if(b.dataset.emote!==undefined){emote=b.dataset.emote;emoteClock=0;showToast('Emotka: '+emote)}
+if(b.dataset.weather){weather=b.dataset.weather;save.weather=weather;persist();applyAtmosphere();renderPanel();showToast('Zmieniono pogodę')}
+if(b.dataset.lock){save.locked=!save.locked;persist();renderPanel();showToast(save.locked?'Zamknięto drzwi (RP)':'Otwarto drzwi')}
+if(b.dataset.homecolor){save.homeColor=(save.homeColor+1)%5;repaintHome();persist();renderPanel();showToast('Nowy kolor domu')}
+if(b.dataset.saveprofile){save.rpName=(el('rpName')?.value||'Gracz').trim().slice(0,24)||'Gracz';save.bio=(el('rpBio')?.value||'').trim().slice(0,80);persist();updateHud();renderPanel();showToast('Zapisano profil RP')}
+if(b.dataset.spawn!==undefined){if(inside){showToast('Wyjdź z domu, żeby przywołać auto');return}replaceVehicle(Number(b.dataset.spawn));
 const roadX=Math.round(playerPos.x/60)*60,roadZ=Math.round(playerPos.z/60)*60;
 if(Math.abs(roadX-playerPos.x)<Math.abs(roadZ-playerPos.z)){car.root.position.set(roadX+4,0,playerPos.z+6);carYaw=0}
 else{car.root.position.set(playerPos.x+6,0,roadZ+4);carYaw=Math.PI/2}
 driving=false;carSpeed=0;car.root.rotation.y=carYaw;avatar.visible=true;showToast('Auto jest na najbliższej ulicy!')}
 if(b.dataset.home){if(!save.house)return;const h=homes.find(h=>h.id===save.house);if(h){if(driving){driving=false;avatar.visible=true;playerPos.set(car.root.position.x+4,0,car.root.position.z+4)}if(inside){inside=false}playerPos.copy(h.entry);showToast('Jesteś przy swoim domu!');togglePanel(activePage)}}
 });
-function updateHud(){el('cash').textContent='$ '+save.cash.toLocaleString('pl-PL');el('role').textContent=save.job;el('mission').textContent=save.delivery+'/5';el('taskProgress').style.width=(save.delivery/5*100)+'%'}
+const housePaints=[0xf9d28f,0xa7d4d9,0xe9b5b5,0xd8c6eb,0xc4d6a3].map(c=>mat(c));
+function repaintHome(){const home=homes.find(h=>h.id===save.house);if(home)home.facade.material=housePaints[save.homeColor]}
+repaintHome();
+function updateHud(){el('cash').textContent='$ '+save.cash.toLocaleString('pl-PL');el('role').textContent=save.rpName+' · '+save.job;el('mission').textContent=save.delivery+'/5';el('taskProgress').style.width=(save.delivery/5*100)+'%'}
 updateHud();
 let points=[[0,-60],[120,0],[0,120],[-120,0],[180,120]],destinationIndex=0;
 const marker=new T.Group();scene.add(marker);
@@ -398,7 +435,7 @@ return chosen;
 function interact(){if(!started||paused)return;const obj=nearObj();if(!obj){showToast('Podejdź do samochodu, domu lub budynku');return}
 if(obj.kind==='leave'){driving=false;avatar.visible=true;playerPos.set(car.root.position.x+4,0,car.root.position.z+3);carSpeed=0;showToast('Wysiadłeś z samochodu')}
 if(obj.kind==='enter'){driving=true;avatar.visible=false;carYaw=car.root.rotation.y;carSpeed=0;showToast('Witaj za kierownicą!')}
-if(obj.kind==='home'){const h=obj.value;if(save.house!==h.id){save.house=h.id;persist();showToast('Zajęto dom numer '+h.id)}else showToast('Witaj w swoim domu');exitPosition=h.entry.clone();inside=true;driving=false;avatar.visible=true;playerPos.set(0,0,629);charYaw=Math.PI}
+if(obj.kind==='home'){const h=obj.value;if(save.house!==h.id){save.house=h.id;save.locked=false;repaintHome();persist();showToast('Zajęto dom numer '+h.id)}else showToast('Witaj w swoim domu');exitPosition=h.entry.clone();inside=true;driving=false;avatar.visible=true;playerPos.set(0,0,629);charYaw=Math.PI}
 if(obj.kind==='exit'){inside=false;playerPos.copy(exitPosition||new T.Vector3(8,0,19));playerPos.z+=3;charYaw=Math.PI;showToast('Wróciłeś do miasta')}
 if(obj.kind==='business'){const b=obj.value;if(b.kind==='hospital')save.job='Lekarz';if(b.kind==='police')save.job='Policjant';if(b.kind==='cafe'||b.kind==='shop')save.job='Sprzedawca';if(b.kind==='garage'){togglePanel('cars');showToast('Witamy w salonie!');return}if(b.kind==='school'){showToast('Witaj w szkole!');return}persist();updateHud();showToast('Odwiedzono: '+b.name+' · zawód: '+save.job)}
 }
@@ -414,7 +451,7 @@ else{leftArm.rotation.x*=.8;rightArm.rotation.x*=.8;for(const l of legs)l.rotati
 }
 function moveCar(dt){let gas=(key.has('forward')?1:0),reverse=key.has('back')?1:0;
 if(gas)carSpeed+=24*dt;else if(reverse)carSpeed-=30*dt;else carSpeed*=Math.exp(-1.6*dt);
-carSpeed=Math.max(-12,Math.min(37,carSpeed));if(Math.abs(carSpeed)<.08)carSpeed=0;
+carSpeed=Math.max(-12,Math.min(vehicleModels[save.vehicle].speed,carSpeed));if(Math.abs(carSpeed)<.08)carSpeed=0;
 const steering=(key.has('left')?1:0)-(key.has('right')?1:0);
 if(Math.abs(carSpeed)>.3)carYaw+=steering*dt*(.8+Math.min(Math.abs(carSpeed),24)*.017)*Math.sign(carSpeed);
 const nx=car.root.position.x-Math.sin(carYaw)*carSpeed*dt,nz=car.root.position.z-Math.cos(carYaw)*carSpeed*dt;
@@ -451,7 +488,7 @@ el('speed').firstChild.textContent=String(Math.round(Math.abs(carSpeed)*3.2))+' 
 minimap()}
 W.addEventListener('resize',()=>{cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
 cam.position.set(8,8,35);cam.lookAt(8,1,19);
-function loop(){requestAnimationFrame(loop);let dt=Math.min(.045,clock.getDelta());if(!paused){if(driving)moveCar(dt);else moveCharacter(dt);updateTraffic(dt);progress(dt);payTick+=dt;if(payTick>60){payTick-=60;if(save.job!=='Mieszkaniec'){save.cash+=500;persist();updateHud();showToast('Wypłata za pracę: +$500')}}marker.rotation.y+=dt*.65;torus.rotation.z+=dt*.7;
+function loop(){requestAnimationFrame(loop);let dt=Math.min(.045,clock.getDelta());if(!paused){if(driving)moveCar(dt);else moveCharacter(dt);animateRoleplay(dt);animateWeather(dt);updateTraffic(dt);progress(dt);payTick+=dt;if(payTick>60){payTick-=60;if(save.job!=='Mieszkaniec'){save.cash+=500;persist();updateHud();showToast('Wypłata za pracę: +$500')}}marker.rotation.y+=dt*.65;torus.rotation.z+=dt*.7;
 for(const n of npc){n.g.position.set(n.x+Math.cos(clock.elapsedTime*.45+n.seed)*3,0,n.z+Math.sin(clock.elapsedTime*.45+n.seed)*3)}
 }
 cameraUpdate(dt);renderer.render(scene,cam);uiTick+=dt;if(uiTick>.17){renderHUD();uiTick=0}}
