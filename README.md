@@ -1,82 +1,86 @@
-# NEXO LIFE RP 4.0 — World Reimagined
+# NEXO LIFE RP 5.0 — City Stories
 
-**Niezależna, proceduralna gra przeglądarkowa 3D, całkowicie z kodu.** Nie wymaga Blendera ani ręcznego tworzenia modeli 3D. Nie jest produktem Roblox/Brookhaven i nie kopiuje ich assetów.
+Autorska, proceduralna gra 3D w przeglądarce. Mechaniki swobodnego roleplay inspirowane gatunkiem gier miejskich RP. **Wszystkie modele, obiekty, elementy świata i efekty są generowane kodem** — bez Blendera i pobierania gotowych assetów 3D.
 
-## Zagraj
+Gra jest **niezależnym projektem**. Nie jest częścią Brookhaven ani Roblox i nie kopiuje ich map, postaci ani modeli.
 
-**https://nexo-life-rp.vercel.app**
+**GRA ONLINE:** https://nexo-life-rp.vercel.app
 
-**Repozytorium:** https://github.com/stronezrobie-hub/nexo-city-3d
+**KOD:** https://github.com/stronezrobie-hub/nexo-city-3d
 
-Projekt Vercel jest połączony z gałęzią `main` GitHuba — każda zatwierdzona aktualizacja automatycznie uruchamia nowe wdrożenie.
+## Wersja 5.0 — co działa
 
-## Nowości w Alpha 4.0
+### Domy i osiedla
+- Wybieranie parceli z katalogu lub podejście do domu w mieście.
+- Cztery autorskie domy generowane kodem: klasyczny, nowoczesny, willa rodzinna, loft.
+- Trzy style wnętrz: przytulny, luksusowy i gaming/neon.
+- Zmiana kolorów elewacji i umowne zamykanie drzwi (tylko RP).
+- Wchodzenie i wychodzenie z umeblowanego wnętrza.
 
-- Nowy, nowoczesny ekran startowy i przeprojektowany interfejs gry (HUD, menu, minimapa, komunikaty, panel misji).
-- Proceduralne niebo renderowane shaderem, nowe oświetlenie, dynamiczne cienie.
-- Materiały trawy, drogi i chodników generowane z kodu przy użyciu CanvasTexture; bez zewnętrznych tekstur.
-- Bardziej szczegółowe samochody: karoserie, szyby, zderzaki, reflektory, felgi, lusterka, detale nadwozia.
-- Bardziej naturalne drzewa, parki z fontannami, kwiaty, rabaty, ławki i ogródki.
-- Oświetlenie ulic nocą z lokalnymi dynamicznymi światłami.
-- Kamera z obracaniem myszą/przeciągnięciem na ekranie dotykowym i zoomem kółkiem.
-- Tryb fotograficzny klawiszem `O` lub przyciskiem aparatu; zamykanie również przez przycisk na ekranie.
-- Nazwy dzielnic i zegar w grze.
-- Ustawienia jakości w telefonie gry: Wydajność, Auto, Ultra. Profil Wydajność ogranicza rozdzielczość i wyłącza cienie.
-- Poprawiona minimapa z linią do celu i wyróżnieniem pozycji gracza.
-- Nowa ikona strony, metadane udostępniania.
+### Garaż i samochody
+- Dziesięć pojazdów: City Cruiser, Family SUV, Street Sport, Police Unit, City Taxi, Ambulance, Fire Rescue, Offroad Explorer, Delivery Van i Executive Sedan.
+- Przywoływanie samochodu, jazda, wsiadanie i wysiadanie, lakier.
+- Syreny świetlne pojazdów służb (L). Klakson (H), generowane dźwięki silnika.
 
-## Funkcje RP
+### Miasto i odgrywanie ról
+- **Swobodne RP bez obowiązkowych dostaw**; zadania kurierskie można włączyć w zakładce Praca.
+- Przewodnik po mieście z możliwością szybkiego dotarcia do wybranego miejsca.
+- Aktywności budynków: lekarz i badanie, komisariat, kawa w kawiarni, zakupy, lekcja, bank z wpłatami/wypłatami, stacja paliw, straż pożarna.
+- Role i prace, profil RP z imieniem i biografią, gesty i animacje.
+- Postać: zmiana skóry, włosów i stroju; przedmioty i zwierzęta.
+- NPC, ulice, sygnalizacja, parki, deszcz, mgła, słońce, dzień i noc.
 
-- Własna postać: ubiór, kolor skóry i włosów, imię, biografia.
-- Spacer, sprint, emotki, plecak i proceduralne przedmioty.
-- Zwierzęta: pies i kot.
-- 4 rodzaje pojazdów, jazda, klakson, generowany dźwięk silnika.
-- Domy: zajęcie, wnętrze, elewacja i ustawienia RP.
-- Szkoła, szpital, policja, straż pożarna, bank, sklep, kawiarnia, stacja paliw.
-- Prace, wypłaty, zadania dostawcze.
-- Deszcz, mgła, dzień/noc, ruch uliczny, NPC.
-- Zapisywanie stanu w localStorage.
+### Wygląd
+- Interfejs, minimapa, kamera obracana myszą/dotykiem, zoom, tryb fotograficzny.
+- Trzy profile jakości: Wydajność, Auto, Ultra.
+- Niebo, materiały, modele i elementy dekoracyjne generowane programistycznie.
 
 ## Sterowanie
 
-| Sterowanie | Akcja |
+| Klawisz | Działanie |
 | --- | --- |
 | WASD / strzałki | Spacer lub jazda |
 | Shift | Sprint |
-| E | Interakcja, samochód, dom |
+| E | Interakcja / wsiadanie / domy / budynki |
 | F | Telefon |
 | C | Zmiana kamery |
-| H | Klakson w pojeździe |
+| H | Klakson |
+| L | Syrena pojazdu służb |
 | P / Esc | Pauza |
 | O | Tryb fotograficzny |
-| Przeciąganie po świecie | Obracanie kamery |
-| Kółko myszy | Zoom |
+| Mysz lub palec | Obracanie kamery |
+| Kółko myszy | Przybliżanie/oddalanie |
 
-Na telefonach dostępne są dotykowe przyciski poruszania, interakcji i kamery.
+Na telefonach dostępne są ekranowe przyciski ruchu i interakcji.
 
-## Uruchamianie lokalne (Vite)
+## Uruchomienie lokalne
 
-W katalogu repozytorium:
+Wymagany Node.js:
 
 ```bash
 npm install
 npm run dev
 ```
 
-Następnie otwórz lokalny adres podany przez Vite. Wersję produkcyjną buduje polecenie `npm run build`.
+Wersja produkcyjna:
 
-**Naprawa uruchamiania:** biblioteka `three` jest dołączana do paczki JS przez Vite. Po wejściu na stronę nie jest już pobierana z zewnętrznego CDN. Ekran startowy odblokowuje przycisk po załadowaniu silnika i pokazuje komunikat, gdy inicjalizacja się nie uda.
+```bash
+npm run build
+npm run preview
+```
+
+Gra korzysta z Three.js i Vite. Zewnętrzne assety graficzne nie są pobierane; Three.js jest dołączony do produkcyjnego bundla.
 
 ## Testy
 
-W repozytorium znajduje się automatyczny test otwierania gry w Chromium w GitHub Actions (`.github/workflows/browser-smoke.yml`).
+`npm run build` sprawdza możliwość zbudowania gry. Test `tests/browser-smoke.cjs` używa Chromium/Playwright i obejmuje uruchomienie gry, wybór parceli i domu, ustawienie wnętrza, garaż, swobodne RP, dostawy oraz interakcje miejskie.
 
-## Ważne ograniczenia
+## Aktualne ograniczenia
 
-- Alpha 4.0 jest **single-player**. Nie ma multiplayera, serwera ani czatu.
-- Stan gry zapisuje się **lokalnie w konkretnej przeglądarce** (localStorage), a nie w chmurze.
-- Ustawienia drzwi mają wyłącznie charakter RP, nie stanowią mechanizmu uprawnień dla innych graczy.
-- Modele są zbudowane proceduralnie, więc mimo ulepszeń nie jest to fotorealistyczna gra klasy AAA.
-- Składnia JavaScript i wdrożenia Vercel są sprawdzane; pełne testy interakcji i płynności w różnych przeglądarkach są osobnym krokiem.
+- To **wersja jednoosobowa**. Nie ma kont użytkowników, serwera multiplayer, wspólnego czatu, znajomych ani synchronizacji graczy.
+- Dane (dom, pojazd, profil, środki, zawód itd.) są zapisywane **tylko lokalnie w przeglądarce** w `localStorage`.
+- Symulacja zamykania domu jest tylko mechaniczną konwencją RP, nie kontrolą dostępu innego gracza.
+- Bank korzysta wyłącznie z lokalnej, wirtualnej waluty gry. Tankowanie i niektóre scenki są symulacjami RP.
+- Świat ma autorską oprawę proceduralną i nie jest fotorealistycznym odpowiednikiem gier AAA.
 
 © NEXO Studios.
